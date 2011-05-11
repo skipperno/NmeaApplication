@@ -76,7 +76,7 @@ void NmeaComm::NmeaCloseInputPort() {
 
 void NmeaComm::NmeaCloseOutputPort() {
 
-	outstream.close();
+	outstream.close(); // // //
 }
 
 
@@ -91,6 +91,7 @@ bool NmeaComm::NmeaInput( char* pStream, int *length) {
 	while (inpstream.readsome(&c, 1) != 0) {
 		i = 0;
 		if (c == '$') {
+			printf("start simbol\n");
 			// NMEA sentence delimiter detected
 			pStream[i++]=c;
 			while (inpstream.good()) {
@@ -100,7 +101,8 @@ bool NmeaComm::NmeaInput( char* pStream, int *length) {
 				switch (c)
 				{
 					case '$' :	// Unexpected NMEA delimiter detected
-						i = 0; 	// Start to check new NMEA sentence
+						i = 1; 	// Start to check new NMEA sentence
+						pStream[0]='$';
 						break;
 
 					case '\n':	// Unexpected <LF> detected
@@ -119,7 +121,7 @@ bool NmeaComm::NmeaInput( char* pStream, int *length) {
 						else {
 							//i = 0;
 							//break;	// Illegal NMEA
-							return false;	// Illegal NMEA
+	//						return false;	// Illegal NMEA
 						}
 						c = inpstream.get();
 						pStream[i++]=c;
@@ -132,13 +134,13 @@ bool NmeaComm::NmeaInput( char* pStream, int *length) {
 						else {
 							//i = 0;
 							//break;	// Illegal NMEA
-							return false;	// Illegal NMEA
+//							return false;	// Illegal NMEA
 						}
 						// Check for correct received checksum
 						if (hh_received != hh_calculate) {
-							i = 0; // Illegal NMEA
-							//break;
-							return false;	// Illegal NMEA
+						//	i = 0; // Illegal NMEA
+
+						//	return false;	// Illegal NMEA
 						}
 						// Check for <CR><LF> after checksum value
 						c = inpstream.get();

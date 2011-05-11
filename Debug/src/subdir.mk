@@ -4,15 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Main.cpp \
 ../src/NmeaComm.cpp \
+../src/NmeaHandler.cpp \
 ../src/nmeaApplication.cpp 
 
 OBJS += \
+./src/Main.o \
 ./src/NmeaComm.o \
+./src/NmeaHandler.o \
 ./src/nmeaApplication.o 
 
 CPP_DEPS += \
+./src/Main.d \
 ./src/NmeaComm.d \
+./src/NmeaHandler.d \
 ./src/nmeaApplication.d 
 
 
