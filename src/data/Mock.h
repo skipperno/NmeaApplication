@@ -2,7 +2,7 @@
  * Mock.h
  *
  *  Created on: 3. mai 2011
- *      Author: nn
+ *      Author: Ernad Secic
  */
 
 #ifndef MOCK_H_

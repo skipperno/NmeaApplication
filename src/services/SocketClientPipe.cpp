@@ -2,7 +2,7 @@
  * SocketClientPipe.cpp
  *
  *  Created on: 2. mai 2011
- *      Author: nn
+ *      Author: Ernad Secic
  */
 
 #include "SocketClientPipe.h"

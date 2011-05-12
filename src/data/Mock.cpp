@@ -2,7 +2,7 @@
  * Mock.cpp
  *
  *  Created on: 3. mai 2011
- *      Author: nn
+ *      Author: Ernad Secic
  */
 
 #include <stdio.h>

@@ -2,7 +2,7 @@
  * SocketClientPipe.h
  *
  *  Created on: 2. mai 2011
- *      Author: nn
+ *      Author: Ernad Secic
  */
 
 #ifndef SOCKETCLIENTPIPE_H_

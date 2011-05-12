@@ -6,20 +6,17 @@
 CPP_SRCS += \
 ../src/Main.cpp \
 ../src/NmeaComm.cpp \
-../src/NmeaHandler.cpp \
-../src/nmeaApplication.cpp 
+../src/NmeaHandler.cpp 
 
 OBJS += \
 ./src/Main.o \
 ./src/NmeaComm.o \
-./src/NmeaHandler.o \
-./src/nmeaApplication.o 
+./src/NmeaHandler.o 
 
 CPP_DEPS += \
 ./src/Main.d \
 ./src/NmeaComm.d \
-./src/NmeaHandler.d \
-./src/nmeaApplication.d 
+./src/NmeaHandler.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

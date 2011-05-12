@@ -8,6 +8,8 @@
 #ifndef NMEAHANDLER_H_
 #define NMEAHANDLER_H_
 
+#include "services/SerialPort.h"
+
 class NmeaHandler {
 public:
 	NmeaHandler();
@@ -23,6 +25,7 @@ public:
 private:
 	char lastMsgStream_1[10024];
 	char lastMsgStream_2[10024];
+	SerialPort serialPortEcholodd;
 };
 
 #endif /* NMEAHANDLER_H_ */

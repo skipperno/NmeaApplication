@@ -10,6 +10,8 @@
 #include <string.h>
 //#include "skipper.h"
 #include "NmeaComm.h"
+#include "utility/NmeaUtility.h"
+
 
 NmeaHandler* thisInstance;
 
@@ -48,34 +50,45 @@ void NmeaHandler::runHandler() {
 	NmeaComm stream1;
 	NmeaComm stream2;
 
-	char stream[10024]; // Storage of NMEA data stream
-	char* pStream = stream; // Pointer to storage of NMEA data stream
+	int echoLoddNmeaMsgLength;
+	char buffer[10024]; // Storage of NMEA data stream
+	char* pBuffer = buffer; // Pointer to storage of NMEA data stream
 	int length, i; // Length of NMEA data stream
-
-	char baud4800[] = "4800"; // Input/output baudrate to be fetched from configuration-file or web-configuration
+/*
+	char baudRate[] = "4800"; // Input/output baudrate to be fetched from configuration-file or web-configuration
 	char nmea2[] = "2"; // Input NMEA port number to be fetched from configuration-file or web-configuration
 	char nmea3[] = "3"; // Input NMEA port number to be fetched from configuration-file or web-configuration
-
-	stream1.NmeaConfigurePort(nmea2, baud4800);
+*/
+	serialPortEcholodd.configurePort("2", "115200");
+	serialPortEcholodd.openInputPort("2");
+	serialPortEcholodd.openOutputPort("2");
+/*	stream1.NmeaConfigurePort(nmea2, baudRate);
 	stream1.NmeaOpenInputPort(nmea2);
 	stream1.NmeaOpenOutputPort(nmea2);
-	stream2.NmeaConfigurePort(nmea3, baud4800);
+	stream2.NmeaConfigurePort(nmea3, baudRate);
 	stream2.NmeaOpenInputPort(nmea3);
-	stream2.NmeaOpenOutputPort(nmea2);
+	stream2.NmeaOpenOutputPort(nmea2);*/
 
 	for (;;) {
-
-		if (stream1.NmeaInput(pStream, &length)) {
+		serialPortEcholodd.receive(pBuffer, &length);
+		if (length > 0) {
+			printf("Received: %d\n", length);
+			serialPortEcholodd.send(pBuffer, length);
+			NmeaUtility::convertCompressedDataToAsciNmea(pBuffer, length, lastMsgStream_1, &echoLoddNmeaMsgLength);
+			printf("%s\n", lastMsgStream_1);
+		}
+		/*
+		if (stream1.NmeaInput(pBuffer, &length)) {
 			printf("stream1, length %d\n", length);
-			stream1.NmeaOutput(pStream, length);
+			stream1.NmeaOutput(pBuffer, length);
 			for (i = 0; i < length; i++) {
-				if (pStream[i] == '\n')
+				if (pBuffer[i] == '\n')
 					cout << "<LF>";
-				else if (pStream[i] == '\r')
+				else if (pBuffer[i] == '\r')
 					cout << "<CR>";
 				else {
-					cout << pStream[i];
-					lastMsgStream_1[i] = pStream[i];
+					cout << pBuffer[i];
+					lastMsgStream_1[i] = pBuffer[i];
 				}
 			}
 			cout << endl;
@@ -83,28 +96,29 @@ void NmeaHandler::runHandler() {
 			 lastMsgStream_1[i - 2] = 0;
 		}
 
-		if (stream2.NmeaInput(pStream, &length)) {
+		if (stream2.NmeaInput(pBuffer, &length)) {
 			printf("stream2, length: %d\n", length);
-			stream2.NmeaOutput(pStream, length);
+			stream2.NmeaOutput(pBuffer, length);
 			for (i = 0; i < length; i++) {
-				if (pStream[i] == '\n')
+				if (pBuffer[i] == '\n')
 					cout << "<LF>";
-				else if (pStream[i] == '\r')
+				else if (pBuffer[i] == '\r')
 					cout << "<CR>";
 				else {
-					cout << pStream[i];
-					lastMsgStream_2[i] = pStream[i];
+					cout << pBuffer[i];
+					lastMsgStream_2[i] = pBuffer[i];
 				}
 			}
 			cout << endl;
 			if (i > 2)
 			 lastMsgStream_2[i - 2] = 0;
-		}
-		usleep(300000);
+		}*/
+		usleep(30000);
 	}
-
-	stream1.NmeaCloseInputPort();
+	serialPortEcholodd.closeInputPort();
+	serialPortEcholodd.closeOutputPort();
+	/*stream1.NmeaCloseInputPort();
 	stream1.NmeaCloseOutputPort();
 	stream2.NmeaCloseInputPort();
-	stream2.NmeaCloseOutputPort();
+	stream2.NmeaCloseOutputPort();*/
 }
