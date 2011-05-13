@@ -24,7 +24,9 @@ var colorArray = new Array();
 var nCanasHeight = 400;
 var dataIndex = 1;
 
-var colors[] = {0x00f, 0x0}
+var colors_R = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252, 224, 180, 160, 120, 80, 40);
+var colors_G = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200, 240, 200, 120, 80, 0, 0, 0, 0); 		
+var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0, 0, 0, 20, 40, 20, 0); 
 
 window.onload = loadGW_LPfirstTime; 
 
@@ -50,8 +52,9 @@ $.get("dataProvider.php",				// calling php
              var mySplitResult = data.split(",");
              
              for (var i = 0; i < 400; i++) {
-             	colorArray[i] = mySplitResult[i];
+            	 colorArray[i] = mySplitResult[i];
              }
+
              
              /*
              for(var i = 0; i<255; i++) {
@@ -87,6 +90,11 @@ function loadCanvasFromTimer()
 	var imageData = canvasBufferContext.createImageData(1, nCanasHeight);
 
 	for (var i = 0; i < 400; i++) {
+		var colorIndex = parseInt((colorArray[i]*19)/255);
+		imageData.data[i*4] = colors_R[colorIndex];
+		imageData.data[i*4 + 1] = colors_G[colorIndex];
+		imageData.data[i*4 + 2] = colors_B[colorIndex];
+	/*	
 	if (colorArray[i] < 180) {
 		imageData.data[i*4] = 0; 
     	imageData.data[i*4 + 1] = 255;
@@ -95,7 +103,7 @@ function loadCanvasFromTimer()
 		imageData.data[i*4] = 255 - (colorArray[i] - 180)*255/75;
     	imageData.data[i*4 + 1] = 0;
     	imageData.data[i*4 + 2] = 0;
-	}
+	}*/
     	/*imageData.data[i*4] = 0; //100 + parseInt(Math.random() * 156);
     	imageData.data[i*4 + 1] = colorArray[i]; //100 + parseInt(Math.random() * 156);
     	imageData.data[i*4 + 2] = colorArray[i]; //0x00;//parseInt(Math.random() * 256);
