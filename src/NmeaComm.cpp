@@ -10,7 +10,7 @@
 #include <stdlib.h>		//not used
 #include "skipper.h"
 #include "NmeaComm.h"
-
+// Hello Georg
 NmeaComm::NmeaComm() {
 	// TODO Auto-generated constructor stub
 
