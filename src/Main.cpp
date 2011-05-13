@@ -14,6 +14,7 @@
 
 int main(int argc, char **argv)
 {
+	//TEST TEST
 	printf("Hello\n");
 	//cout << "Hei 2 !!!" << endl; // prints !!!Hello World!!!
 
