@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml"> 
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> 
+<title>Skippers</title>
+
+<meta http-equiv="Pragma" content="no-cache" />
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+<link rel="stylesheet" type="text/css" href="imed.css"/>
+
+
+<script src="jquery.js"></script>
+
+<script type="text/javascript" charset="UTF-8"> //ISO-8859-1">
+var t;
+var timer_is_on=0;
+var xmlhttp;
+var canvasBuffer;
+var colorArray = new Array();
+var nCanasHeight = 400;
+var dataIndex = 1;
+
+window.onload = loadGW_LPfirstTime; 
+
+function loadGW_LPfirstTime()
+{	
+	canvasBuffer = document.createElement('canvas');  
+	canvasBuffer.width = 900;  
+    canvasBuffer.height = nCanasHeight; 
+   
+	startTimerGW_L();
+	startCanvasTimer();
+}
+
+function loadGW_LP_fromTimer()
+{
+///////////////////////////////////////////////
+// Get data using jquery function "get"
+///////////////////////////////////////////////
+$.get("dataProvider.php",				// calling php
+         { index: dataIndex},			// parameter to send
+             function(data) { 			// callback function
+             var temp = "";
+             var mySplitResult = data.split(",");
+             
+             for (var i = 0; i < 400; i++) {
+             	colorArray[i] = mySplitResult[i];
+             }
+             
+             /*
+             for(var i = 0; i<255; i++) {
+             	var chr = data.charAt(i);
+             	temp += (chr.charCodeAt(chr) + " ");
+             }
+             $('#timeval').html(temp);*/
+             $('#timeval').html(data);
+          }
+				
+          );
+          dataIndex ++;
+          if (dataIndex > 129)
+          dataIndex = 1;
+          //string.charAt(index)
+///////////////////////////////////////////////
+// The same using jquery function "load"
+///////////////////////////////////////////////
+//$('#timeval').load('dataProvider.php?randval='+ Math.random());
+	
+	startTimerGW_L();
+}
+
+function startTimerGW_L()
+{
+	t=setTimeout("loadGW_LP_fromTimer()", 500);
+}
+
+function loadCanvasFromTimer()
+{    
+    var canvasBufferContext = canvasBuffer.getContext('2d');  
+  	canvasBufferContext.drawImage(document.getElementById('bg'), -1, 0);
+	var imageData = canvasBufferContext.createImageData(1, nCanasHeight);
+
+	for (var i = 0; i < 400; i++) {
+	if (colorArray[i] < 180) {
+		imageData.data[i*4] = 0; 
+    	imageData.data[i*4 + 1] = 255;
+    	imageData.data[i*4 + 2] = 255 - colorArray[i]*255/180;
+	} else {
+		imageData.data[i*4] = 255 - (colorArray[i] - 180)*255/75;
+    	imageData.data[i*4 + 1] = 0;
+    	imageData.data[i*4 + 2] = 0;
+	}
+    	/*imageData.data[i*4] = 0; //100 + parseInt(Math.random() * 156);
+    	imageData.data[i*4 + 1] = colorArray[i]; //100 + parseInt(Math.random() * 156);
+    	imageData.data[i*4 + 2] = colorArray[i]; //0x00;//parseInt(Math.random() * 256);
+    	*/
+    	
+		imageData.data[i*4 + 3] = 0xff; // opaque
+	}
+	canvasBufferContext.putImageData(imageData, 899, 0); 
+
+	document.getElementById('bg').getContext('2d').drawImage(canvasBuffer, 0, 0);
+ 
+	////////////////////////////////////////
+	startCanvasTimer();
+}
+
+function startCanvasTimer()
+{
+	t=setTimeout("loadCanvasFromTimer()", 50);
+}
+</script>
+
+<meta http-equiv="Page-Enter" content="blendTrans(Duration=2)"/>
+<meta http-equiv="Site-Exit" content="blendTrans(Duration=5)"/>
+</head>
+
+<body>
+
+
+
+<div id="wrapper">
+<!--<p id="headline">&copy; ImedSecure.</p>-->
+<div id="header">
+<div id="timeval"> </div>
+
+ 
+<canvas id="bg" width="900" height="400"></canvas>
+</div>
+
+</div>
+</div>
+</body>
+</html>
+
+
