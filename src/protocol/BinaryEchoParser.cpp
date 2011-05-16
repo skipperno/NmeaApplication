@@ -5,30 +5,30 @@
  *      Author: Ernad Secic
  */
 
-#include "NmeaUtility.h"
+#include "BinaryEchoParser.h"
 #include <string.h>
 #include <stdio.h>
 
 #define AVERAGED_RESOLUTION 400
 
 
-NmeaUtility::NmeaUtility() {
+BinaryEchoParser::BinaryEchoParser() {
 	// TODO Auto-generated constructor stub
 
 }
 
-NmeaUtility::~NmeaUtility() {
+BinaryEchoParser::~BinaryEchoParser() {
 	// TODO Auto-generated destructor stub
 }
 
-void NmeaUtility::convertCompressedDataToAsciNmea(char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength) {
+void BinaryEchoParser::convertCompressedDataToAsciNmea(char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength) {
 	char averageBuffer[AVERAGED_RESOLUTION];
 	convertCompressedDataToAverage(compressedBuffer, nCompressedLength, averageBuffer);
 
 	convertAverageToAsciNmea(averageBuffer, asciNmeaMsg, nAsciMsgLength);
 }
 
-void NmeaUtility::convertCompressedDataToAverage(char* compressedBuffer, int nCompressedLength, char* averageBuffer) {
+void BinaryEchoParser::convertCompressedDataToAverage(char* compressedBuffer, int nCompressedLength, char* averageBuffer) {
 	//printf("start convertCompressedDataToAverage\n");
 	char decomprBuffer[6000]; //TODO: 6000 or more?
 	int nDecompressedLength = 0;
@@ -57,7 +57,7 @@ void NmeaUtility::convertCompressedDataToAverage(char* compressedBuffer, int nCo
 }
 
 
-void NmeaUtility::convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
+void BinaryEchoParser::convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
 	char nmeaStart[] = {"$PSKPES,400,"};
 	strcpy(asciNmeaMsg, nmeaStart);
 	*nAsciMsgLength = 12;
@@ -84,7 +84,7 @@ void NmeaUtility::convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMs
 	//printf("end convertAverageToAsciNmea\n");
 }
 
-void NmeaUtility::decompressData(char* compressedBuffer, int nCompressedLength, char* decompressedBuffer, int* nDecompressedLength) {
+void BinaryEchoParser::decompressData(char* compressedBuffer, int nCompressedLength, char* decompressedBuffer, int* nDecompressedLength) {
 	//printf("start decompressData\n");
 	for (int i = 0; i < nCompressedLength; i++) {
 		if (compressedBuffer[i] != 0) {

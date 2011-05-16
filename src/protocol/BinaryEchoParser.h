@@ -5,13 +5,13 @@
  *      Author: Ernad Secic
  */
 
-#ifndef NMEAUTILITY_H_
-#define NMEAUTILITY_H_
+#ifndef BINARYECHOPARSER_H_
+#define BINARYECHOPARSER_H_
 
-class NmeaUtility {
+class BinaryEchoParser {
 public:
-	NmeaUtility();
-	virtual ~NmeaUtility();
+	BinaryEchoParser();
+	virtual ~BinaryEchoParser();
 	static void convertCompressedDataToAsciNmea(char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength);
 	// TODO: private? Only "convertCompressedDataToAsciNmea" as public?
 	static void convertCompressedDataToAverage(char* compressedBuffer, int nCompressedLength, char* averageBuffer);
@@ -21,4 +21,4 @@ private:
 	static void decompressData(char* compressedBuffer, int nCompressedLength, char* decompressedBuffer, int* nDecompressedLength);
 };
 
-#endif /* NMEAUTILITY_H_ */
+#endif /* BINARYECHOPARSER_H_ */

@@ -11,6 +11,7 @@ if( $_REQUEST["index"] )
    //echo "Msg type: ". $type;
 }
 
+// don't remove this yet:
 //url finder from the server - used in AJAX call to server - to pass variables to the server from the JavaScript
 /*	$pageURL = 'http';
 	if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}

@@ -8,7 +8,7 @@
 #ifndef NMEAHANDLER_H_
 #define NMEAHANDLER_H_
 
-#include "services/SerialPort.h"
+#include "comm/SerialPort.h"
 
 class NmeaHandler {
 public:

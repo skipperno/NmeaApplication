@@ -10,7 +10,7 @@
 #include <string.h>
 //#include "skipper.h"
 #include "NmeaComm.h"
-#include "utility/NmeaUtility.h"
+#include "protocol/BinaryEchoParser.h"
 
 
 NmeaHandler* thisInstance;
@@ -53,7 +53,7 @@ void NmeaHandler::runHandler() {
 	int echoLoddNmeaMsgLength;
 	char buffer[10024]; // Storage of NMEA data stream
 	char* pBuffer = buffer; // Pointer to storage of NMEA data stream
-	int length, i; // Length of NMEA data stream
+	int length; // Length of NMEA data stream
 /*
 	char baudRate[] = "4800"; // Input/output baudrate to be fetched from configuration-file or web-configuration
 	char nmea2[] = "2"; // Input NMEA port number to be fetched from configuration-file or web-configuration
@@ -74,7 +74,7 @@ void NmeaHandler::runHandler() {
 		if (length > 0) {
 			printf("Received: %d\n", length);
 			serialPortEcholodd.send(pBuffer, length);
-			NmeaUtility::convertCompressedDataToAsciNmea(pBuffer, length, lastMsgStream_1, &echoLoddNmeaMsgLength);
+			BinaryEchoParser::convertCompressedDataToAsciNmea(pBuffer, length, lastMsgStream_1, &echoLoddNmeaMsgLength);
 			printf("%s\n", lastMsgStream_1);
 		}
 		/*

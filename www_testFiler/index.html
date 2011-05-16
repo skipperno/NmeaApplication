@@ -22,31 +22,41 @@ var xmlhttp;
 var canvasBuffer;
 var colorArray = new Array();
 var nCanasHeight = 400;
-var dataIndex = 1;
+var dataParameter = 1;
 
 var colors_R = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252, 224, 180, 160, 120, 80, 40);
 var colors_G = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200, 240, 200, 120, 80, 0, 0, 0, 0); 		
 var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0, 0, 0, 20, 40, 20, 0); 
 
-window.onload = loadGW_LPfirstTime; 
+window.onload = loadFirstTime; 
 
-function loadGW_LPfirstTime()
+function loadFirstTime()
 {	
 	canvasBuffer = document.createElement('canvas');  
 	canvasBuffer.width = 900;  
     canvasBuffer.height = nCanasHeight; 
    
-	startTimerGW_L();
-	startCanvasTimer();
+    startDataProviderTimer();
+    startPaintingCanvasTimer();
 }
 
-function loadGW_LP_fromTimer()
+
+//////////////////////////////////////////////////
+// FUNCTIONS USED FOR GETING OF SENSOR DATA FROM 
+// THE WEB SERVER.
+//////////////////////////////////////////////////
+function startDataProviderTimer()
 {
-///////////////////////////////////////////////
-// Get data using jquery function "get"
-///////////////////////////////////////////////
-$.get("dataProvider.php",				// calling php
-         { index: dataIndex},			// parameter to send
+	t=setTimeout("getData()", 500);
+}
+
+function getData()
+{
+	///////////////////////////////////////////////
+	// Get data using jquery function "get"
+	///////////////////////////////////////////////
+	$.get("dataProvider.php",				// calling php
+         { index: dataParameter},			// parameter to send
              function(data) { 			// callback function
              var temp = "";
              var mySplitResult = data.split(",");
@@ -55,28 +65,33 @@ $.get("dataProvider.php",				// calling php
             	 colorArray[i] = mySplitResult[i];
              }
 
-             //$('#timeval').html(data);
+             //$('#timeval').html(data); // don't remove. It displays received message
           }
 				
-          );
-          dataIndex ++;
-          if (dataIndex > 129)
-          dataIndex = 1;
-          //string.charAt(index)
-///////////////////////////////////////////////
-// The same using jquery function "load"
-///////////////////////////////////////////////
-//$('#timeval').load('dataProvider.php?randval='+ Math.random());
+	); // end of "$get"
+     
+	/*
+	dataParameter ++;  
+    if (dataParameter > 129)
+    	dataParameter = 1;*/
+
+	///////////////////////////////////////////////
+	// Don't remove: The same using jquery function "load"
+	///////////////////////////////////////////////
+	//$('#timeval').load('dataProvider.php?randval='+ Math.random());
 	
-	startTimerGW_L();
+    startDataProviderTimer();
 }
 
-function startTimerGW_L()
+//////////////////////////////////////////////////
+//FUNCTIONS USED FOR GRAPH PAINTING IN CANVAS
+//////////////////////////////////////////////////
+function startPaintingCanvasTimer()
 {
-	t=setTimeout("loadGW_LP_fromTimer()", 500);
+	t=setTimeout("paintCanvas()", 50);
 }
 
-function loadCanvasFromTimer()
+function paintCanvas()
 {    
     var canvasBufferContext = canvasBuffer.getContext('2d');  
   	canvasBufferContext.drawImage(document.getElementById('bg'), -1, 0);
@@ -91,18 +106,16 @@ function loadCanvasFromTimer()
     	
 		imageData.data[i*4 + 3] = 0xff; // opaque
 	}
+	
 	canvasBufferContext.putImageData(imageData, 899, 0); 
 
 	document.getElementById('bg').getContext('2d').drawImage(canvasBuffer, 0, 0);
  
 	////////////////////////////////////////
-	startCanvasTimer();
+	startPaintingCanvasTimer();
 }
 
-function startCanvasTimer()
-{
-	t=setTimeout("loadCanvasFromTimer()", 50);
-}
+
 </script>
 
 <meta http-equiv="Page-Enter" content="blendTrans(Duration=2)"/>

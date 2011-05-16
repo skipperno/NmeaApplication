@@ -19,7 +19,6 @@
 //#include "../utility/ip.h"
 #include <pthread.h> // mutex
 
-#include "../data/Mock.h"
 #include "../NmeaHandler.h"
 
 typedef struct {
@@ -81,11 +80,6 @@ int  SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
 	char bufferRec[MAX_REQUEST_LENGTH];
 	char bufferRemoteIP[40];
 	char bufferSend[MAX_RESPONSE_LENGTH];
-	int nLength;
-	char loginState;
-	char tempChar;
-
-	postHeader postHeaderData;
 
 	memset(bufferSend, 0, MAX_RESPONSE_LENGTH);
 	memset(bufferRec, 0, MAX_REQUEST_LENGTH);
@@ -105,7 +99,7 @@ int  SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
 	char temp[1000];
 	char servText[8000];
 	if (!NmeaHandler::getInstance()->getLastEchoMessage(servText))
-	   Mock::getByteString(servText);
+	   printf("Error getting last Echologg message\n");
 	//Mock::getString(servText);
 	//servText[256] = 0; // null terminate
 	sprintf(temp, "%s\r\n", &servText[12]);
