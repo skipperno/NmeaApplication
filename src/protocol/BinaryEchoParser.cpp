@@ -34,7 +34,7 @@ void BinaryEchoParser::convertCompressedDataToAverage(char* compressedBuffer, in
 	int nDecompressedLength = 0;
 
 	decompressData(compressedBuffer, nCompressedLength, decomprBuffer, &nDecompressedLength);
-
+printf("decompr. len: %d\n", nDecompressedLength);
 	unsigned int nCountPerMeassurment;
 	unsigned int nSum = 0;
 

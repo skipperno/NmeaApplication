@@ -91,12 +91,17 @@ int  SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
 	}
 
 	int nTotLength = Readline(conn_s, bufferRemoteIP, 39);
+	if (nTotLength <= 0) {
+		printf("***********ERROR, received: %d\n", nTotLength);
+		return 0;
+	}
+
 	bufferRemoteIP[nTotLength] = 0;
 
 	//printf("Received from client: %d bytes\n", nTotLength);
 	//usleep(10000);
 
-	char temp[1000];
+	char temp[2000];
 	char servText[8000];
 	if (!NmeaHandler::getInstance()->getLastEchoMessage(servText))
 	   printf("Error getting last Echologg message\n");

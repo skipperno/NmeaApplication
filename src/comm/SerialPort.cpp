@@ -87,12 +87,13 @@ void SerialPort::receive(char* pBuffer, int *length) {
 	}
 
 	while (true) {
-
 		if (inpstream.readsome(&c, 1) != 0) {
 			nNotReceivedCounter = 0;
+			//printf("%d ", c);
 			pBuffer[(*length)++] = c;
 
 		} else if(nNotReceivedCounter > 5) {
+			//printf("END.\n");
 			return;
 		} else {
 			nNotReceivedCounter++;

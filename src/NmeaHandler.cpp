@@ -8,12 +8,15 @@
 #include "NmeaHandler.h"
 #include <iostream>
 #include <string.h>
+#include <pthread.h>
+
 //#include "skipper.h"
 #include "NmeaComm.h"
 #include "protocol/BinaryEchoParser.h"
 
 
 NmeaHandler* thisInstance;
+pthread_mutex_t lastMsgMutex;
 
 NmeaHandler::NmeaHandler() {
 	memset(lastMsgStream_1, 0, 10024);
@@ -38,10 +41,14 @@ void NmeaHandler::getLastWeatherMessage(char* pStream) {
 }
 
 bool NmeaHandler::getLastEchoMessage(char* pStream) {
+	pthread_mutex_lock(&lastMsgMutex);
+
 	if (lastMsgStream_1[0] != 0) {
 		strcpy(pStream, lastMsgStream_1);
+		pthread_mutex_unlock(&lastMsgMutex);
 		return true;
 	} else {
+		pthread_mutex_unlock(&lastMsgMutex);
 		return false;
 	}
 }
@@ -73,9 +80,12 @@ void NmeaHandler::runHandler() {
 		serialPortEcholodd.receive(pBuffer, &length);
 		if (length > 0) {
 			printf("Received: %d\n", length);
+
 			serialPortEcholodd.send(pBuffer, length);
+			pthread_mutex_lock(&lastMsgMutex);
 			BinaryEchoParser::convertCompressedDataToAsciNmea(pBuffer, length, lastMsgStream_1, &echoLoddNmeaMsgLength);
-			printf("%s\n", lastMsgStream_1);
+			pthread_mutex_unlock(&lastMsgMutex);
+			//printf("%s\n", lastMsgStream_1);
 		}
 		/*
 		if (stream1.NmeaInput(pBuffer, &length)) {

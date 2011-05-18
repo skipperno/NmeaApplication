@@ -1,141 +1,139 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml"> 
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> 
-<title>Skippers</title>
-
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <meta http-equiv="Pragma" content="no-cache" />
-<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link rel="stylesheet" type="text/css" href="imed.css"/>
+<meta http-equiv="Page-Enter" content="blendTrans(Duration=2)" />
+<meta http-equiv="Site-Exit" content="blendTrans(Duration=5)" />
 
+<link rel="stylesheet" type="text/css" href="imed.css" />
+
+<title>Skippers</title>
 
 <script src="jquery.js"></script>
 
-<script type="text/javascript" charset="UTF-8"> //ISO-8859-1">
-var t;
-var timer_is_on=0;
-var xmlhttp;
-var canvasBuffer;
-var colorArray = new Array();
-var nCanasHeight = 400;
-var dataParameter = 1;
+<script type="text/javascript" charset="UTF-8">
+	//ISO-8859-1">
+	var t;
+	var timer_is_on = 0;
+	var xmlhttp;
+	var canvasBuffer;
+	var colorArray = new Array();
+	var nCanasHeight = 400;
+	var dataParameter = 1;
 
-var colors_R = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252, 224, 180, 160, 120, 80, 40);
-var colors_G = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200, 240, 200, 120, 80, 0, 0, 0, 0); 		
-var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0, 0, 0, 20, 40, 20, 0); 
+	var colors_R = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252,
+			224, 180, 160, 120, 80, 40);
+	var colors_G = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200,
+			240, 200, 120, 80, 0, 0, 0, 0);
+	var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0,
+			0, 0, 0, 20, 40, 20, 0);
 
-window.onload = loadFirstTime; 
+	window.onload = loadFirstTime;
 
-function loadFirstTime()
-{	
-	canvasBuffer = document.createElement('canvas');  
-	canvasBuffer.width = 900;  
-    canvasBuffer.height = nCanasHeight; 
-   
-    startDataProviderTimer();
-    startPaintingCanvasTimer();
-}
+	function loadFirstTime() {
+		canvasBuffer = document.createElement('canvas');
+		canvasBuffer.width = 900;
+		canvasBuffer.height = nCanasHeight;
 
-
-//////////////////////////////////////////////////
-// FUNCTIONS USED FOR GETING OF SENSOR DATA FROM 
-// THE WEB SERVER.
-//////////////////////////////////////////////////
-function startDataProviderTimer()
-{
-	t=setTimeout("getData()", 500);
-}
-
-function getData()
-{
-	///////////////////////////////////////////////
-	// Get data using jquery function "get"
-	///////////////////////////////////////////////
-	$.get("dataProvider.php",				// calling php
-         { index: dataParameter},			// parameter to send
-             function(data) { 			// callback function
-             var temp = "";
-             var mySplitResult = data.split(",");
-             
-             for (var i = 0; i < 400; i++) {
-            	 colorArray[i] = mySplitResult[i];
-             }
-
-             //$('#timeval').html(data); // don't remove. It displays received message
-          }
-				
-	); // end of "$get"
-     
-	/*
-	dataParameter ++;  
-    if (dataParameter > 129)
-    	dataParameter = 1;*/
-
-	///////////////////////////////////////////////
-	// Don't remove: The same using jquery function "load"
-	///////////////////////////////////////////////
-	//$('#timeval').load('dataProvider.php?randval='+ Math.random());
-	
-    startDataProviderTimer();
-}
-
-//////////////////////////////////////////////////
-//FUNCTIONS USED FOR GRAPH PAINTING IN CANVAS
-//////////////////////////////////////////////////
-function startPaintingCanvasTimer()
-{
-	t=setTimeout("paintCanvas()", 50);
-}
-
-function paintCanvas()
-{    
-    var canvasBufferContext = canvasBuffer.getContext('2d');  
-  	canvasBufferContext.drawImage(document.getElementById('bg'), -1, 0);
-	var imageData = canvasBufferContext.createImageData(1, nCanasHeight);
-
-	for (var i = 0; i < 400; i++) {
-		var colorIndex = parseInt((colorArray[i]*19)/255);
-		imageData.data[i*4] = colors_R[colorIndex];
-		imageData.data[i*4 + 1] = colors_G[colorIndex];
-		imageData.data[i*4 + 2] = colors_B[colorIndex];
-
-    	
-		imageData.data[i*4 + 3] = 0xff; // opaque
+		startDataProviderTimer();
+		startPaintingCanvasTimer();
 	}
-	
-	canvasBufferContext.putImageData(imageData, 899, 0); 
 
-	document.getElementById('bg').getContext('2d').drawImage(canvasBuffer, 0, 0);
- 
-	////////////////////////////////////////
-	startPaintingCanvasTimer();
-}
+	function changeCenterDiv() {
+		var divTop = document.getElementById('timeval');
+		divTop.innerHTML = "Hei fungerer";
+	}
 
+	//////////////////////////////////////////////////
+	// FUNCTIONS USED FOR GETING OF SENSOR DATA FROM 
+	// THE WEB SERVER.
+	//////////////////////////////////////////////////
+	function startDataProviderTimer() {
+		t = setTimeout("getData()", 500);
+	}
 
+	function getData() {
+		///////////////////////////////////////////////
+		// Get data using jquery function "get"
+		///////////////////////////////////////////////
+		$.get("dataProvider.php", // calling php
+		{
+			index : dataParameter
+		}, // parameter to send
+		function(data) { // callback function
+			var temp = "";
+			var mySplitResult = data.split(",");
+
+			for ( var i = 0; i < 400; i++) {
+				colorArray[i] = mySplitResult[i];
+			}
+
+			//$('#timeval').html(data); // don't remove. It displays received message
+		}
+
+		); // end of "$get"
+
+		/*
+		dataParameter ++;  
+		if (dataParameter > 129)
+			dataParameter = 1;*/
+
+		///////////////////////////////////////////////
+		// Don't remove: The same using jquery function "load"
+		///////////////////////////////////////////////
+		//$('#timeval').load('dataProvider.php?randval='+ Math.random());
+		startDataProviderTimer();
+	}
+
+	//////////////////////////////////////////////////
+	//FUNCTIONS USED FOR GRAPH PAINTING IN CANVAS
+	//////////////////////////////////////////////////
+	function startPaintingCanvasTimer() {
+		t = setTimeout("paintCanvas()", 50);
+	}
+
+	function paintCanvas() {
+		var canvasBufferContext = canvasBuffer.getContext('2d');
+		canvasBufferContext.drawImage(document.getElementById('bg'), -1, 0);
+		var imageData = canvasBufferContext.createImageData(1, nCanasHeight);
+
+		for ( var i = 0; i < 400; i++) {
+			var colorIndex = parseInt((colorArray[i] * 19) / 255);
+			imageData.data[i * 4] = colors_R[colorIndex];
+			imageData.data[i * 4 + 1] = colors_G[colorIndex];
+			imageData.data[i * 4 + 2] = colors_B[colorIndex];
+
+			imageData.data[i * 4 + 3] = 0xff; // opaque
+		}
+
+		canvasBufferContext.putImageData(imageData, 899, 0);
+
+		document.getElementById('bg').getContext('2d').drawImage(canvasBuffer,
+				0, 0);
+
+		////////////////////////////////////////
+		startPaintingCanvasTimer();
+	}
 </script>
-
-<meta http-equiv="Page-Enter" content="blendTrans(Duration=2)"/>
-<meta http-equiv="Site-Exit" content="blendTrans(Duration=5)"/>
 </head>
 
 <body>
 
 
 
-<div id="wrapper">
-<div id="header">
-<div id="timeval"> </div>
+	<div id="wrapper">
+		<div id="header">
+			<div id="timeval"></div>
+			<canvas id="bg" width="900" height="400"></canvas>
+			<input type="button" value="Test" onclick="changeCenterDiv();"></input>
+		</div>
 
- 
-<canvas id="bg" width="900" height="400"></canvas>
-</div>
-
-</div>
-</div>
+	</div>
 </body>
 </html>
 
