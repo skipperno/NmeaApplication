@@ -19,8 +19,10 @@ NmeaHandler* thisInstance;
 pthread_mutex_t lastMsgMutex;
 
 NmeaHandler::NmeaHandler() {
-	memset(lastMsgStream_1, 0, 10024);
+	memset(lastMsgStream_1, 0, 17000);
 	memset(lastMsgStream_2, 0, 10024);
+	nNoOfMessages = 0;
+	nNextMsgPos = 0;
 	thisInstance = this;
 }
 
@@ -45,6 +47,8 @@ bool NmeaHandler::getLastEchoMessage(char* pStream) {
 
 	if (lastMsgStream_1[0] != 0) {
 		strcpy(pStream, lastMsgStream_1);
+		nNoOfMessages = 0;
+		nNextMsgPos = 0;
 		pthread_mutex_unlock(&lastMsgMutex);
 		return true;
 	} else {
@@ -83,7 +87,11 @@ void NmeaHandler::runHandler() {
 
 			serialPortEcholodd.send(pBuffer, length);
 			pthread_mutex_lock(&lastMsgMutex);
-			BinaryEchoParser::convertCompressedDataToAsciNmea(pBuffer, length, lastMsgStream_1, &echoLoddNmeaMsgLength);
+			//if(nNoOfMessages < 5) {
+				BinaryEchoParser::convertCompressedDataToAsciNmea(pBuffer, length, &lastMsgStream_1[nNextMsgPos], &echoLoddNmeaMsgLength);
+				//nNextMsgPos += echoLoddNmeaMsgLength;
+				//nNoOfMessages ++;
+			//}
 			pthread_mutex_unlock(&lastMsgMutex);
 			//printf("%s\n", lastMsgStream_1);
 		}

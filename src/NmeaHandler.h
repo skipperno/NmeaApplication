@@ -23,7 +23,10 @@ public:
 	static NmeaHandler* getInstance();
 
 private:
-	char lastMsgStream_1[10024];
+	int nNoOfMessages;
+	int nNextMsgPos;
+
+	char lastMsgStream_1[17000];
 	char lastMsgStream_2[10024];
 	SerialPort serialPortEcholodd;
 };

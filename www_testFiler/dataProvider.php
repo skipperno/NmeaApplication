@@ -44,7 +44,7 @@ $curPageURL = curPageURL($pageURL);
 $client = new TcpClient("127.0.0.1", 2004); 
 $client->Timeout = 2000; 
 $client->NewLine = "\r\n"; 
-$client->ReceiveBufferSize = 6000;
+$client->ReceiveBufferSize = 17000;
 
 $client->Connect();
 
