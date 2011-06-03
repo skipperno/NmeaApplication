@@ -83,7 +83,7 @@ void NmeaHandler::runHandler() {
 	for (;;) {
 		serialPortEcholodd.receive(pBuffer, &length);
 		if (length > 0) {
-			printf("Received: %d\n", length);
+			//printf("Received: %d\n", length);
 
 			serialPortEcholodd.send(pBuffer, length);
 			pthread_mutex_lock(&lastMsgMutex);

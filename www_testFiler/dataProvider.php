@@ -1,7 +1,8 @@
 <?php
 include('TcpClient.php');
-include ('layoutDepth.php');
 $index = 1;
+$myTest = 1;
+
 //////////////////////////////
 // parse received parameter
 //////////////////////////////
@@ -53,8 +54,8 @@ $client->Connect();
 //////////////////////////////
 $client->WriteLine("Hei");
 $line = $client->ReadLine();
- $client->Close();
- 
+$client->Close();
+
 //////////////////////////////
 // send back to browser
 //////////////////////////////

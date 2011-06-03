@@ -19,14 +19,17 @@
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
+	var echoCanvas1;
+	var dataReceived = 0;
+	var newColorArray;
+	dataParameter = 1;
+	window.onload = initCanvas;
 	
-	window.onload = echoPainter_init;
 
-	
-
-	function changeCenterDiv() {
-		var divTop = document.getElementById('timeval');
-		divTop.innerHTML = "Hei fungerer";
+	function initCanvas() {
+		echoCanvas1 = new EchoCanvas(900, 400);
+		startDataProviderTimer();
+		startPaintingCanvasTimer();
 	}
 
 	//////////////////////////////////////////////////
@@ -34,34 +37,71 @@
 	// THE WEB SERVER.
 	//////////////////////////////////////////////////
 	function startDataProviderTimer() {
-		t = setTimeout("echoPainter_getData()", 1000);
+		t = setTimeout("onDataProviderTimer()", 500);
 	}
 
+	////////////////////////////////////////////////
+	// Get echo data from php
+	////////////////////////////////////////////////
+	function onDataProviderTimer() {
+		$.get("dataProvider.php", // calling php
+		{
+			index : dataParameter
+		}, // parameter to send
+		function(data) { // callback function
+			parseEchoData(data);
+			//$('#timeval').html(data); // don't remove. It displays received message
+		}
+
+		); // end of "$get"
+
+		startDataProviderTimer();
+		///////////////////////////////////////////////
+		// Don't remove: The same using jquery function "load"
+		///////////////////////////////////////////////
+		//$('#timeval').load('dataProvider.php?randval='+ Math.random());
+	}
 	
+	////////////////////////////////////////////////
+	// Parse echo data received from php
+	////////////////////////////////////////////////
+	function parseEchoData(data){	
+		newColorArray = data.split(",");
+		dataReceived = 1;
+		echoCanvas1.setNewData(newColorArray);
+		//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
+	}
 
 	//////////////////////////////////////////////////
-	//TIMER USED FOR GRAPH PAINTING IN CANVAS
+	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("echoPainter_PaintCanvas()", 50);
+		t = setTimeout("onPaintingCanvasTimer()", 100);
+	}
+
+	function onPaintingCanvasTimer() {
+		if (dataReceived > 0) {
+			echoCanvas1.echoPainter_PaintCanvas();		
+		}
+		startPaintingCanvasTimer();
 	}
 </script>
 </head>
 
+
 <body>
 	<div id="wrap">
 		<div id="container">
-			<div id="timeval"></div>
+			<div id="timeval"></div> <!-- used only for test-->
 			<canvas id="echoCanvas" width="900" height="400"></canvas>
 			<div class="menuDown">
-			<div class="buttonsDiv">
-				<a href="#" class="myButton">Test 1</a>
-				<a href="#" class="myButton">Test 3</a>
-				<a href="#" class="myButton">Test 5</a>
-			</div>
+				<div class="buttonsDiv">
+					<a href="#" class="myButton">Test 1</a> <a href="#"
+						class="myButton">Test 3</a> <a href="#" class="myButton">Test
+						5</a>
+				</div>
 			</div>
 		</div>
-	</div>
 	</div>
 </body>
 </html>

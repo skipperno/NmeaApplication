@@ -110,6 +110,7 @@ int  SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
 	sprintf(temp, "%s\r\n", &servText[12]);
 
 	socketClientPipe_write(conn_s, temp, strlen(temp)); //"GGA,10,0,1,1,98.5,3,1\r\n", 23);
+	printf("sent data to php\n");
 /*
 	nTotLength = Readline(conn_s, bufferRec, MAX_REQUEST_LENGTH - 1);
 	bufferRec[nTotLength] = 0;

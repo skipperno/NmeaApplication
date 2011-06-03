@@ -59,8 +59,8 @@ printf("decompr. len: %d\n", nDecompressedLength);
 
 void BinaryEchoParser::convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
 	char nmeaStart[] = {"$PSKPES,400,"};
-	//strcpy(asciNmeaMsg, nmeaStart);
-	*nAsciMsgLength = 0;//12;
+	strcpy(asciNmeaMsg, nmeaStart);
+	*nAsciMsgLength = 12;
 	//printf("start convertAverageToAsciNmea\n");
 
 	for (int i = 0; i < AVERAGED_RESOLUTION; i++) {
