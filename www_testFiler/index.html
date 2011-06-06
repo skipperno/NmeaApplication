@@ -20,16 +20,28 @@
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
 	var echoCanvas1;
+	var echoCanvas2;
 	var dataReceived = 0;
-	var newColorArray;
-	dataParameter = 1;
-	window.onload = initCanvas;
+	var newColorArrayCh1;
+	var newColorArrayCh2;
 	
-
-	function initCanvas() {
-		echoCanvas1 = new EchoCanvas(900, 400);
+	dataParameter = 1;
+	window.onload = initEchoPainting;
+	
+	function initEchoPainting() {
+		initOneCanvas();
 		startDataProviderTimer();
 		startPaintingCanvasTimer();
+	}
+
+	function initOneCanvas() {
+		echoCanvas1 = new EchoCanvas(0, 0, 900, 400);
+		echoCanvas2 = null;
+	}
+	
+	function initBothCanvas() {
+		echoCanvas1 = new EchoCanvas(0, 0, 450, 400);
+		echoCanvas2 = new EchoCanvas(450, 0, 450, 400);
 	}
 
 	//////////////////////////////////////////////////
@@ -46,7 +58,7 @@
 	function onDataProviderTimer() {
 		$.get("dataProvider.php", // calling php
 		{
-			index : dataParameter
+			index : "c" + dataParameter // c1 when 1 channel requested. c2 for 2 chanels
 		}, // parameter to send
 		function(data) { // callback function
 			parseEchoData(data);
@@ -65,10 +77,16 @@
 	////////////////////////////////////////////////
 	// Parse echo data received from php
 	////////////////////////////////////////////////
-	function parseEchoData(data){	
-		newColorArray = data.split(",");
+	function parseEchoData(data){
+		var chanelsArray = data.split("CH");
+		newColorArrayCh1 = chanelsArray[0].split(",");
+		if (chanelsArray.length > 1)
+			newColorArrayCh2 = chanelsArray[1].split(",");
+		
 		dataReceived = 1;
-		echoCanvas1.setNewData(newColorArray);
+		echoCanvas1.setNewData(newColorArrayCh1);
+		if (echoCanvas2 != null)
+			echoCanvas2.setNewData(newColorArrayCh2);
 		//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
 	}
 
@@ -76,12 +94,14 @@
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", 100);
+		t = setTimeout("onPaintingCanvasTimer()", 50);
 	}
 
 	function onPaintingCanvasTimer() {
 		if (dataReceived > 0) {
-			echoCanvas1.echoPainter_PaintCanvas();		
+			echoCanvas1.echoPainter_PaintCanvas();	
+			if (echoCanvas2 != null)
+				echoCanvas2.echoPainter_PaintCanvas();	
 		}
 		startPaintingCanvasTimer();
 	}
@@ -96,9 +116,9 @@
 			<canvas id="echoCanvas" width="900" height="400"></canvas>
 			<div class="menuDown">
 				<div class="buttonsDiv">
-					<a href="#" class="myButton">Test 1</a> <a href="#"
-						class="myButton">Test 3</a> <a href="#" class="myButton">Test
-						5</a>
+					<a href="#" class="myButton" onclick="initOneCanvas()">One channel</a>
+					<a href="#" class="myButton" onclick="initBothCanvas()">Two channels</a>
+					<a href="#" class="myButton" onclick="changeToGreen()">Test</a>
 				</div>
 			</div>
 		</div>

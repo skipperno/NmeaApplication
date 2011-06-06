@@ -1,10 +1,14 @@
 var noOfColors = 19; // !!! set this number to length of your color array
 
 // DON'T REMOVE. This is array for green color
-/*var colors_R = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x29, 0x38, 0x5C, 0x8C, 0xAC);
- var colors_G = new Array(0x00, 0x25, 0x40, 0x5E, 0x6D, 0x9D, 0xBE, 0xFF, 0xFF, 0xFF);
- var colors_B = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x29, 0x38, 0x5C, 0x8C, 0xAC);
- */
+
+var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x29, 0x38, 0x5C,
+ 0x8C, 0xAC); 
+var colors_G2 = new Array(0x00, 0x25, 0x40, 0x5E, 0x6D, 0x9D,
+0xBE, 0xFF, 0xFF, 0xFF); 
+var colors_B2 = new Array(0x00, 0x00, 0x09, 0x0D,
+0x1C, 0x29, 0x38, 0x5C, 0x8C, 0xAC);
+
 
 var colors_R = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252,
 		224, 180, 160, 120, 80, 40);
@@ -13,9 +17,19 @@ var colors_G = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200, 240,
 var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0,
 		0, 0, 20, 40, 20, 0);
 
+
+function changeToGreen() {
+	colors_R = colors_R2;
+	colors_G = colors_G2;
+	colors_B = colors_B2;
+	noOfColors = 10;
+}
 // //////////////////////////////
 // EchoCanvas class
-function EchoCanvas(canWidth, canHeight) {
+function EchoCanvas(x, y, canWidth, canHeight) {
+	this.x = x;
+	this.y = y;
+	this.test = 1;
 	this.canWidth = canWidth;
 	this.canHeight = canHeight;
 	this.canvasDoubleBuffElement = null;
@@ -27,7 +41,6 @@ function EchoCanvas(canWidth, canHeight) {
 	this.colorStartIndex;
 	this.colorRest;
 
-	
 	this.echoPainter_init();
 } // end of class
 
@@ -36,10 +49,10 @@ EchoCanvas.prototype.echoPainter_init = function() {
 
 	this.canvasDoubleBuffElement = document.createElement('canvas');
 	this.canvasDoubleBuffElement.width = this.canWidth + 20; // 20 pix if
-																// painting 20
-																// times in one
-																// sec.(sleep
-																// 50ms)
+	// painting 20
+	// times in one
+	// sec.(sleep
+	// 50ms)
 	this.canvasDoubleBuffElement.height = this.canHeight;
 
 	this.canvasDoubleBuffer2Dcontext = this.canvasDoubleBuffElement
@@ -59,24 +72,33 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
 	// var imageData = canvasDoubleBuffer2Dcontext.createImageData(1,
 	// nCanasHeight);
 
-	for ( var i = 0; i < 400; i++) {
-		this.interpolateColorIndex(this.colorArray[i]);
+	if (this.colorArray != null) {
+		for ( var i = 0; i < 400; i++) {
+			this.interpolateColorIndex(this.colorArray[i]);
 
-		this.canvasDoubleBuff_1pixData.data[i * 4] = this
-				.getInterpolateColorR(); // colors_R[colorIndex];
-		this.canvasDoubleBuff_1pixData.data[i * 4 + 1] = this
-				.getInterpolateColorG(); // colors_G[colorIndex];
-		this.canvasDoubleBuff_1pixData.data[i * 4 + 2] = this
-				.getInterpolateColorB(); // colors_B[colorIndex];
+			this.canvasDoubleBuff_1pixData.data[i * 4] = this
+					.getInterpolateColorR(); // colors_R[colorIndex];
+			this.canvasDoubleBuff_1pixData.data[i * 4 + 1] = this
+					.getInterpolateColorG(); // colors_G[colorIndex];
+			this.canvasDoubleBuff_1pixData.data[i * 4 + 2] = this
+					.getInterpolateColorB(); // colors_B[colorIndex];
 
-		this.canvasDoubleBuff_1pixData.data[i * 4 + 3] = 0xff; // opaque
+			this.canvasDoubleBuff_1pixData.data[i * 4 + 3] = 0xff; // opaque
+		}
+
+		this.canvasDoubleBuffer2Dcontext.putImageData(
+				this.canvasDoubleBuff_1pixData, this.canWidth - 1, this.y);
+
+		document.getElementById('echoCanvas').getContext('2d').drawImage(
+				this.canvasDoubleBuffElement, this.x, this.y, this.canWidth,
+				this.canHeight);
+		document.getElementById('echoCanvas').getContext('2d').font = "bold 36px sans-serif";
+		document.getElementById('echoCanvas').getContext('2d').fillText(
+				"" + this.test, 10, 30);
+		this.test++;
+	} else {
+		//TODO: if data has not been received
 	}
-
-	this.canvasDoubleBuffer2Dcontext.putImageData(
-			this.canvasDoubleBuff_1pixData, this.canWidth - 1, 0);
-
-	document.getElementById('echoCanvas').getContext('2d').drawImage(
-			this.canvasDoubleBuffElement, 0, 0);
 }
 
 /**
