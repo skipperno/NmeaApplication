@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define AVERAGED_RESOLUTION 400
+#define VERT_RESOLUTION 400
 
 
 BinaryEchoParser::BinaryEchoParser() {
@@ -21,20 +21,20 @@ BinaryEchoParser::~BinaryEchoParser() {
 	// TODO Auto-generated destructor stub
 }
 
-void BinaryEchoParser::convertCompressedDataToAsciNmea(char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength) {
-	char averageBuffer[AVERAGED_RESOLUTION];
-	convertCompressedDataToAverage(compressedBuffer, nCompressedLength, averageBuffer);
+void BinaryEchoParser::convertCompressedDataToAsciNmea(int nRange, char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength) {
+	char averageBuffer[VERT_RESOLUTION];
+	convertCompressedDataToAverage(nRange, compressedBuffer, nCompressedLength, averageBuffer);
 
 	convertAverageToAsciNmea(averageBuffer, asciNmeaMsg, nAsciMsgLength);
 }
 
-void BinaryEchoParser::convertCompressedDataToAverage(char* compressedBuffer, int nCompressedLength, char* averageBuffer) {
+void BinaryEchoParser::convertCompressedDataToAverage(int nRange, char* compressedBuffer, int nCompressedLength, char* averageBuffer) {
 	//printf("start convertCompressedDataToAverage\n");
 	char decomprBuffer[6000]; //TODO: 6000 or more?
 	int nDecompressedLength = 0;
 
 	decompressData(compressedBuffer, nCompressedLength, decomprBuffer, &nDecompressedLength);
-printf("decompr. len: %d\n", nDecompressedLength);
+printf("decompressed len: %d\n", nDecompressedLength);
 	unsigned int nCountPerMeassurment;
 	unsigned int nSum = 0;
 
@@ -43,9 +43,9 @@ printf("decompr. len: %d\n", nDecompressedLength);
 		return;
 	}
 
-	nCountPerMeassurment = (unsigned int)nDecompressedLength / AVERAGED_RESOLUTION;
+	nCountPerMeassurment = ((unsigned int)nDecompressedLength - (unsigned int)nDecompressedLength*nRange/10)/ VERT_RESOLUTION;
 
-	for (int i = 0; i < AVERAGED_RESOLUTION; i++) {
+	for (int i = 0; i < VERT_RESOLUTION; i++) {
 		nSum = 0;
 		for (int j = 0; j < (int)nCountPerMeassurment; j++) {
 			nSum += decomprBuffer[i * nCountPerMeassurment + j];
@@ -63,7 +63,7 @@ void BinaryEchoParser::convertAverageToAsciNmea(char* averageBuffer, char* asciN
 	*nAsciMsgLength = 12;
 	//printf("start convertAverageToAsciNmea\n");
 
-	for (int i = 0; i < AVERAGED_RESOLUTION; i++) {
+	for (int i = 0; i < VERT_RESOLUTION; i++) {
 		if (averageBuffer[i] > 99) {
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + averageBuffer[i] / 100;
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (averageBuffer[i] % 100) / 10;
@@ -75,7 +75,7 @@ void BinaryEchoParser::convertAverageToAsciNmea(char* averageBuffer, char* asciN
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + averageBuffer[i];
 		}
 
-		if (i == AVERAGED_RESOLUTION - 1) //the last element, null terminate.
+		if (i == VERT_RESOLUTION - 1) //the last element, null terminate.
 			asciNmeaMsg[*nAsciMsgLength] = 0;
 		else
 			asciNmeaMsg[(*nAsciMsgLength)++] = ',';

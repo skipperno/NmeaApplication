@@ -24,10 +24,11 @@ NmeaHandler::NmeaHandler() {
 	nNoOfMessages = 0;
 	nNextMsgPos = 0;
 	thisInstance = this;
+	nRange = 0;
 }
 
 NmeaHandler::~NmeaHandler() {
-	// TODO Auto-generated destructor stub
+
 }
 
 NmeaHandler* NmeaHandler::getInstance() {
@@ -42,9 +43,11 @@ void NmeaHandler::getLastWeatherMessage(char* pStream) {
 	strcpy(pStream, lastMsgStream_2);
 }
 
-bool NmeaHandler::getLastEchoMessage(char* pStream) {
-	pthread_mutex_lock(&lastMsgMutex);
+void NmeaHandler::setRange(int nRange) {
+	this->nRange = nRange;
+}
 
+bool NmeaHandler::getLastEchoMessage(char* pStream) {
 	if (lastMsgStream_1[0] != 0) {
 		strcpy(pStream, lastMsgStream_1);
 		nNoOfMessages = 0;
@@ -88,7 +91,7 @@ void NmeaHandler::runHandler() {
 			serialPortEcholodd.send(pBuffer, length);
 			pthread_mutex_lock(&lastMsgMutex);
 			//if(nNoOfMessages < 5) {
-				BinaryEchoParser::convertCompressedDataToAsciNmea(pBuffer, length, &lastMsgStream_1[nNextMsgPos], &echoLoddNmeaMsgLength);
+				BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, &lastMsgStream_1[nNextMsgPos], &echoLoddNmeaMsgLength);
 				//nNextMsgPos += echoLoddNmeaMsgLength;
 				//nNoOfMessages ++;
 			//}

@@ -12,9 +12,9 @@ class BinaryEchoParser {
 public:
 	BinaryEchoParser();
 	virtual ~BinaryEchoParser();
-	static void convertCompressedDataToAsciNmea(char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength);
+	static void convertCompressedDataToAsciNmea(int nRange, char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength);
 	// TODO: private? Only "convertCompressedDataToAsciNmea" as public?
-	static void convertCompressedDataToAverage(char* compressedBuffer, int nCompressedLength, char* averageBuffer);
+	static void convertCompressedDataToAverage(int nRange, char* compressedBuffer, int nCompressedLength, char* averageBuffer);
 	static void convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength);
 
 private:

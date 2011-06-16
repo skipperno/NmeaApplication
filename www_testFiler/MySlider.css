@@ -1,0 +1,31 @@
+@charset "utf-8";
+/* CSS Document */
+
+.mySlidCont{
+	display:inline;
+	float:left;
+	height:80px;
+}
+
+.mySlid{
+	width:60px;
+	height:80px;
+	background: url(images/slidBackg.png);
+	background-repeat:no-repeat;
+	float:left;
+}
+
+.mySlidLine{
+	width:20px;
+	height:80px;
+	background:#F43;
+}
+
+.mySlidHandlBut{
+	width:21px;
+	height:12px;
+	background: url(images/slidHandle.png);
+	position:relative;
+	left:0px;
+	top:10px;
+}

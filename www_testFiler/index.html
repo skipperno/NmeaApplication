@@ -12,6 +12,15 @@
 
 <link rel="stylesheet" type="text/css" href="Combox.css" />
 
+<link rel="stylesheet" type="text/css" href="Main.css" />
+<link rel="stylesheet" type="text/css" href="Position.css" />
+<link rel="stylesheet" type="text/css" href="Menu.css" />
+
+<link rel="stylesheet" type="text/css" href="MySlider.css" />
+<script type="text/javascript" src="MySliding.js"></script>
+<script type="text/javascript" src="Menu.js"></script>
+<script type="text/javascript" src="Range.js"></script>
+
 <title>Skippers</title>
 
 <script src="EchoPainter.js"></script>
@@ -25,7 +34,10 @@
 	var newColorArrayCh1;
 	var newColorArrayCh2;
 	
-	dataParameter = 1;
+
+	
+	var chan = 1;
+	var currRange = 5;
 	window.onload = initEchoPainting;
 	
 	function initEchoPainting() {
@@ -49,7 +61,7 @@
 	// THE WEB SERVER.
 	//////////////////////////////////////////////////
 	function startDataProviderTimer() {
-		t = setTimeout("onDataProviderTimer()", 500);
+		t = setTimeout("onDataProviderTimer()", 1000);
 	}
 
 	////////////////////////////////////////////////
@@ -58,7 +70,9 @@
 	function onDataProviderTimer() {
 		$.get("dataProvider.php", // calling php
 		{
-			index : "c" + dataParameter // c1 when 1 channel requested. c2 for 2 chanels
+			type : 1, 			// echo = 1, ...
+			chan : chan, 		// 1 when 1 channel requested. 2 for 2 chanels
+			range : currRange   //
 		}, // parameter to send
 		function(data) { // callback function
 			parseEchoData(data);
@@ -74,6 +88,20 @@
 		//$('#timeval').load('dataProvider.php?randval='+ Math.random());
 	}
 	
+	
+	function onSliderMoved(sliderIndex, pos) {
+		if (sliderIndex == 3) {
+			changeTimeRange(pos);
+		} else if (sliderIndex == 4) {
+			pos = parseInt(pos/10);
+			if(pos > 5)
+				pos = 5;
+			echoCanvas1.paintChangedRange(pos, pos);
+			changeRange(pos);
+			
+		}
+	}
+
 	////////////////////////////////////////////////
 	// Parse echo data received from php
 	////////////////////////////////////////////////
@@ -94,7 +122,7 @@
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", 50);
+		t = setTimeout("onPaintingCanvasTimer()", 500);
 	}
 
 	function onPaintingCanvasTimer() {
@@ -112,17 +140,37 @@
 <body>
 	<div id="wrap">
 		<div id="container">
-			<div id="timeval"></div> <!-- used only for test-->
-			<canvas id="echoCanvas" width="900" height="400"></canvas>
-			<div class="menuDown">
-				<div class="buttonsDiv">
-					<a href="#" class="myButton" onclick="initOneCanvas()">One channel</a>
-					<a href="#" class="myButton" onclick="initBothCanvas()">Two channels</a>
-					<a href="#" class="myButton" onclick="changeToGreen()">Test</a>
-				</div>
-			</div>
-		</div>
-	</div>
+				<div class="northsidebar" >
+                        <img src="images/boat_40_2.png" style="float:right; margin-right:100px;" width="62" height="40" /></div>
+		
+        
+				<div class="eastsidebar">
+                	<div id="leftMenu" style="height:410px">
+                		
+					</div>
+                </div>
+                    
+				<div id="maincenter"><canvas id="echoCanvas" width="900" height="400"></canvas></div>
+                
+                <div class="westsidebar" ><div id="rangeScale"> </div></div>
+                <div class="westsidebar" ><canvas  id="sideCanvas" width="50" height="400"></canvas><!--  <div style="width:50px; background:#f00"> </div>--></div>
+  
+                <div class="eastsidebar">
+                	<div style="height:100px; vertical-align:middle; display: table-cell;">
+                    	<div style="height:40px; width:100px">
+                        <img src="images/menu.png" class="centerImg" id="enbMenuBut" width="70" height="70" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
+                        </div>
+                    </div> 
+                </div>
+                <div id="timeScale"> </div>
+                <div id="downCenterSidebar"><div style="height:100px; width:600px; vertical-align:middle; display: table-cell;">
+                <div id="mainMenu">
+
+                </div></div></div>
+        </div>
+        <!-- container end -->
+    </div>
+    
 </body>
 </html>
 

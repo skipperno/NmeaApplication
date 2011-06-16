@@ -1,0 +1,23 @@
+@charset "utf-8";
+/* CSS Document */
+
+#downCenterSidebar
+{
+	width:900px;
+  /*  LINE-HEIGHT: 145%;*/
+    FLOAT: left;
+    OVERFLOW: hidden;
+	margin:0px;
+}
+
+#mainMenu {
+height:60px;
+width:100%;
+display:inline;
+}
+
+
+#mainMenu IMG {
+float:left;
+margin-left: 40px;
+}

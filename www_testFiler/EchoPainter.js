@@ -61,10 +61,18 @@ EchoCanvas.prototype.echoPainter_init = function() {
 			.createImageData(1, this.canHeight);
 }
 
+EchoCanvas.prototype.paintChangedRange = function(oldRange, newRange) {
+	range_PaintChangedRange(oldRange, this.canvasDoubleBuffer2Dcontext, 896);
+	//this.canvasDoubleBuffElement
+	//.getContext('2d')
+	
+}
+
 /**
  * public method, class EchoCanvas
  */
 EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
+	// copy the same buffer one pixel left
 	this.canvasDoubleBuffer2Dcontext.drawImage(this.canvasDoubleBuffElement,
 			-1, 0);
 	// TODO: if "createImageData" is not supported by browser, use:
@@ -90,11 +98,11 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
 				this.canvasDoubleBuff_1pixData, this.canWidth - 1, this.y);
 
 		document.getElementById('echoCanvas').getContext('2d').drawImage(
-				this.canvasDoubleBuffElement, this.x, this.y, this.canWidth,
-				this.canHeight);
-		document.getElementById('echoCanvas').getContext('2d').font = "bold 36px sans-serif";
+				this.canvasDoubleBuffElement, this.x, this.y);//, this.canWidth,
+				//this.canHeight);
+		/*document.getElementById('echoCanvas').getContext('2d').font = "bold 36px sans-serif";
 		document.getElementById('echoCanvas').getContext('2d').fillText(
-				"" + this.test, 10, 30);
+				"" + this.test, 10, 30);*/
 		this.test++;
 	} else {
 		//TODO: if data has not been received

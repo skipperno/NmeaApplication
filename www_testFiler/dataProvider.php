@@ -1,15 +1,18 @@
 <?php
 include('TcpClient.php');
-$index = 1;
-$myTest = 1;
+$type = 1;
+$chan = 1;
+$range = 0;
 
 //////////////////////////////
 // parse received parameter
 //////////////////////////////
-if( $_REQUEST["index"] )
+if( $_REQUEST["type"] )
 {
-   $index = $_REQUEST['index'];
+   $type = $_REQUEST['type'];
    //echo "Msg type: ". $type;
+   $chan = $_REQUEST['chan'];
+   $range = $_REQUEST['range'];
 }
 
 // don't remove this yet:
@@ -52,7 +55,7 @@ $client->Connect();
 //////////////////////////////
 // send and recevie to main program
 //////////////////////////////
-$client->WriteLine("Hei");
+$client->WriteLine("t:" .$type ."c:" .$chan ."r:" .$range);
 $line = $client->ReadLine();
 $client->Close();
 

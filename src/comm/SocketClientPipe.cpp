@@ -78,26 +78,32 @@ void sigpipe_handler()
 
 int  SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
 	char bufferRec[MAX_REQUEST_LENGTH];
-	char bufferRemoteIP[40];
+	char recCommand[40];
 	char bufferSend[MAX_RESPONSE_LENGTH];
 
 	memset(bufferSend, 0, MAX_RESPONSE_LENGTH);
 	memset(bufferRec, 0, MAX_REQUEST_LENGTH);
-	//printf("Read msg from client\n");
+	//fprintf(stderr, "Read msg from client\n");
 
 	if (conn_s < 0) {
 		printf("Error socketClientPipe_readAllParams\n");
 		return -1;
 	}
 
-	int nTotLength = Readline(conn_s, bufferRemoteIP, 39);
+	int nTotLength = Readline(conn_s, recCommand, 39);
 	if (nTotLength <= 0) {
-		printf("***********ERROR, received: %d\n", nTotLength);
+		fprintf(stderr, "***********ERROR, received: %d\n", nTotLength);
 		return 0;
 	}
 
-	bufferRemoteIP[nTotLength] = 0;
+	recCommand[nTotLength] = 0;
+	printf("rec: %s\n", recCommand);
 
+	int nType = recCommand[2] - 0x30;
+	int nChann = recCommand[5]- 0x30;
+	int nRange = recCommand[8]- 0x30;
+
+	NmeaHandler::getInstance()->setRange(nRange);
 	//printf("Received from client: %d bytes\n", nTotLength);
 	//usleep(10000);
 
