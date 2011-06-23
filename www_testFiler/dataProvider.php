@@ -63,6 +63,10 @@ $client->Close();
 // send back to browser
 //////////////////////////////
 print($line);
+/*for (i= 0; i<100;i++){
+	usleep(100000);
+	print($line);
+}*/
 //print("<b> From target: " . $line . "</b><br>");
 
 ?>

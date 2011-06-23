@@ -3,7 +3,7 @@
 
 #downCenterSidebar
 {
-	width:900px;
+	width:100%;
   /*  LINE-HEIGHT: 145%;*/
     FLOAT: left;
     OVERFLOW: hidden;
@@ -17,7 +17,8 @@ display:inline;
 }
 
 
-#mainMenu IMG {
+#menuBut IMG {
 float:left;
-margin-left: 40px;
+margin-right: 20px;
+padding:0px;
 }

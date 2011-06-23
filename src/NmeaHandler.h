@@ -28,7 +28,9 @@ private:
 	int nNextMsgPos;
 
 	char lastMsgStream_1[17000];
-	char lastMsgStream_2[10024];
+	int nStram_1_length;
+	char lastMsgStream_2[17000];
+	int nStram_2_length;
 	SerialPort serialPortEcholodd;
 
 	int nRange;

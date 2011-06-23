@@ -27,9 +27,10 @@ function MySliding (slidIndex, slMin, slMax, slStart, imgUrl, parentContainer) {
 	this.mySlidImg = this.document.createElement("img");
 	this.mySlidImg.setAttribute('src', imgUrl);
 	this.mySlidImg.setAttribute('alt', 'alternate text');
-	this.mySlidImg.setAttribute('width', '50px');
-	this.mySlidImg.setAttribute('height', '80px');
+	this.mySlidImg.setAttribute('width', '40px');
+	this.mySlidImg.setAttribute('height', '60px');
 	this.mySlidImg.setAttribute('margin-right', '20px');
+	this.mySlidImg.setAttribute('float', 'left');
 	//this.mySlidImg.setAttribute('width', '100px');
 
 	this.mySlidDiv = this.document.createElement("DIV");

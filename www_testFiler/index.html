@@ -15,11 +15,13 @@
 <link rel="stylesheet" type="text/css" href="Main.css" />
 <link rel="stylesheet" type="text/css" href="Position.css" />
 <link rel="stylesheet" type="text/css" href="Menu.css" />
+<link rel="stylesheet" type="text/css" href="Other.css" />
 
 <link rel="stylesheet" type="text/css" href="MySlider.css" />
 <script type="text/javascript" src="MySliding.js"></script>
 <script type="text/javascript" src="Menu.js"></script>
 <script type="text/javascript" src="Range.js"></script>
+<script type="text/javascript" src="TimeScale.js"></script>
 
 <title>Skippers</title>
 
@@ -28,32 +30,38 @@
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
+	var oldRange = 0;
+	var currRange = 0;
+	
 	var echoCanvas1;
 	var echoCanvas2;
 	var dataReceived = 0;
 	var newColorArrayCh1;
 	var newColorArrayCh2;
-	
+	var canvasWidth = 556;
+	var canvasHeight = 400;
 
 	
 	var chan = 1;
-	var currRange = 5;
+	
 	window.onload = initEchoPainting;
 	
 	function initEchoPainting() {
 		initOneCanvas();
 		startDataProviderTimer();
 		startPaintingCanvasTimer();
+		enableMenuClick();
+		//changeToGreen();
 	}
 
 	function initOneCanvas() {
-		echoCanvas1 = new EchoCanvas(0, 0, 900, 400);
+		echoCanvas1 = new EchoCanvas(0, 0, canvasWidth, canvasHeight);
 		echoCanvas2 = null;
 	}
 	
 	function initBothCanvas() {
-		echoCanvas1 = new EchoCanvas(0, 0, 450, 400);
-		echoCanvas2 = new EchoCanvas(450, 0, 450, 400);
+		echoCanvas1 = new EchoCanvas(0, 0, 450, canvasHeight);
+		echoCanvas2 = new EchoCanvas(450, 0, 450, canvasHeight);
 	}
 
 	//////////////////////////////////////////////////
@@ -76,6 +84,7 @@
 		}, // parameter to send
 		function(data) { // callback function
 			parseEchoData(data);
+		//alert("ajax callback");
 			//$('#timeval').html(data); // don't remove. It displays received message
 		}
 
@@ -90,15 +99,17 @@
 	
 	
 	function onSliderMoved(sliderIndex, pos) {
+		pos = parseInt(pos/10);
+		if(pos > 5)
+			pos = 5;
+		
 		if (sliderIndex == 3) {
 			changeTimeRange(pos);
 		} else if (sliderIndex == 4) {
-			pos = parseInt(pos/10);
-			if(pos > 5)
-				pos = 5;
-			echoCanvas1.paintChangedRange(pos, pos);
-			changeRange(pos);
-			
+			oldRange = currRange;
+			currRange = pos;
+			echoCanvas1.paintChangedRange(oldRange);
+			changeRange(currRange);
 		}
 	}
 
@@ -122,7 +133,7 @@
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", 500);
+		t = setTimeout("onPaintingCanvasTimer()", 1000);
 	}
 
 	function onPaintingCanvasTimer() {
@@ -141,32 +152,42 @@
 	<div id="wrap">
 		<div id="container">
 				<div class="northsidebar" >
-                        <img src="images/boat_40_2.png" style="float:right; margin-right:100px;" width="62" height="40" /></div>
-		
+                      <!--   <img src="images/boat_40_2.png" style="float:right; margin-right:100px;" width="62" height="40" />
+                     	 -->
+		 		</div>
         
-				<div class="eastsidebar">
-                	<div id="leftMenu" style="height:410px">
+				<!--  <div class="eastsidebar">
+                	<div id="leftMenu" style="height:400px">
                 		
 					</div>
-                </div>
+                </div>-->
                     
-				<div id="maincenter"><canvas id="echoCanvas" width="900" height="400"></canvas></div>
+				<div id="maincenter">
+					<canvas id="echoCanvas" width="556" height="400"></canvas>
+					 <div id="timeScale"> </div>
+				</div>
                 
-                <div class="westsidebar" ><div id="rangeScale"> </div></div>
-                <div class="westsidebar" ><canvas  id="sideCanvas" width="50" height="400"></canvas><!--  <div style="width:50px; background:#f00"> </div>--></div>
+                <div class="westsidebar" style="width:30px;"><div id="rangeScale"> </div></div>
+                <div class="westsidebar" ><canvas  id="sideCanvas" width="30" height="400"></canvas><!--  <div style="width:50px; background:#f00"> </div>--></div>
   
                 <div class="eastsidebar">
-                	<div style="height:100px; vertical-align:middle; display: table-cell;">
-                    	<div style="height:40px; width:100px">
+                	<div style="height:26px; vertical-align:middle; display: table-cell;">
+                    	<!--  <div style="height:40px; width:100px">
                         <img src="images/menu.png" class="centerImg" id="enbMenuBut" width="70" height="70" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
-                        </div>
+                        </div>-->
                     </div> 
                 </div>
-                <div id="timeScale"> </div>
-                <div id="downCenterSidebar"><div style="height:100px; width:600px; vertical-align:middle; display: table-cell;">
-                <div id="mainMenu">
-
-                </div></div></div>
+        
+                <div id="downCenterSidebar">
+                	<!--  <div style="height:100px; vertical-align:middle; display: table-cell;"> -->
+                	<div id="menuBut" style="height:100%; float:left">
+                		<img src="images/menu.png" class="centerImg" id="enbMenuBut" width="60" height="60" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
+               	 	</div>
+                	<div id="mainMenu">
+                                 
+                	</div>
+                	<!-- </div> -->
+                </div>
         </div>
         <!-- container end -->
     </div>

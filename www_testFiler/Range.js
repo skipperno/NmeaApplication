@@ -12,10 +12,30 @@ var rangeText = [["0", "2", "4", "6", "8", "10"], ["0", "10", "20", "30", "40", 
 
 var rangePos_Y= [20, 80, 160, 240, 320, 400];
 
+
+function changeRange(range){
+	var myElement = document.getElementById('rangeScale');
+	var inner="";
+	var i = 1;
+
+	
+	inner +="<div style=\"width:100%; height:20px;float:right; margin:0px; color:#fff; border-top:1px solid #fff\">" + rangeText[range][0] + "</div>";
+	inner +="<div style=\"width:100%; height:20px;float:right; margin-top:39px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
+	
+	for(var i = 2; i < 6; i++){
+		inner +="<div style=\"width:100%; height:20px;float:right; margin-top:59px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
+		//inner +="<div>" + rangeText[currRange][i] + "<img src=\"images/range.png\" height:\"3px\" style=\"float:right; margin-top:" + 80 + "px\" /></div>";
+	}
+	//alert(inner);
+	myElement.innerHTML=inner;
+	
+}
+
+
 function range_PaintChangedRange(newRange, bufferContex, changedX) {
 	range_PaintVerticalLine(bufferContex, changedX);
 	//range_PaintArrowLine_2color(bufferContex, 898, 100, "R:" + newRange);
-	var nArrowX = 898;
+	var nArrowX = canvasWidth - 2;
 	
 	
 	range_PaintText_2color(bufferContex,  nArrowX, rangePos_Y[0], rangeText[newRange][0]);
@@ -73,12 +93,12 @@ function range_PaintChangedRange(newRange, bufferContex, changedX) {
 
 function range_PaintVerticalLine(bufferContex, changedX) {
 	bufferContex.fillStyle = arrColor_2;
-	bufferContex.fillRect(897,0,3,400);
+	bufferContex.fillRect(canvasWidth - 3,0,3,canvasHeight);
 	
 	bufferContex.strokeStyle = arrColor_1;
 	bufferContex.beginPath();
-	bufferContex.moveTo(898, 0);
-	bufferContex.lineTo(898, 400);
+	bufferContex.moveTo(canvasWidth - 2, 0);
+	bufferContex.lineTo(canvasWidth - 2, canvasHeight);
 	bufferContex.stroke();
 }
 
@@ -114,22 +134,4 @@ function range_PaintArrowLine(arrColor, bufferContex, posX, posY, valueText) {
 	
 	//bufferContex.fillStyle = arrColor;
 	//bufferContex.fillText(valueText, posX -arrowLength, posY - 4);
-}
-
-function changeRange(range){
-	var myElement = document.getElementById('rangeScale');
-	var inner="";
-	var i = 1;
-
-	
-	inner +="<div style=\"width:100%; height:20px;float:right; margin:0px; color:#fff; border-top:1px solid #fff\">" + rangeText[range][0] + "</div>";
-	inner +="<div style=\"width:100%; height:20px;float:right; margin-top:39px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
-	
-	for(var i = 2; i < 6; i++){
-		inner +="<div style=\"width:100%; height:20px;float:right; margin-top:59px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
-		//inner +="<div>" + rangeText[currRange][i] + "<img src=\"images/range.png\" height:\"3px\" style=\"float:right; margin-top:" + 80 + "px\" /></div>";
-	}
-	//alert(inner);
-	myElement.innerHTML=inner;
-	
 }

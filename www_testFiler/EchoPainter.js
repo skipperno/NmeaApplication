@@ -48,7 +48,7 @@ function EchoCanvas(x, y, canWidth, canHeight) {
 EchoCanvas.prototype.echoPainter_init = function() {
 
 	this.canvasDoubleBuffElement = document.createElement('canvas');
-	this.canvasDoubleBuffElement.width = this.canWidth + 20; // 20 pix if
+	this.canvasDoubleBuffElement.width = this.canWidth;// + 20; // 20 pix if
 	// painting 20
 	// times in one
 	// sec.(sleep
@@ -61,8 +61,8 @@ EchoCanvas.prototype.echoPainter_init = function() {
 			.createImageData(1, this.canHeight);
 }
 
-EchoCanvas.prototype.paintChangedRange = function(oldRange, newRange) {
-	range_PaintChangedRange(oldRange, this.canvasDoubleBuffer2Dcontext, 896);
+EchoCanvas.prototype.paintChangedRange = function(oldRange) {
+	range_PaintChangedRange(oldRange, this.canvasDoubleBuffer2Dcontext, this.canWidth - 4);
 	//this.canvasDoubleBuffElement
 	//.getContext('2d')
 	

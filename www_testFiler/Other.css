@@ -1,0 +1,28 @@
+@CHARSET "UTF-8";
+
+#timeScale
+{
+	/*width:900px;*/
+	height: 15px;
+    /*BACKGROUND: url(img/main_shadow.gif) #fff repeat-x 50% top;*/
+    FLOAT: right;
+    OVERFLOW: hidden;
+	margin:0px;
+	display:block;
+	/*BACKGROUND: url(images/time.png) 10% 0% repeat-x;*/
+	BACKGROUND: #383838;
+	text-align:right;
+}
+
+#rangeScale    /* Not used? */
+{
+	width:30px;
+	height: 400px;
+    /*BACKGROUND: url(img/main_shadow.gif) #fff repeat-x 50% top;*/
+    FLOAT: left;
+    OVERFLOW: hidden;
+	margin:0px;
+	display:block;
+	/*BACKGROUND: url(images/time.png) 10% 0% repeat-x;*/
+	BACKGROUND: #383838;
+}*

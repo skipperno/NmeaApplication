@@ -20,11 +20,13 @@ pthread_mutex_t lastMsgMutex;
 
 NmeaHandler::NmeaHandler() {
 	memset(lastMsgStream_1, 0, 17000);
-	memset(lastMsgStream_2, 0, 10024);
+	memset(lastMsgStream_2, 0, 17000);
 	nNoOfMessages = 0;
 	nNextMsgPos = 0;
 	thisInstance = this;
 	nRange = 0;
+	nStram_1_length = 0;
+	nStram_2_length = 0;
 }
 
 NmeaHandler::~NmeaHandler() {
@@ -48,10 +50,12 @@ void NmeaHandler::setRange(int nRange) {
 }
 
 bool NmeaHandler::getLastEchoMessage(char* pStream) {
+	pthread_mutex_lock(&lastMsgMutex);
 	if (lastMsgStream_1[0] != 0) {
 		strcpy(pStream, lastMsgStream_1);
-		nNoOfMessages = 0;
-		nNextMsgPos = 0;
+		lastMsgStream_1[0] = 0;
+		//nNoOfMessages = 0;
+		//nNextMsgPos = 0;
 		pthread_mutex_unlock(&lastMsgMutex);
 		return true;
 	} else {
@@ -64,7 +68,9 @@ void NmeaHandler::runHandler() {
 	NmeaComm stream1;
 	NmeaComm stream2;
 
-	int echoLoddNmeaMsgLength;
+	int nLastReceivingIndex = 2;
+
+	//int echoLoddNmeaMsgLength;
 	char buffer[10024]; // Storage of NMEA data stream
 	char* pBuffer = buffer; // Pointer to storage of NMEA data stream
 	int length; // Length of NMEA data stream
@@ -91,8 +97,14 @@ void NmeaHandler::runHandler() {
 			serialPortEcholodd.send(pBuffer, length);
 			pthread_mutex_lock(&lastMsgMutex);
 			//if(nNoOfMessages < 5) {
-				BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, &lastMsgStream_1[nNextMsgPos], &echoLoddNmeaMsgLength);
-				//nNextMsgPos += echoLoddNmeaMsgLength;
+			if (nLastReceivingIndex == 2) {
+				BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
+				nLastReceivingIndex = 1;
+			} else {
+				BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_2, &nStram_2_length);
+				nLastReceivingIndex = 2;
+			}
+			//nNextMsgPos += echoLoddNmeaMsgLength;
 				//nNoOfMessages ++;
 			//}
 			pthread_mutex_unlock(&lastMsgMutex);

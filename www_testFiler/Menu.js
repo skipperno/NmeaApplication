@@ -1,26 +1,9 @@
 
 var menuShown = false;
-var windowWidth = 900;
 var selectedMenuIndex = 1;
-var myRange=0;
 
 
 
-
-function changeTimeRange(range){
-	var myElement = document.getElementById('timeScale');
-	var inner="";
-	var i = 1;
-	
-	
-	while(windowWidth > i*range){
-		inner +="<img src=\"images/time.png\" width:\"3px\" style=\"float:right; margin-right:" + range + "px\" />";
-		i++
-	}
-	//alert(inner);
-	myElement.innerHTML=inner;
-	
-}
 
 function enableMenuOver() {
 	if (!menuShown) {
@@ -41,7 +24,7 @@ function enableMenuClick() {
 
 	if (!menuShown) {
 		menuShown = true;
-		myElement.src="images/menu_click.png";
+		myElement.src="images/go-back-icon_black.png";
 		
 					var mySliding1 = new MySliding(1,2,99, 34,  "images/alarm_Up.png", document.getElementById("mainMenu"));
 					var mySliding2 = new MySliding(2,2,99, 34,  "images/alarm_down.png", document.getElementById("mainMenu"));
