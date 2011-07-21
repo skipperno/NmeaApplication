@@ -1,0 +1,63 @@
+@charset "utf-8";
+
+/************* Vertical slider ********************/
+
+.verticalSliderConteiner{
+	width:60px;
+	height:400px;
+	float:left;
+	display:block;
+}
+
+.sliderTopButton{
+	/*float:left;*/
+	height:41px;
+	width:60px;
+	background: url(images/empty.png);
+	margin-bottom:9px;
+}
+
+.verticalSliderCenter{
+	width:60px;
+	height:300px;
+	background: url(images/slidVertBackground.png);
+	background-repeat:repeat-y;
+	position:relative;
+	/*float:left;*/
+} 
+
+.sliderDownButton{
+	/*float:left;*/
+    height:41px;
+	width:60px;
+	background: url(images/empty.png);
+	margin-top:9px;
+}
+
+.verticalSliderHandleButton{
+	width:21px;
+	height:12px;
+	background: url(images/slidHandle_V.png);
+	position:relative;
+	left:30px;
+	top:0px;
+}
+
+.verticalTextDiv{
+	position:absolute;
+	left:-13px;
+	top:0px;
+	color:#fff;
+	width:50px;
+	text-align:center;
+	font-size:14px;
+}
+.verticalTextDiv2{
+	position:absolute;
+	left:-12px;
+	top:0px;
+	color:#000;
+	width:50px;
+	text-align:center;
+	font-size:14px;
+}

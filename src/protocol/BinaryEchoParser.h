@@ -15,7 +15,7 @@ public:
 	static void convertCompressedDataToAsciNmea(int nRange, char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength);
 	// TODO: private? Only "convertCompressedDataToAsciNmea" as public?
 	static void convertCompressedDataToAverage(int nRange, char* compressedBuffer, int nCompressedLength, char* averageBuffer);
-	static void convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength);
+	static void convertAverageToAsciNmea(int nRange, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength);
 
 private:
 	static void decompressData(char* compressedBuffer, int nCompressedLength, char* decompressedBuffer, int* nDecompressedLength);

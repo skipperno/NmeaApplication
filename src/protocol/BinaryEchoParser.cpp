@@ -22,10 +22,10 @@ BinaryEchoParser::~BinaryEchoParser() {
 }
 
 void BinaryEchoParser::convertCompressedDataToAsciNmea(int nRange, char* compressedBuffer, int nCompressedLength, char* asciNmeaMsg, int * nAsciMsgLength) {
-	char averageBuffer[VERT_RESOLUTION];
+	char averageBuffer[VERT_RESOLUTION + 2]; // 2 for header (1- type, 2-range)
 	convertCompressedDataToAverage(nRange, compressedBuffer, nCompressedLength, averageBuffer);
 
-	convertAverageToAsciNmea(averageBuffer, asciNmeaMsg, nAsciMsgLength);
+	convertAverageToAsciNmea(nRange, averageBuffer, asciNmeaMsg, nAsciMsgLength);
 }
 
 void BinaryEchoParser::convertCompressedDataToAverage(int nRange, char* compressedBuffer, int nCompressedLength, char* averageBuffer) {
@@ -43,7 +43,12 @@ void BinaryEchoParser::convertCompressedDataToAverage(int nRange, char* compress
 		return;
 	}
 
-	nCountPerMeassurment = ((unsigned int)nDecompressedLength - (unsigned int)nDecompressedLength*nRange/10)/ VERT_RESOLUTION;
+	int rangeLength[] = {10, 50, 100, 500, 1000, 1600}; //TODO: wrong place for this array
+
+	// !!! Here is assuming that data from simulator applies to depth of 1600m.
+	nCountPerMeassurment = ((unsigned int)nDecompressedLength - (unsigned int)nDecompressedLength*rangeLength[nRange]/1600)/ VERT_RESOLUTION;
+
+
 
 	for (int i = 0; i < VERT_RESOLUTION; i++) {
 		nSum = 0;
@@ -51,17 +56,24 @@ void BinaryEchoParser::convertCompressedDataToAverage(int nRange, char* compress
 			nSum += decomprBuffer[i * nCountPerMeassurment + j];
 		}
 
+
 		averageBuffer[i] = (char)(nSum / nCountPerMeassurment);
 	}
 	//printf("end convertCompressedDataToAverage\n");
 }
 
 
-void BinaryEchoParser::convertAverageToAsciNmea(char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
-	char nmeaStart[] = {"$PSKPES,400,"};
+void BinaryEchoParser::convertAverageToAsciNmea(int nRange, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
+	/*char nmeaStart[] = {"$PSKPES,400,"};
 	strcpy(asciNmeaMsg, nmeaStart);
-	*nAsciMsgLength = 12;
+	*nAsciMsgLength = 12;*/
 	//printf("start convertAverageToAsciNmea\n");
+
+	//Data starts from byte No. 2. (averageBuffer[0] = msgType, averageBuffer[1] = range)
+	asciNmeaMsg[0] = '1'; // TODO: msg type
+	asciNmeaMsg[1] = 0x30 + nRange;
+
+	*nAsciMsgLength = 2;
 
 	for (int i = 0; i < VERT_RESOLUTION; i++) {
 		if (averageBuffer[i] > 99) {

@@ -1,24 +1,139 @@
 @charset "utf-8";
 /* CSS Document */
-
-#downCenterSidebar
-{
-	width:100%;
-  /*  LINE-HEIGHT: 145%;*/
-    FLOAT: left;
-    OVERFLOW: hidden;
-	margin:0px;
+#menuBar {
+	width: 100%;
+	/*  LINE-HEIGHT: 145%;*/
+	FLOAT: left;
+	OVERFLOW: hidden;
+	margin: 0px;
+	display: inline;
 }
 
-#mainMenu {
-height:60px;
-width:100%;
-display:inline;
+#subMenu {
+	height: 60px;
+	width: 500px;
+	float: left;
+	position: relative;
+	overflow: hidden;
+	margin-top: 5px;
 }
 
+#fastSubMenu {
+	height: 60px;
+	width: 430px;
+	position: relative;
+	overflow: hidden;
+	float: left;
+}
 
-#menuBut IMG {
-float:left;
-margin-right: 20px;
-padding:0px;
+.subMenuDiv{
+	height: 60px;
+	width: 430px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#mainChoiceText {
+	color: #fff;
+	font-size: 10px;
+	float: left;
+}
+
+#menuOnOffBut {
+	float: left;
+}
+
+#menuOnOffBut IMG {
+	float: left;
+	margin-right: 5px;
+	padding: 0px;
+}
+
+#slidingMenu {
+	height: 40px;
+	width: 800px;
+	overflow: hidden;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#subMenuLeft {
+	float: left;
+	height: 40px;
+	width: 28px;
+	background: url(images/leftSubMenu.png);
+	margin-right: 9px;
+}
+
+#subMenuRight {
+	float: left;
+	height: 40px;
+	width: 28px;
+	background: url(images/rightSubMenu.png);
+	margin-left: 9px;
+}
+
+.menuItem {
+	height: 40px;
+	width: 80px;
+	background: url(images/menuItemBackround.png);
+	float: left;
+	margin-left: 5px;
+	color: #fff;
+}
+
+.menuItem .text1 {
+	height: 20px;
+	text-align: center;
+	line-height: 20px;
+}
+
+.menuItem .text2 {
+	height: 20px;
+	text-align: center;
+	line-height: 20px;
+}
+/************ VERTICAL ***************/
+#westMenu {
+	width: 80px;
+	height: 400px;
+	position: relative;
+	overflow: hidden;
+}
+
+#westMenuSliding {
+	width: 100%;
+	height: 720px;
+	position: absolute;
+	overflow: hidden;
+	top: 0px;
+	left: 0px;
+}
+
+#westMenuTopButt {
+	height: 40px;
+	width: 80px;
+	background: url(images/up.png);
+}
+
+#westMenuDownButt {
+	height: 40px;
+	width: 80px;
+	background: url(images/down.png);
+}
+
+.verMenuItem {
+	height: 40px;
+	width: 80px;
+	background: url(images/VerMenuItemBackround.png);
+	margin-top: 5px;
+	color: #fff;
+}
+
+.verMenuItem .verTextDiv {
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
 }

@@ -19,7 +19,7 @@ public:
 	void getLastXXMessage(char* pStream);
 	void getLastWeatherMessage(char* pStream);
 	bool getLastEchoMessage(char* pStream);
-	void setRange(int nRange);
+	static void setRange(int nRange);
 
 	static NmeaHandler* getInstance();
 
@@ -32,8 +32,6 @@ private:
 	char lastMsgStream_2[17000];
 	int nStram_2_length;
 	SerialPort serialPortEcholodd;
-
-	int nRange;
 };
 
 #endif /* NMEAHANDLER_H_ */

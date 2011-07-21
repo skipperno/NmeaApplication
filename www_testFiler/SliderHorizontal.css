@@ -1,0 +1,53 @@
+@charset "utf-8";
+
+/************* Horizontal slider ********************/
+
+.horisSlid{
+	width:400px;
+	height:60px;
+	float:left;
+	display:inline;
+}
+
+.horisSlidLeft{
+	float:left;
+	height:60px;
+	width:41px;
+	background: url(images/left_60.png);
+	margin-right:9px;
+}
+
+.horisSlidCenter{
+	width:300px;
+	height:60px;
+	background: url(images/slidHorBackg3.png);
+	background-repeat:repeat-x;
+	position:relative;
+	float:left;
+} 
+
+.horisSlidRight{
+	float:right;
+    height:60px;
+	width:41px;
+	background: url(images/right_60.png);
+	margin-left:9px;
+}
+
+.horisSlidHandlBut{
+	width:12px;
+	height:21px;
+	background: url(images/slidHandle_H.png);
+	position:relative;
+	left:0px;
+	top:25px;
+}
+
+.horisSlidText{
+	position:absolute;
+	left:0px;
+	top:0px;
+	color:#fff;
+	width:50px;
+	text-align:center;
+}

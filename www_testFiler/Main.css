@@ -41,6 +41,7 @@ BODY
     OVERFLOW: hidden;
 	margin:0px;
 }
+
 #maincenter
 {
 	width:556px;
@@ -51,8 +52,8 @@ BODY
 	margin:0px;
 	display:block;
 	BACKGROUND: #fff;
+	position:relative;
 }
-
 
 .westsidebar
 {
@@ -62,10 +63,6 @@ BODY
     OVERFLOW: hidden;
 	margin:0px;
 }
-
-
-
-
 
 h1 {
 	FONT-SIZE: 18px;

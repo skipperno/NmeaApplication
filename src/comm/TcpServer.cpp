@@ -7,6 +7,8 @@
 
 #include "TcpServer.h"
 #include "SocketClientPipe.h"
+#include "Dispatcher.h"
+
 #include <pthread.h>
 
 void * runServerThread(void *ptr);
@@ -30,7 +32,7 @@ int TcpServer::serverSocket_start(void) {
 
 void * runServerThread(void *ptr) {
 	int list_s; /*  listening socket          */
-		int conn_s; /*  connection socket         */
+
 		struct sockaddr_in servaddr; /*  socket address structure  */
 
 		unsigned int addrlen;
@@ -59,7 +61,7 @@ void * runServerThread(void *ptr) {
 		fprintf(stderr, "TCP_SERVER: Listen successed\n");
 
 		while (1) {
-
+			int conn_s; /*  connection socket         */
 			/*  Wait for a connection, then accept() it  */
 			addrlen = sizeof(servaddr);
 			if ((conn_s = accept(list_s, (struct sockaddr *) &servaddr, &addrlen))
@@ -67,10 +69,12 @@ void * runServerThread(void *ptr) {
 				fprintf(stderr, "TCP_SERVER: Error calling accept()\n");
 				return NULL;
 			}
-			//fprintf(stderr, "TCP_SERVER, Client accepted\n");
+			fprintf(stderr, "TCP_SERVER, Client accepted\n");
 
-			SocketClientPipe socketClient;
-			socketClient.socketClientPipe_handleRequest(conn_s);
+			SocketClientPipe* socketClient = new SocketClientPipe();
+
+			socketClient->startClientSocket(conn_s);
+			Dispatcher::addClient(socketClient);
 
 		//	socketClientPipe_handleRequest(conn_s);
 		}

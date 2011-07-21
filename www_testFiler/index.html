@@ -18,10 +18,24 @@
 <link rel="stylesheet" type="text/css" href="Other.css" />
 
 <link rel="stylesheet" type="text/css" href="MySlider.css" />
+<link rel="stylesheet" type="text/css" href="SliderHorizontal.css" />
+<link rel="stylesheet" type="text/css" href="SliderVertical.css" />
+
 <script type="text/javascript" src="MySliding.js"></script>
+<script type="text/javascript" src="SliderHorizontal.js"></script>
+<script type="text/javascript" src="SliderVertical.js"></script>
+
 <script type="text/javascript" src="Menu.js"></script>
+<script type="text/javascript" src="MenuMain.js"></script>
+<script type="text/javascript" src="Submenu.js"></script>
+<script type="text/javascript" src="MenuItem.js"></script>
 <script type="text/javascript" src="Range.js"></script>
 <script type="text/javascript" src="TimeScale.js"></script>
+
+<!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
+<script type="text/javascript" src="swfobject.js"></script>
+<script type="text/javascript" src="web_socket.js"></script>
+<!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
 
 <title>Skippers</title>
 
@@ -30,9 +44,15 @@
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
+	WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf"; 
+	var conn = {};
+	var webSock;
+
 	var oldRange = 0;
 	var currRange = 0;
 	
+	var currTimeScale = 0;
+
 	var echoCanvas1;
 	var echoCanvas2;
 	var dataReceived = 0;
@@ -41,16 +61,14 @@
 	var canvasWidth = 556;
 	var canvasHeight = 400;
 
-	
 	var chan = 1;
-	
+
 	window.onload = initEchoPainting;
-	
+
 	function initEchoPainting() {
 		initOneCanvas();
-		startDataProviderTimer();
+		//startDataProviderTimer();
 		startPaintingCanvasTimer();
-		enableMenuClick();
 		//changeToGreen();
 	}
 
@@ -58,17 +76,34 @@
 		echoCanvas1 = new EchoCanvas(0, 0, canvasWidth, canvasHeight);
 		echoCanvas2 = null;
 	}
-	
+
 	function initBothCanvas() {
 		echoCanvas1 = new EchoCanvas(0, 0, 450, canvasHeight);
 		echoCanvas2 = new EchoCanvas(450, 0, 450, canvasHeight);
 	}
+	
+	//////////////////////////////////////////////////
+	//TIMER USED FOR ECHO PAINTING USING CANVAS
+	//////////////////////////////////////////////////
+	function startPaintingCanvasTimer() {
+		t = setTimeout("onPaintingCanvasTimer()", startSleepTime + sleepCoef*100); //300);
+	}
+
+	function onPaintingCanvasTimer() {
+		if (dataReceived > 0) {
+			echoCanvas1.echoPainter_PaintCanvas();
+			if (echoCanvas2 != null)
+				echoCanvas2.echoPainter_PaintCanvas();
+		}
+		startPaintingCanvasTimer();
+	}
+	
 
 	//////////////////////////////////////////////////
 	// TIMER USED FOR GETING OF SENSOR DATA FROM 
 	// THE WEB SERVER.
 	//////////////////////////////////////////////////
-	function startDataProviderTimer() {
+	/*function startDataProviderTimer() {
 		t = setTimeout("onDataProviderTimer()", 1000);
 	}
 
@@ -78,13 +113,14 @@
 	function onDataProviderTimer() {
 		$.get("dataProvider.php", // calling php
 		{
-			type : 1, 			// echo = 1, ...
-			chan : chan, 		// 1 when 1 channel requested. 2 for 2 chanels
-			range : currRange   //
+			type : 1, // echo = 1, ...
+			chan : chan, // 1 when 1 channel requested. 2 for 2 chanels
+			range : currRange
+		//
 		}, // parameter to send
 		function(data) { // callback function
 			parseEchoData(data);
-		//alert("ajax callback");
+			//alert("ajax callback");
 			//$('#timeval').html(data); // don't remove. It displays received message
 		}
 
@@ -95,103 +131,152 @@
 		// Don't remove: The same using jquery function "load"
 		///////////////////////////////////////////////
 		//$('#timeval').load('dataProvider.php?randval='+ Math.random());
-	}
-	
-	
+	}*/
+
+	// some of sliders is moved. 
 	function onSliderMoved(sliderIndex, pos) {
-		pos = parseInt(pos/10);
-		if(pos > 5)
+		pos = parseInt(pos / 10);
+		if (pos > 5)
 			pos = 5;
 		
-		if (sliderIndex == 3) {
+		
+
+		if (sliderIndex == 2){
+			reconnectSocket();
+		} else if (sliderIndex == 3){
 			changeTimeRange(pos);
 		} else if (sliderIndex == 4) {
-			oldRange = currRange;
+			sendToServer("R" + pos);
+			/*oldRange = currRange;
 			currRange = pos;
 			echoCanvas1.paintChangedRange(oldRange);
-			changeRange(currRange);
+			changeRange(currRange);*/
 		}
 	}
 
 	////////////////////////////////////////////////
 	// Parse echo data received from php
 	////////////////////////////////////////////////
-	function parseEchoData(data){
-		var chanelsArray = data.split("CH");
-		newColorArrayCh1 = chanelsArray[0].split(",");
-		if (chanelsArray.length > 1)
-			newColorArrayCh2 = chanelsArray[1].split(",");
-		
-		dataReceived = 1;
-		echoCanvas1.setNewData(newColorArrayCh1);
-		if (echoCanvas2 != null)
-			echoCanvas2.setNewData(newColorArrayCh2);
-		//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
-	}
+	function parseEchoData(data) {
 
-	//////////////////////////////////////////////////
-	//TIMER USED FOR ECHO PAINTING USING CANVAS
-	//////////////////////////////////////////////////
-	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", 1000);
-	}
+		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
+			var range = data.charAt(1);
+			
+			if (currRange != range) {
+				oldRange = currRange;
+				currRange = range;
+				echoCanvas1.paintChangedRange(oldRange);
+				changeRange(currRange);
+			}
+			
+			var chanelsArray = data.substring(2).split("CH");
+			newColorArrayCh1 = chanelsArray[0].split(",");
+			if (chanelsArray.length > 1)
+				newColorArrayCh2 = chanelsArray[1].split(",");
 
-	function onPaintingCanvasTimer() {
-		if (dataReceived > 0) {
-			echoCanvas1.echoPainter_PaintCanvas();	
+			dataReceived = 1;
+			echoCanvas1.setNewData(newColorArrayCh1);
 			if (echoCanvas2 != null)
-				echoCanvas2.echoPainter_PaintCanvas();	
+				echoCanvas2.setNewData(newColorArrayCh2);
+			//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
 		}
-		startPaintingCanvasTimer();
+	}
+
+	
+
+	function sendToServer(msgToServer) {
+		webSock.send(msgToServer + "\n");
 	}
 </script>
 </head>
 
 
 <body>
+
+	
+
 	<div id="wrap">
 		<div id="container">
-				<div class="northsidebar" >
-                      <!--   <img src="images/boat_40_2.png" style="float:right; margin-right:100px;" width="62" height="40" />
-                     	 -->
-		 		</div>
-        
-				<!--  <div class="eastsidebar">
-                	<div id="leftMenu" style="height:400px">
-                		
-					</div>
-                </div>-->
-                    
-				<div id="maincenter">
-					<canvas id="echoCanvas" width="556" height="400"></canvas>
-					 <div id="timeScale"> </div>
-				</div>
-                
-                <div class="westsidebar" style="width:30px;"><div id="rangeScale"> </div></div>
-                <div class="westsidebar" ><canvas  id="sideCanvas" width="30" height="400"></canvas><!--  <div style="width:50px; background:#f00"> </div>--></div>
-  
-                <div class="eastsidebar">
-                	<div style="height:26px; vertical-align:middle; display: table-cell;">
-                    	<!--  <div style="height:40px; width:100px">
+			<div class="northsidebar">
+			</div>
+			<div id="maincenter">
+				<canvas id="echoCanvas" width="556" height="400"></canvas>
+				<div id="timeScale"></div>
+				<div id="testCont" style="position:absolute;top:10px;left:10px;"></div>
+			</div>
+
+			<div class="westsidebar" id="westMenu" style="width: 80px;">
+				
+			</div>
+			<!--  <div id="rangeScale"></div>
+			</div>
+		<!-- 	<div class="westsidebar">
+				<canvas id="sideCanvas" width="30" height="400"></canvas>
+				
+			</div>-->	
+
+			<div class="eastsidebar">
+				<div
+					style="height: 26px; vertical-align: middle; display: table-cell;">
+					<!--  <div style="height:40px; width:100px">
                         <img src="images/menu.png" class="centerImg" id="enbMenuBut" width="70" height="70" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
                         </div>-->
-                    </div> 
-                </div>
-        
-                <div id="downCenterSidebar">
-                	<!--  <div style="height:100px; vertical-align:middle; display: table-cell;"> -->
-                	<div id="menuBut" style="height:100%; float:left">
-                		<img src="images/menu.png" class="centerImg" id="enbMenuBut" width="60" height="60" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
-               	 	</div>
-                	<div id="mainMenu">
-                                 
-                	</div>
-                	<!-- </div> -->
-                </div>
-        </div>
-        <!-- container end -->
-    </div>
-    
+				</div>
+			</div>
+
+			<div id="menuBar">
+				<div id="menuOnOffBut" style="height:100%; float:left">
+					<img src="images/menu.png" class="centerImg" id="enbMenuBut"
+						width="60" height="60" onmouseover="enableMenuOver()"
+						onmouseout="enableMenuOut()" onclick="enableMenuClick()" ;/>
+				</div>
+				<!--  <div id="mainChoiceText">Range</div>-->
+				<div id="subMenu"></div>
+				<img src="images/boat_40_2.png" style="float:right; margin-right:10px;" width="62" height="40" />
+				<!-- </div> -->
+			</div>
+		</div><!-- container end -->
+		
+	</div><!-- wrap end -->
+	
+	<script>
+	initVertMenu(document.getElementById("westMenu"));
+	initMenu();
+	
+	//showVertMenu(false);
+	
+	var rangeText=["10","30","50","100","900","1200"];
+	var rangeSlider2 = new SliderVertical(1,1,100, 34,  document.getElementById("testCont"),rangeText);
+	$("#testCont").hide();
+	
+	
+	reconnectSocket();
+	
+	function reconnectSocket() {
+		//if (conn.readyState === undefined || conn.readyState > 1) {
+			
+			webSock = new WebSocket('ws://10.31.1.119/echo');
+			
+			webSock.onopen = function() { //e
+			//	alert("Connected");
+			};
+			webSock.onmessage = function(msg) {
+				parseEchoData(msg.data);
+				//appendTxtNode(msg.data);
+			};
+			webSock.onclose = function() { //e
+				alert("Lost connection");
+			};
+
+			/*webSock.onerror = function(e) {
+				alert("error");
+			};
+			*/
+			
+	//	} else {alert("ready?");}
+	}
+	</script>
+
 </body>
 </html>
 
