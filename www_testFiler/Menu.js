@@ -3,6 +3,7 @@ var menuShown = false;
 var selectedMenuIndex = 1;
 
 function onMainMenuClickCallback(menuIndex){
+	selectVerticalMenu(menuIndex);
 	showSubmenu(menuIndex);
 }
 

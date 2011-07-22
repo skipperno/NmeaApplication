@@ -15,7 +15,7 @@
 int main(int argc, char **argv)
 {
 	//TEST TEST
-	printf("Hello\n");
+	printf("Version 1.2 (with websocket and Curtis format\n");
 	//cout << "Hei 2 !!!" << endl; // prints !!!Hello World!!!
 
 	TcpServer tcpServer;

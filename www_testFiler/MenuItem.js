@@ -43,6 +43,7 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 function VerMenuItem(itemIndex, itemText, parentContainer) {
 	this.itemIndex= itemIndex;
 	this.itemText=itemText;
+	this.selected=false;
 	
 	this.parentContainer = parentContainer;
 	
@@ -63,14 +64,26 @@ function VerMenuItem(itemIndex, itemText, parentContainer) {
 	this.parentContainer.appendChild(this.verMenuItem);
 	
 	$(this.verMenuItem).mouseover(function(e){
-		this.style.backgroundImage='url(images/VerMenuItemBackroundSelect.png)';
+		if (!this.parentObject.selected)
+			this.style.backgroundImage='url(images/VerMenuItemBackroundOver.png)';
 	});
 	
 	$(this.verMenuItem).mouseout(function(e){
-		this.style.backgroundImage='url(images/VerMenuItemBackround.png)';
+		if (!this.parentObject.selected)
+			this.style.backgroundImage='url(images/VerMenuItemBackround.png)';
 	});
 	
 	$(this.verMenuItem).click(function(e){
 		onMainMenuClickCallback(this.parentObject.itemIndex);
 	});
+}
+
+VerMenuItem.prototype.select = function(select){
+	if(select){
+		this.selected = true;
+		this.verMenuItem.style.backgroundImage='url(images/VerMenuItemBackroundSelect.png)';
+	} else{
+		this.selected = false;
+		this.verMenuItem.style.backgroundImage='url(images/VerMenuItemBackround.png)';
+	}
 }
