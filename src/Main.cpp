@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	}
 */
 	//TEST TEST
-	printf("Version 1.3 (with websocket and Curtis format)\n");
+	printf("Version 1.4 (with websocket and Curtis format)\n");
 	//cout << "Hei 2 !!!" << endl; // prints !!!Hello World!!!
 
 	TcpServer tcpServerEcho;
