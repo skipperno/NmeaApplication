@@ -20,6 +20,7 @@ public:
 	void getLastWeatherMessage(char* pStream);
 	bool getLastEchoMessage(char* pStream);
 	static void setRange(int nRange);
+	static void setGain(int newGain);
 
 	static NmeaHandler* getInstance();
 

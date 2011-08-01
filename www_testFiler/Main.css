@@ -8,6 +8,7 @@ BODY
     FONT-SIZE: 11px;
 	margin:0px;
 	padding:0px;
+	background-color:#c4c4c4;
 }
 
 #wrap
@@ -23,8 +24,9 @@ BODY
     MARGIN: auto;
    	WIDTH: 640px;
 	height:480px;
-	BACKGROUND: #282828;/*#282828;*/
+	BACKGROUND: #404040;/*#282828;*/
 	border:2px ridge #C90;
+	position:relative;
 }
 
 .northsidebar {
@@ -32,16 +34,27 @@ BODY
 	float: left;
 }
 
+
+#eastsidebar
+{
+	height:400px;
+	width:80px;
+   /* LINE-HEIGHT: 145%;*/
+    FLOAT: left;
+    OVERFLOW: hidden;
+    position:relative;
+	margin:0px;
+}
+
+/*
 .eastsidebar
 {
 	width:2px;
-  /*  LINE-HEIGHT: 145%;*/
-    /*url(images/bacgr_grey.png) repeat-y;*/
     FLOAT: left;
     OVERFLOW: hidden;
 	margin:0px;
 }
-
+*/
 #maincenter
 {
 	width:556px;
@@ -55,14 +68,6 @@ BODY
 	position:relative;
 }
 
-.westsidebar
-{
-	height:400px;
-    LINE-HEIGHT: 145%;
-    FLOAT: left;
-    OVERFLOW: hidden;
-	margin:0px;
-}
 
 h1 {
 	FONT-SIZE: 18px;

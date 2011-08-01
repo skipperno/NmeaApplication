@@ -13,6 +13,7 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 	this.menuItem = this.document.createElement("DIV");
 	this.menuItem.className = "menuItem";
 	this.menuItem.id = "menuItem_" + itemIndex;
+	this.menuItem.parentObject = this;
 	
 	this.text1div = this.document.createElement("DIV");
 	this.text1div.className = "text1";
@@ -27,15 +28,41 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 	
 	this.parentContainer.appendChild(this.menuItem);
 	
+	
+	$(this.menuItem).mouseover(function(e){
+		if (!this.parentObject.selected)
+			this.style.backgroundImage='url(images/menuItemBackroundOver.png)';
+	});
+	
+	$(this.menuItem).mouseout(function(e){
+		if (!this.parentObject.selected)
+			this.style.backgroundImage='url(images/menuItemBackround.png)';
+	});
+	
 	$(this.menuItem).click(function(e){
-		if(testShown){
+		/*if(testShown){
 			$("#testCont").hide();
 			testShown = false;
 		}else{
 			$("#testCont").show();
 			testShown = true;
-		}
+		}*/
+		onHorisontalMenuCallback(this.parentObject.itemIndex);
 	});
+}
+
+HorizMenuItem.prototype.select = function(select){
+	if(select){
+		this.selected = true;
+		this.menuItem.style.backgroundImage='url(images/menuItemBackroundSelect.png)';
+	} else{
+		this.selected = false;
+		this.menuItem.style.backgroundImage='url(images/menuItemBackround.png)';
+	}
+}
+
+HorizMenuItem.prototype.changeValueText = function(newValue){
+		this.text1div.innerHTML = newValue;
 }
 /**********************
 	VERTICAL

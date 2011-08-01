@@ -23,15 +23,16 @@ TcpServer::~TcpServer() {
 	// TODO Auto-generated destructor stub
 }
 
-int TcpServer::serverSocket_start(void) {
+int TcpServer::serverSocket_start(int nServerPort) {
+	this->nServerPort = nServerPort;
 	int ret;
-		ret = pthread_create(&thread1, NULL, runServerThread, (void*) NULL);
-		return ret;
-
+	ret = pthread_create(&thread1, NULL, runServerThread, (void*) this);
+	return ret;
 }
 
 void * runServerThread(void *ptr) {
 	int list_s; /*  listening socket          */
+	TcpServer* server = (TcpServer*)ptr;
 
 		struct sockaddr_in servaddr; /*  socket address structure  */
 
@@ -42,10 +43,12 @@ void * runServerThread(void *ptr) {
 			return NULL;
 		}
 
+		fprintf(stderr, "start TCP_SERVER, port %d\n", server->nServerPort);
+
 		memset(&servaddr, 0, sizeof(servaddr));
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		servaddr.sin_port = htons(SERVER_PORT);
+		servaddr.sin_port = htons(server->nServerPort);
 
 		if (bind(list_s, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
 			fprintf(stderr, "TCP_SERVER: Error calling bind()\n");
@@ -72,8 +75,10 @@ void * runServerThread(void *ptr) {
 			fprintf(stderr, "TCP_SERVER, Client accepted\n");
 
 			SocketClientPipe* socketClient = new SocketClientPipe();
-
-			socketClient->startClientSocket(conn_s);
+if(server->nServerPort == 2005)
+			socketClient->startClientSocket(conn_s, SOCK_DATA);
+else
+	socketClient->startClientSocket(conn_s, SOCK_ECHO);
 			Dispatcher::addClient(socketClient);
 
 		//	socketClientPipe_handleRequest(conn_s);

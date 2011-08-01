@@ -21,18 +21,19 @@
 //#include "socketClientPipe.h"
 
 #define MAX_LINE_LENGTH           	(1000)
-#define SERVER_PORT   				 2004
+//#define SERVER_PORT   				 2004
 
 class TcpServer {
 public:
 	TcpServer();
 	virtual ~TcpServer();
 
-	int serverSocket_start(void);
+	int serverSocket_start(int nServerPort);
 
 	int readParams(int conn_s);
 	int getNextParam(char* buffer, char* paramName, char* paramValue);
 	int readAllParams(int conn_s);
+	int nServerPort;
 
 };
 

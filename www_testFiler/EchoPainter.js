@@ -6,6 +6,10 @@ var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C, 0xBC, 
 var colors_G2 = new Array(0x00, 0x45, 0x60, 0x8E, 0x9D, 0xAF, 0xBF, 0xCF, 0xFF, 0xFF); 
 var colors_B2 = new Array(0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x22, 0x53, 0x80, 0xC3);
 
+var colors_R3 = new Array(0x00, 10, 20, 30, 40, 50,   60,  70,  80,  90); 
+var colors_G3 = new Array(0x00, 20, 40, 60, 80, 100, 120, 140, 160, 180); 
+var colors_B3 = new Array(0x00, 22, 44, 66, 88, 110, 132, 154, 176, 198);
+
 /*var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C,
  0xBC, 0xDC); 
 var colors_G2 = new Array(0x00, 0x25, 0x40, 0x5E, 0x6D, 0x9D,
@@ -23,9 +27,9 @@ var colors_B = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0,
 
 
 function changeToGreen() {
-	colors_R = colors_R2;
-	colors_G = colors_G2;
-	colors_B = colors_B2;
+	colors_R = colors_R3;
+	colors_G = colors_G3;
+	colors_B = colors_B3;
 	noOfColors = 10;
 }
 // //////////////////////////////
@@ -40,7 +44,7 @@ function EchoCanvas(x, y, canWidth, canHeight) {
 	this.canvasDoubleBuffer2Dcontext = null;
 	this.canvasDoubleBuff_1pixData = null;
 
-	this.colorArray = new Array();
+	this.colorArray = new Array(); // received data
 
 	this.colorStartIndex;
 	this.colorRest;
@@ -61,6 +65,10 @@ EchoCanvas.prototype.echoPainter_init = function() {
 
 	this.canvasDoubleBuffer2Dcontext = this.canvasDoubleBuffElement
 			.getContext('2d');
+	
+	this.canvasDoubleBuffer2Dcontext.fillStyle = "#000"; 
+	this.canvasDoubleBuffer2Dcontext.fillRect(0,0,this.canWidth,this.canHeight); 
+
 	this.canvasDoubleBuff_1pixData = this.canvasDoubleBuffer2Dcontext
 			.createImageData(1, this.canHeight);
 }
@@ -131,16 +139,25 @@ EchoCanvas.prototype.interpolateColorIndex = function(rgb) {
 }
 
 EchoCanvas.prototype.getInterpolateColorR = function() {
-	return parseInt(colors_R[this.colorStartIndex] * (1 - this.colorRest)
+	if (this.colorStartIndex < (noOfColors - 1))
+		return parseInt(colors_R[this.colorStartIndex] * (1 - this.colorRest)
 			+ colors_R[this.colorStartIndex + 1] * this.colorRest);
+	else
+		return colors_R[this.colorStartIndex];
 }
 
 EchoCanvas.prototype.getInterpolateColorG = function() {
+	if (this.colorStartIndex < (noOfColors - 1))
 	return parseInt(colors_G[this.colorStartIndex] * (1 - this.colorRest)
 			+ colors_G[this.colorStartIndex + 1] * this.colorRest);
+	else
+		return colors_G[this.colorStartIndex];
 }
 
 EchoCanvas.prototype.getInterpolateColorB = function() {
+	if (this.colorStartIndex < (noOfColors - 1))
 	return parseInt(colors_B[this.colorStartIndex] * (1 - this.colorRest)
 			+ colors_B[this.colorStartIndex + 1] * this.colorRest);
+	else
+		return colors_B[this.colorStartIndex];
 }

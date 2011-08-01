@@ -19,11 +19,11 @@ function changeRange(range){
 	var i = 1;
 
 	
-	inner +="<div style=\"width:100%; height:20px;float:right; margin:0px; color:#fff; border-top:1px solid #fff\">" + rangeText[range][0] + "</div>";
-	inner +="<div style=\"width:100%; height:20px;float:right; margin-top:39px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
+	inner +="<div style=\"width:100%; height:20px;float:right; margin:0px;text-align:right; border-top:1px solid #fff\">" + rangeText[range][0] + "</div>";
+	inner +="<div style=\"width:100%; height:20px;float:right; margin-top:39px;text-align:right; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
 	
 	for(var i = 2; i < 6; i++){
-		inner +="<div style=\"width:100%; height:20px;float:right; margin-top:59px; color:#fff; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
+		inner +="<div style=\"width:100%; height:20px;float:right; margin-top:59px;text-align:right; border-bottom:1px solid #fff\">" + rangeText[range][i] + "</div>";
 		//inner +="<div>" + rangeText[currRange][i] + "<img src=\"images/range.png\" height:\"3px\" style=\"float:right; margin-top:" + 80 + "px\" /></div>";
 	}
 	//alert(inner);

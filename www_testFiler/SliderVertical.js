@@ -14,7 +14,7 @@ function onVerticalSliderMoved(sliderIndex, pos) {
 }
 
 
-function SliderVertical(slidIndex, slMin, slMax, slStart, parentContainer,textArray) {
+function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContainer,textArray) {
 	this.currentStep=0;
 	this.mouseDownX;
 	this.mouseDownY;
@@ -60,6 +60,14 @@ function SliderVertical(slidIndex, slMin, slMax, slStart, parentContainer,textAr
 	this.verticalSliderCenter = this.document.createElement("DIV");
 	this.verticalSliderCenter.className = "verticalSliderCenter";
 	this.verticalSliderCenter.myObject = this;
+	
+	this.nameDiv = this.document.createElement("DIV");
+	this.nameDiv.className = "horisSlidText";
+	this.nameDiv.unselectable = "on";
+	this.nameDiv.innerHTML = slidName;
+	this.nameDiv.style.left = "45px";
+	this.nameDiv.style.top = "120px";
+	this.verticalSliderCenter.appendChild(this.nameDiv);
 	
 		this.verticalSliderHandleButton = this.document.createElement("DIV");
 		this.verticalSliderHandleButton.className = "verticalSliderHandleButton";

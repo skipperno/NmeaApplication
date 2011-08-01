@@ -16,11 +16,13 @@
 #include <unistd.h> /* close */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h> //atoi
 //#include "../utility/ip.h"
 
 #include <signal.h>
 #include "../NmeaHandler.h"
 #include "Dispatcher.h"
+#include "../data/Data.h"
 
 #include <exception>
 using namespace std;
@@ -59,8 +61,9 @@ void SocketClientPipe::catchClosedSocket() {
 	signal(SIGPIPE, sigpipe_handler); // catch socket closing
 }
 
-int SocketClientPipe::startClientSocket(int conn_s) {
+int SocketClientPipe::startClientSocket(int conn_s, int nSocketType) {
 	m_sockd = conn_s;
+	this->nSocketType = nSocketType;
 	int ret;
 	ret = pthread_create(&threadClient, NULL, runClientSocket, (void*) this);
 	return ret;
@@ -74,16 +77,30 @@ void * runClientSocket(void *ptr) {
 	socketClientPipe->soketOk = 1;
 	printf("Client CONNECTED, id: %d\n", socketClientPipe->m_sockd);
 
-	char recCommand[40];
+	char dataMsg[1000];
+	if(socketClientPipe->nSocketType == SOCK_DATA) {
+
+		Data::getInstance()->getJsonData(dataMsg);
+		socketClientPipe->socketClientPipe_send(dataMsg, strlen(dataMsg));
+		printf("SENT: %s\n", dataMsg);
+		printf("SENT: %d\n", (strlen(dataMsg)));
+	}
 
 	while(true) {
 
-		if (socketClientPipe->waitOnCommand(recCommand) == 0) {
-			if(recCommand[0] == 'R') {
+		if (socketClientPipe->waitOnCommand(dataMsg, 1000) == 0) {
+			Data::getInstance()->parseJsonMsg(dataMsg);
+			//Data::getInstance()->getJsonData(dataMsg);
+			//socketClientPipe->socketClientPipe_send(dataMsg, strlen(dataMsg));
+
+			/*if(recCommand[0] == 'R') {
 				NmeaHandler::setRange(recCommand[1] - 0x30);
+			} else if(recCommand[0] == 'G') {
+				int nGain = atoi(&recCommand[1]);
+				NmeaHandler::setGain(nGain);
 			} else {
 				printf("Received unknown command: %s\n", recCommand);
-			}
+			}*/
 		} else {
 			printf("Disconnect\n");
 			Dispatcher::onDisconnected(socketClientPipe);
@@ -94,10 +111,10 @@ void * runClientSocket(void *ptr) {
 	return NULL;
 }
 
-int SocketClientPipe::waitOnCommand(char* recCommand) {
+int SocketClientPipe::waitOnCommand(char* recCommand, int nLength) {
 	printf("Wait on command\n");
-	int nTotLength = Readline(m_sockd, recCommand, 39);
-	printf ("ReadLine end\n");
+	int nTotLength = readAvailable(m_sockd, recCommand, nLength);
+	printf ("readAvailable end\n");
 
 	if (nTotLength <= 0) {
 		fprintf(stderr, "***********ERROR, received: %d\n", nTotLength);
@@ -143,54 +160,6 @@ int SocketClientPipe::socketClientPipe_send(const void *vptr, size_t nSize) {
 	return nwritten;
 }
 
-int SocketClientPipe::socketClientPipe_readAllParams(int conn_s) {
-	char bufferRec[MAX_REQUEST_LENGTH];
-	char recCommand[40];
-	char bufferSend[MAX_RESPONSE_LENGTH];
-
-	memset(bufferSend, 0, MAX_RESPONSE_LENGTH);
-	memset(bufferRec, 0, MAX_REQUEST_LENGTH);
-	fprintf(stderr, "Read msg from client\n");
-
-	if (conn_s < 0) {
-		printf("Error socketClientPipe_readAllParams\n");
-		return -1;
-	}
-
-	int nTotLength = Readline(conn_s, recCommand, 39);
-	if (nTotLength <= 0) {
-		fprintf(stderr, "***********ERROR, received: %d\n", nTotLength);
-		return 0;
-	}
-
-	recCommand[nTotLength] = 0;
-	printf("rec: %s\n", recCommand);
-
-	int nType = recCommand[2] - 0x30;
-	int nChann = recCommand[5] - 0x30;
-	int nRange = recCommand[8] - 0x30;
-
-	NmeaHandler::getInstance()->setRange(nRange);
-	//printf("Received from client: %d bytes\n", nTotLength);
-	//usleep(10000);
-
-	char temp[2000];
-	char servText[8000];
-	if (!NmeaHandler::getInstance()->getLastEchoMessage(servText))
-		printf("Error getting last Echologg message\n");
-	//Mock::getString(servText);
-	//servText[256] = 0; // null terminate
-	sprintf(temp, "%s\r\n", &servText[12]);
-
-	socketClientPipe_write(conn_s, temp, strlen(temp)); //"GGA,10,0,1,1,98.5,3,1\r\n", 23);
-	printf("sent data to php\n");
-	/*
-	 nTotLength = Readline(conn_s, bufferRec, MAX_REQUEST_LENGTH - 1);
-	 bufferRec[nTotLength] = 0;
-	 //nLength = postHeader_getData(bufferRec, &postHeaderData);
-	 */
-	return -1;
-}
 
 ssize_t SocketClientPipe::socketClientPipe_write(int sockd, const void *vptr,
 		size_t nSize) {
@@ -222,6 +191,25 @@ ssize_t SocketClientPipe::socketClientPipe_write(int sockd, const void *vptr,
 
 	return nwritten; //nWrittenTot;
 }
+
+/*  Read a line from a socket  */
+
+ssize_t SocketClientPipe::readAvailable(int sockd, char *buffer, size_t maxlen) {
+	size_t n, rc;
+	char c;
+
+	if (sockd < 0)
+		return 0;
+
+	if ((rc = read(sockd, buffer, maxlen)) > 0) {
+		return rc;
+	} else {
+		if (errno == EINTR)
+			return 0;
+		return -1;
+	}
+}
+
 
 /*  Read a line from a socket  */
 

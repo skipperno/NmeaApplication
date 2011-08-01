@@ -34,7 +34,7 @@ void Dispatcher::sendMsg(const void *vptr, size_t nSize) {
 	}
 
 	if (clientsCount == 0) {
-		printf("ALARM DISPLAY\n");
+		//printf("ALARM DISPLAY\n");
 	}
 }
 

@@ -1,5 +1,7 @@
 @charset "utf-8";
 /* CSS Document */
+
+
 #menuBar {
 	width: 100%;
 	/*  LINE-HEIGHT: 145%;*/
@@ -13,9 +15,8 @@
 	height: 60px;
 	width: 500px;
 	float: left;
-	position: relative;
-	overflow: hidden;
-	margin-top: 5px;
+	OVERFLOW: hidden;
+	position:relative;
 }
 
 #fastSubMenu {
@@ -24,6 +25,8 @@
 	position: relative;
 	overflow: hidden;
 	float: left;
+	margin-left:auto;
+	margin-right:auto;
 }
 
 .subMenuDiv{
@@ -96,20 +99,27 @@
 	line-height: 20px;
 }
 /************ VERTICAL ***************/
-#westMenu {
+/*#westMenu {
 	width: 80px;
 	height: 400px;
 	position: relative;
 	overflow: hidden;
-}
+}*/
 
-#westMenuSliding {
+#vertMenuSliding {
 	width: 100%;
-	height: 720px;
+	height: 1200px;
 	position: absolute;
 	overflow: hidden;
 	top: 0px;
 	left: 0px;
+	display: block;
+}
+.vertMenuSlidingBlock{
+	width: 100%;
+	height: 400px; /*45*7*/
+	overflow: hidden;
+	display: block;
 }
 
 #westMenuTopButt {

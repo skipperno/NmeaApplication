@@ -10,7 +10,7 @@
 <meta http-equiv="Page-Enter" content="blendTrans(Duration=2)" />
 <meta http-equiv="Site-Exit" content="blendTrans(Duration=5)" />
 
-<link rel="stylesheet" type="text/css" href="Combox.css" />
+
 
 <link rel="stylesheet" type="text/css" href="Main.css" />
 <link rel="stylesheet" type="text/css" href="Position.css" />
@@ -26,11 +26,13 @@
 <script type="text/javascript" src="SliderVertical.js"></script>
 
 <script type="text/javascript" src="Menu.js"></script>
-<script type="text/javascript" src="MenuMain.js"></script>
-<script type="text/javascript" src="Submenu.js"></script>
+<script type="text/javascript" src="MenuVertical.js"></script>
+<script type="text/javascript" src="MenuHorizontal.js"></script>
 <script type="text/javascript" src="MenuItem.js"></script>
 <script type="text/javascript" src="Range.js"></script>
 <script type="text/javascript" src="TimeScale.js"></script>
+<script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="json2.js"></script>
 
 <!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
 <script type="text/javascript" src="swfobject.js"></script>
@@ -44,13 +46,14 @@
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
-	WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf"; 
+	WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
 	var conn = {};
-	var webSock;
+	var echoWebSock; //echo sounder data
+	var dataWebSock; // set-get data (e.q. GAIN, TVG...)
 
 	var oldRange = 0;
 	var currRange = 0;
-	
+
 	var currTimeScale = 0;
 
 	var echoCanvas1;
@@ -81,12 +84,13 @@
 		echoCanvas1 = new EchoCanvas(0, 0, 450, canvasHeight);
 		echoCanvas2 = new EchoCanvas(450, 0, 450, canvasHeight);
 	}
-	
+
 	//////////////////////////////////////////////////
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", startSleepTime + sleepCoef*100); //300);
+		t = setTimeout("onPaintingCanvasTimer()", startSleepTime + sleepCoef
+				* 100); //300);
 	}
 
 	function onPaintingCanvasTimer() {
@@ -97,7 +101,6 @@
 		}
 		startPaintingCanvasTimer();
 	}
-	
 
 	//////////////////////////////////////////////////
 	// TIMER USED FOR GETING OF SENSOR DATA FROM 
@@ -133,6 +136,7 @@
 		//$('#timeval').load('dataProvider.php?randval='+ Math.random());
 	}*/
 
+	/* !!! DON*T REMOVE THIS
 	// some of sliders is moved. 
 	function onSliderMoved(sliderIndex, pos) {
 		pos = parseInt(pos / 10);
@@ -147,13 +151,9 @@
 			changeTimeRange(pos);
 		} else if (sliderIndex == 4) {
 			sendToServer("R" + pos);
-			/*oldRange = currRange;
-			currRange = pos;
-			echoCanvas1.paintChangedRange(oldRange);
-			changeRange(currRange);*/
 		}
 	}
-
+	 */
 	////////////////////////////////////////////////
 	// Parse echo data received from php
 	////////////////////////////////////////////////
@@ -161,14 +161,14 @@
 
 		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
 			var range = data.charAt(1);
-			
+
 			if (currRange != range) {
 				oldRange = currRange;
 				currRange = range;
 				echoCanvas1.paintChangedRange(oldRange);
 				changeRange(currRange);
 			}
-			
+
 			var chanelsArray = data.substring(2).split("CH");
 			newColorArrayCh1 = chanelsArray[0].split(",");
 			if (chanelsArray.length > 1)
@@ -181,100 +181,118 @@
 			//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
 		}
 	}
-
 	
-
+	
+	function parseRecData(data){
+		//var myObject 
+		jsonDATA = JSON.parse(data);//, reviver);
+		setSignalData();
+	}
+	
 	function sendToServer(msgToServer) {
-		webSock.send(msgToServer + "\n");
+		dataWebSock.send(msgToServer);// + "\n");
 	}
 </script>
 </head>
 
-
 <body>
-
-	
-
 	<div id="wrap">
 		<div id="container">
-			<div class="northsidebar">
-			</div>
+
+			<div class="northsidebar"></div>
 			<div id="maincenter">
+				<div id="depth">???</div>
 				<canvas id="echoCanvas" width="556" height="400"></canvas>
+				<div id="rangeScale"></div>
 				<div id="timeScale"></div>
-				<div id="testCont" style="position:absolute;top:10px;left:10px;"></div>
+				<div id="sliderChoice"></div>
 			</div>
 
-			<div class="westsidebar" id="westMenu" style="width: 80px;">
-				
-			</div>
-			<!--  <div id="rangeScale"></div>
-			</div>
-		<!-- 	<div class="westsidebar">
-				<canvas id="sideCanvas" width="30" height="400"></canvas>
-				
-			</div>-->	
-
-			<div class="eastsidebar">
-				<div
-					style="height: 26px; vertical-align: middle; display: table-cell;">
-					<!--  <div style="height:40px; width:100px">
-                        <img src="images/menu.png" class="centerImg" id="enbMenuBut" width="70" height="70" onmouseover="enableMenuOver()" onmouseout="enableMenuOut()" onclick="enableMenuClick()";/> 
-                        </div>-->
-				</div>
+			<div id="eastsidebar">
+				<div id="sss" style="margin: 0px auto; width: 60px;"></div>
 			</div>
 
 			<div id="menuBar">
-				<div id="menuOnOffBut" style="height:100%; float:left">
+				<div id="menuOnOffBut" style="height: 100%; float: left">
 					<img src="images/menu.png" class="centerImg" id="enbMenuBut"
-						width="60" height="60" onmouseover="enableMenuOver()"
-						onmouseout="enableMenuOut()" onclick="enableMenuClick()" ;/>
+						width="60" height="60" onmouseover="onSetupButtonOver()"
+						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;/>
 				</div>
 				<!--  <div id="mainChoiceText">Range</div>-->
 				<div id="subMenu"></div>
-				<img src="images/boat_40_2.png" style="float:right; margin-right:10px;" width="62" height="40" />
+				<img src="images/boat_40_2.png"
+					style="float: right; margin-right: 10px;" width="62" height="40" />
 				<!-- </div> -->
 			</div>
-		</div><!-- container end -->
-		
-	</div><!-- wrap end -->
-	
+
+			<div id="rangeSliderDiv"></div>
+		</div>
+		<!-- container end -->
+
+	</div>
+	<!-- wrap end -->
+
 	<script>
-	initVertMenu(document.getElementById("westMenu"));
-	initMenu();
-	
-	//showVertMenu(false);
-	
-	var rangeText=["10","30","50","100","900","1200"];
-	var rangeSlider2 = new SliderVertical(1,1,100, 34,  document.getElementById("testCont"),rangeText);
-	$("#testCont").hide();
-	
-	
-	reconnectSocket();
-	
-	function reconnectSocket() {
-		//if (conn.readyState === undefined || conn.readyState > 1) {
-			
-			webSock = new WebSocket('ws://10.31.1.119/echo');
-			
-			webSock.onopen = function() { //e
-			//	alert("Connected");
+		changeRange(0);
+		initVertMenu(document.getElementById("sss"));//eastsidebar"));
+		initMenu();
+		$('#sliderChoice').hide();
+		//showVertMenu(false);
+
+		var rangeText = [ "10", "50", "100", "500", "1200", "1600" ];
+		//var rangeSlider2 = new SliderVertical(1,1,100, 34,  document.getElementById("sss"),rangeText);//testCont"),rangeText);
+		var rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
+				document.getElementById("rangeSliderDiv"), rangeText);//testCont"),rangeText);
+		
+				setSignalData();
+				
+		reconnectSocket();
+
+		function reconnectSocket() {
+			//if (conn.readyState === undefined || conn.readyState > 1) {
+			//////// ECHO SOUNDER WEBSOCKET ////////
+			echoWebSock = new WebSocket('ws://10.31.1.119/echo');
+
+			echoWebSock.onopen = function() { //e
+				//	alert("Connected");
 			};
-			webSock.onmessage = function(msg) {
+			echoWebSock.onmessage = function(msg) {
 				parseEchoData(msg.data);
+				
 				//appendTxtNode(msg.data);
 			};
-			webSock.onclose = function() { //e
+			echoWebSock.onclose = function() { //e
+				var clearArray = new Array();
+			
+				echoCanvas1.setNewData(clearArray);
+				if (echoCanvas2 != null)
+					echoCanvas2.setNewData(clearArray);
+		
 				alert("Lost connection");
 			};
 
-			/*webSock.onerror = function(e) {
-				alert("error");
+			echoWebSock.onerror = function(e) {
+				alert("websocket error");
 			};
-			*/
-			
-	//	} else {alert("ready?");}
-	}
+
+			//////// DATA WEBSOCKET ////////
+			dataWebSock = new WebSocket('ws://10.31.1.119/data');
+			dataWebSock.onopen = function() { //e
+					//alert("Connected dataWebSock");
+			};
+			dataWebSock.onmessage = function(msg) {
+				parseRecData(msg.data);
+				//appendTxtNode(msg.data);
+			};
+			dataWebSock.onclose = function() { //e
+				alert("dataWebSock Lost connection");
+			};
+
+			dataWebSock.onerror = function(e) {
+				alert("dataWebSock error: " + e);
+			};
+
+		}
 	</script>
 
 </body>

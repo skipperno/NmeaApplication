@@ -22,6 +22,7 @@ NmeaHandler* thisInstance;
 pthread_mutex_t lastMsgMutex;
 
 int nRange;
+int nGain = 1;
 
 NmeaHandler::NmeaHandler() {
 	memset(lastMsgStream_1, 0, 17000);
@@ -53,6 +54,12 @@ void NmeaHandler::getLastWeatherMessage(char* pStream) {
 void NmeaHandler::setRange(int newRange) {
 	nRange = newRange;
 }
+
+void NmeaHandler::setGain(int newGain) {
+	nGain = newGain;
+}
+
+
 
 bool NmeaHandler::getLastEchoMessage(char* pStream) {
 	pthread_mutex_lock(&lastMsgMutex);
@@ -100,7 +107,7 @@ void NmeaHandler::runHandler() {
 			//printf("Received: %d\n", length);
 
 			serialPortEcholodd.send(pBuffer, length);
-			NewEchoParser::convertDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
+			NewEchoParser::convertDataToAsciNmea(nRange, nGain, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 			//BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 
 			Dispatcher::sendMsg(lastMsgStream_1, nStram_1_length);

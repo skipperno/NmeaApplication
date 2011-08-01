@@ -57,7 +57,7 @@ function initHorisontalSubMenu(){
 	menuArray[8]=new HorizMenuItem(8, "line", "MARK", subMenuDiv[2]);
 	menuArray[9]=new HorizMenuItem(9, "off", "PRINT", subMenuDiv[2]);
 	menuArray[10]=new HorizMenuItem(10, "off", "SYSTEM", subMenuDiv[2]);
-
+	menuArray[11]=new HorizMenuItem(11, "green", "COLOR", subMenuDiv[2]);
 	
 	for(i=0;i<3;i++){
 		fastSubMenu.appendChild(subMenuDiv[i]);
@@ -67,14 +67,23 @@ function initHorisontalSubMenu(){
 	document.getElementById("subMenu").appendChild(fastSubMenu);
 	//document.getElementById("subMenu").appendChild(subMenuRight);
 	
-	showSubmenu(-1);
+	showHorizontalMenu(-1);
+}
+
+function selectHorizontalMenu(menuIndex){
+	for(i=0;i<12;i++){
+		if(i != menuIndex)
+			menuArray[i].select(false);
+		else
+			menuArray[i].select(true);
+	}
 }
 
 /**
  * 
  * @param submenuIndex index of shown submenu. If -1, submenu is not shown.
  */
-function showSubmenu(submenuIndex){
+function showHorizontalMenu(submenuIndex){
 	if (submenuIndex < 0)
 		$(fastSubMenu).hide();
 	else {
