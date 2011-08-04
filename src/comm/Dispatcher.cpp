@@ -8,7 +8,9 @@
 #include "Dispatcher.h"
 #include <stdio.h>
 
-map<unsigned int, SocketClientPipe*> socketDispatcherMap;
+map<unsigned int, SocketClientPipe*> socketDispatcherEchoData;
+map<unsigned int, SocketClientPipe*> socketDispatcherConfigData;
+
 int dummi = 0;
 
 Dispatcher::Dispatcher() {
@@ -20,13 +22,13 @@ Dispatcher::~Dispatcher() {
 	// TODO Auto-generated destructor stub
 }
 
-void Dispatcher::sendMsg(const void *vptr, size_t nSize) {
+void Dispatcher::sendEchoMsg(const void *vptr, size_t nSize) {
 	map<unsigned int, SocketClientPipe*>::iterator socketIterator;
 	SocketClientPipe* socketClientPipe;
 	int clientsCount = 0;
 
-	for (socketIterator = socketDispatcherMap.begin(); socketIterator
-			!= socketDispatcherMap.end();) {
+	for (socketIterator = socketDispatcherEchoData.begin(); socketIterator
+			!= socketDispatcherEchoData.end();) {
 		socketClientPipe = (*socketIterator).second;
 		socketClientPipe->socketClientPipe_send(vptr, nSize);
 		socketIterator++;
@@ -38,21 +40,53 @@ void Dispatcher::sendMsg(const void *vptr, size_t nSize) {
 	}
 }
 
-void Dispatcher::addClient(SocketClientPipe* socketClientPipe) {
-	socketDispatcherMap[dummi++] = socketClientPipe;
+void Dispatcher::sendConfigMsg(const void *vptr, size_t nSize) {
+	map<unsigned int, SocketClientPipe*>::iterator socketIterator;
+	SocketClientPipe* socketClientPipe;
+	int clientsCount = 0;
+
+	for (socketIterator = socketDispatcherConfigData.begin(); socketIterator
+			!= socketDispatcherConfigData.end();) {
+		socketClientPipe = (*socketIterator).second;
+		socketClientPipe->socketClientPipe_send(vptr, nSize);
+		socketIterator++;
+		clientsCount++;
+	}
+
+	if (clientsCount == 0) {
+		//printf("ALARM DISPLAY\n");
+	}
+}
+
+void Dispatcher::addClient(SocketClientPipe* socketClientPipe, socktType type) {
+	if (type == SOCK_ECHO)
+		socketDispatcherEchoData[dummi++] = socketClientPipe;
+	else
+		socketDispatcherConfigData[dummi++] = socketClientPipe;
 }
 
 void Dispatcher::onDisconnected(SocketClientPipe* disconnetdClientPipe) {
 	map<unsigned int, SocketClientPipe*>::iterator socketIterator;
 	SocketClientPipe* socketClientPipe;
-	for (socketIterator = socketDispatcherMap.begin(); socketIterator
-			!= socketDispatcherMap.end();) {
+	for (socketIterator = socketDispatcherEchoData.begin(); socketIterator
+			!= socketDispatcherEchoData.end();) {
 		socketClientPipe = (*socketIterator).second;
 		if (disconnetdClientPipe == socketClientPipe) {
-			socketDispatcherMap.erase((*socketIterator).first);
+			socketDispatcherEchoData.erase((*socketIterator).first);
 			return;
 		} else {
 			socketIterator++;
 		}
 	}
+
+	for (socketIterator = socketDispatcherConfigData.begin(); socketIterator
+				!= socketDispatcherConfigData.end();) {
+			socketClientPipe = (*socketIterator).second;
+			if (disconnetdClientPipe == socketClientPipe) {
+				socketDispatcherConfigData.erase((*socketIterator).first);
+				return;
+			} else {
+				socketIterator++;
+			}
+		}
 }

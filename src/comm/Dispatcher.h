@@ -18,8 +18,9 @@ class Dispatcher {
 public:
 	Dispatcher();
 	virtual ~Dispatcher();
-	static void sendMsg(const void *vptr, size_t nSize);
-	static void addClient(SocketClientPipe* socketClientPipe);
+	static void sendEchoMsg(const void *vptr, size_t nSize);
+	static void sendConfigMsg(const void *vptr, size_t nSize);
+	static void addClient(SocketClientPipe* socketClientPipe, socktType type);
 	static void onDisconnected(SocketClientPipe* disconnetdClientPipe);
 private:
 

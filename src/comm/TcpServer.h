@@ -34,7 +34,7 @@ public:
 	int getNextParam(char* buffer, char* paramName, char* paramValue);
 	int readAllParams(int conn_s);
 	int nServerPort;
-
+	static void sigpipe_handler(int nSignal);
 };
 
 #endif /* TCPSERVER_H_ */

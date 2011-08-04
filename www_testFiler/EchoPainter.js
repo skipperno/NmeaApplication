@@ -6,9 +6,13 @@ var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C, 0xBC, 
 var colors_G2 = new Array(0x00, 0x45, 0x60, 0x8E, 0x9D, 0xAF, 0xBF, 0xCF, 0xFF, 0xFF); 
 var colors_B2 = new Array(0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x22, 0x53, 0x80, 0xC3);
 
+var colors_R3 = new Array(0x00, 15, 30, 45, 60, 85,   90,  105,  120,  135); 
+var colors_G3 = new Array(0x00, 24, 52, 88, 112, 138, 162, 188, 214, 240); 
+var colors_B3 = new Array(0x00, 28, 56, 94, 122, 150, 178, 206, 234, 255);
+/*
 var colors_R3 = new Array(0x00, 10, 20, 30, 40, 50,   60,  70,  80,  90); 
 var colors_G3 = new Array(0x00, 20, 40, 60, 80, 100, 120, 140, 160, 180); 
-var colors_B3 = new Array(0x00, 22, 44, 66, 88, 110, 132, 154, 176, 198);
+var colors_B3 = new Array(0x00, 22, 44, 66, 88, 110, 132, 154, 176, 198);*/
 
 /*var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C,
  0xBC, 0xDC); 
@@ -52,6 +56,13 @@ function EchoCanvas(x, y, canWidth, canHeight) {
 	this.echoPainter_init();
 } // end of class
 
+EchoCanvas.prototype.resize = function(x, y, canWidth, canHeight) {
+	this.x = x;
+	this.y = y;
+	this.canWidth = canWidth;
+	this.canHeight = canHeight;
+}
+
 // public methode, class EchoCanvas
 EchoCanvas.prototype.echoPainter_init = function() {
 
@@ -94,7 +105,7 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
 
 	if (this.colorArray != null) {
 		for ( var i = 0; i < 400; i++) {
-			this.interpolateColorIndex(this.colorArray[399 - i]);
+			this.interpolateColorIndex(this.colorArray[i]); //399 - i]);
 
 			this.canvasDoubleBuff_1pixData.data[i * 4] = this
 					.getInterpolateColorR(); // colors_R[colorIndex];
@@ -125,7 +136,8 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
  * Use this after the new data has been received
  */
 EchoCanvas.prototype.setNewData = function(data) {
-	this.colorArray = data;
+	for (i = 0; i < 400; i++)
+	this.colorArray[i] = data[i+1]; //TODO: not "elegant". First element is depth
 }
 
 /**

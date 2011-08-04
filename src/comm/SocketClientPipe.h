@@ -16,14 +16,14 @@
 
 enum socktType{
 	SOCK_ECHO,
-	SOCK_DATA
+	SOCK_CONFIG
 };
 
 class SocketClientPipe {
 public:
 	SocketClientPipe();
 	virtual ~SocketClientPipe();
-	void catchClosedSocket();
+	//void catchClosedSocket();
 int socketClientPipe_send(const void *vptr, size_t nSize);
 
 ssize_t readAvailable(int sockd, char *buffer, size_t maxlen);

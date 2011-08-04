@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "../data/Data.h"
+#include "../data/ButterworthLowPassFilter.h"
+#include "../data/DataProcessing.h"
 #include <math.h>
 
 int VERTICAL_RESOLUTION = 400;
@@ -22,29 +24,43 @@ NewEchoParser::~NewEchoParser() {
 	// TODO Auto-generated destructor stub
 }
 
-void NewEchoParser::convertDataToAsciNmea(int nRange, int nGain, char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength) {
+void NewEchoParser::convertDataToAsciNmea(int nButtom, int nRange, int nGain,
+		char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength) {
 	char averageBuffer[VERTICAL_RESOLUTION + 2]; // 2 for header (1- type, 2-range)
-	//convertCompressedDataToAverage(nRange, compressedBuffer, nCompressedLength, averageBuffer);
 
-	NewEchoParser::convertAverageToAsciNmea(nRange, nGain, inBuffer, asciNmeaMsg, nAsciMsgLength);
+	// My average filter
+	/*	char outArray[401];
+	 DataProcessing::kalmanFilter(inBuffer, 400, outArray);
+	 NewEchoParser::convertAverageToAsciNmea(nRange, nGain, outArray, asciNmeaMsg, nAsciMsgLength);
+	 */
+	// Low pass filter
+	/*char outArray[401];
+	 ButterworthLowPassFilter::test(inBuffer, 400, outArray);
+	 NewEchoParser::convertAverageToAsciNmea(nRange, nGain, outArray, asciNmeaMsg, nAsciMsgLength);*/
+
+
+	// Normal
+	NewEchoParser::convertAverageToAsciNmea(nButtom, nRange, nGain, inBuffer,
+			asciNmeaMsg, nAsciMsgLength);
 }
 
-char NewEchoParser::calcTvg(char signal, int Tvg, float nDistance){
+char NewEchoParser::calcTvg(char signal, int Tvg, float nDistance) {
 	//5.f should be 30.f but signal is to strong (e.g. 30.f*log10(nDistance))
-	int nTemp = (int)((int)signal * (1.f + Tvg * 5.f *log10(nDistance)/100.f));//testTvg(Tvg, nDistance);
+	int nTemp = (int) ((int) signal * (1.f + Tvg * 5.f * log10(nDistance)
+			/ 100.f));//testTvg(Tvg, nDistance);
 
 	if (nTemp > 255)
 		return 255;
 	else if (nTemp < 0)
 		return 0;
 	else
-		return (char)nTemp;
+		return (char) nTemp;
 }
 
 /*
  * TODO: change this function and use for improving of processor performances (table for log10)
  */
-float NewEchoParser::myLog10(float nDistance){
+float NewEchoParser::myLog10(float nDistance) {
 	if (nDistance < 3)
 		return 0.3f;
 	if (nDistance < 10)
@@ -59,10 +75,11 @@ float NewEchoParser::myLog10(float nDistance){
 		return 2.3f; //2.3;
 	if (nDistance < 1000)
 		return 2.5f; //2.5;
-	return 3.f; 	//3;
+	return 3.f; //3;
 }
 
-void NewEchoParser::convertAverageToAsciNmea(int nRange, int nGain, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
+void NewEchoParser::convertAverageToAsciNmea(int nButtom, int nRange,
+		int nGain, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
 	int nTemp;
 	int nTvg;
 	asciNmeaMsg[0] = '1'; // TODO: msg type
@@ -71,20 +88,36 @@ void NewEchoParser::convertAverageToAsciNmea(int nRange, int nGain, char* averag
 	*nAsciMsgLength = 2;
 
 	nGain = Data::getInstance()->getGain();
-	nTvg  = Data::getInstance()->getTvg();
+	nTvg = Data::getInstance()->getTvg();
 	nRange = 50; //TODO
 
+	if (nButtom > 99) {
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom / 100;
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 100) / 10;
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom % 10;
+	} else if (nButtom > 9) {
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom / 10;
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom % 10;
+	} else {
+		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom;
+	}
+
+	asciNmeaMsg[(*nAsciMsgLength)++] = ',';
+
 	for (int i = 0; i < VERTICAL_RESOLUTION; i++) {
-		nTemp = (int)averageBuffer[i] + ((int)averageBuffer[i])*(nGain-50)/100;
+		nTemp = (int) averageBuffer[i] + ((int) averageBuffer[i])
+				* (nGain - 50) / 100;
 
 		if (nTemp > 255)
 			nTemp = 255;
 
-		averageBuffer[i] = calcTvg((char)nTemp, nTvg, ((float)nRange - (float)i*nRange/VERTICAL_RESOLUTION)); //!!! Curtis-format has opposite distance order
+		averageBuffer[i] = calcTvg((char) nTemp, nTvg,
+				((float) nRange - (float) i * nRange / VERTICAL_RESOLUTION)); //!!! Curtis-format has opposite distance order
 
 		if (averageBuffer[i] > 99) {
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + averageBuffer[i] / 100;
-			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (averageBuffer[i] % 100) / 10;
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (averageBuffer[i] % 100)
+					/ 10;
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + averageBuffer[i] % 10;
 		} else if (averageBuffer[i] > 9) {
 			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + averageBuffer[i] / 10;

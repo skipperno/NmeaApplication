@@ -1,8 +1,10 @@
 var menuShown = false;
 var selectedHorizMenuIndex = -1;
 
-function onHorisontalMenuCallback(menuIndex) {
-	if (selectedHorizMenuIndex > -1) {
+var shownScope = false;
+
+function onHorisontalMenuCallback(menuIndex, pushed) {
+	/*if (!pushed) { // the same button released
 		$('#sliderChoice').empty();
 		
 		if (selectedHorizMenuIndex == menuIndex) {// the same button
@@ -11,28 +13,50 @@ function onHorisontalMenuCallback(menuIndex) {
 			$('#sliderChoice').hide();
 			return;
 		}
-		// TODO: save?
-	}
-
-	selectedHorizMenuIndex = menuIndex;
+		
+	}*/
+	
+	// TODO: save?
+	
+	if (pushed) {
+		if (selectedHorizMenuIndex > -1) { // other button was pushed 
+			
+		}
+		selectedHorizMenuIndex = menuIndex;
+	} else
+		selectedHorizMenuIndex = -1;
 	
 	switch(menuIndex){
 	case 0:
-		showGain();
+		if (pushed)
+			showGain();
+		else
+			$('#sliderChoice').empty();
 		break;
 	case 1:
-		showTVG();
+		if (pushed)
+			showTVG();
+		else
+			$('#sliderChoice').empty();
+		break;
+	case 10:
+		if (pushed) {
+			changeHorMenuButtonValue(menuIndex, "On");
+			changeToScopeScreen();
+		} else {
+			changeHorMenuButtonValue(menuIndex, "Off");
+			changeToEchoScreen();
+		}
 		break;
 	case 11:
-		changeToGreen();
+		if (pushed) {
+			changeToGreen();
+		} else {}
 		break;
 	default:
 		alert("NOT IMPELMENTED");
 		break;
 	}
-
-	
-	selectHorizontalMenu(menuIndex);
 }
 
 function onMainMenuClickCallback(menuIndex) {

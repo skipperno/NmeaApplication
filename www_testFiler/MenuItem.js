@@ -1,10 +1,9 @@
-var testShown = false;
 
 function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 	this.itemIndex= itemIndex;
 	this.text1=line1;
 	this.text2 = line2;
-	
+	this.selected = false;
 	this.parentContainer = parentContainer;
 	
 	this.document = parentContainer.ownerDocument || parentContainer.document;
@@ -39,15 +38,10 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 			this.style.backgroundImage='url(images/menuItemBackround.png)';
 	});
 	
-	$(this.menuItem).click(function(e){
-		/*if(testShown){
-			$("#testCont").hide();
-			testShown = false;
-		}else{
-			$("#testCont").show();
-			testShown = true;
-		}*/
-		onHorisontalMenuCallback(this.parentObject.itemIndex);
+	$(this.menuItem).click(function(e){	
+		this.selected = ~this.selected;
+		this.parentObject.select(this.selected);
+		onHorisontalMenuCallback(this.parentObject.itemIndex, this.selected);
 	});
 }
 

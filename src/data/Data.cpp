@@ -86,7 +86,7 @@ void Data::parseJsonMsg(char* msg){
 */
 	 	 char msgToSend[1000];
 	 	 getJsonData(msgToSend);
-	 	 Dispatcher::sendMsg(msgToSend, strlen(msgToSend));
+	 	 Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 	 }
 	 /*
 	 if(strcmp(ddd.Value().c_str(), "G") == 0){

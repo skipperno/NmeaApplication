@@ -17,11 +17,11 @@
 <link rel="stylesheet" type="text/css" href="Menu.css" />
 <link rel="stylesheet" type="text/css" href="Other.css" />
 
-<link rel="stylesheet" type="text/css" href="MySlider.css" />
 <link rel="stylesheet" type="text/css" href="SliderHorizontal.css" />
 <link rel="stylesheet" type="text/css" href="SliderVertical.css" />
 
-<script type="text/javascript" src="MySliding.js"></script>
+<script src="jquery.js"></script>
+
 <script type="text/javascript" src="SliderHorizontal.js"></script>
 <script type="text/javascript" src="SliderVertical.js"></script>
 
@@ -39,10 +39,11 @@
 <script type="text/javascript" src="web_socket.js"></script>
 <!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
 
-<title>Skippers</title>
-
 <script src="EchoPainter.js"></script>
-<script src="jquery.js"></script>
+<script src="Scope.js"></script>
+
+
+<title>Skippers</title>
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
@@ -57,32 +58,55 @@
 	var currTimeScale = 0;
 
 	var echoCanvas1;
+	var echoCanvas1_x = 0;
+	var echoCanvas1_y = 0;
 	var echoCanvas2;
+	var scopeCanvas;
+	var scopeVisible = false;
+	
+	var CANVAS_WIDTH = 556;
+	var CANVAS_HEIGHT = 400;
+	
 	var dataReceived = 0;
 	var newColorArrayCh1;
 	var newColorArrayCh2;
-	var canvasWidth = 556;
-	var canvasHeight = 400;
+	var canvasWidth = CANVAS_WIDTH;
+	var canvasHeight = CANVAS_HEIGHT;
 
 	var chan = 1;
 
 	window.onload = initEchoPainting;
 
 	function initEchoPainting() {
+		scopeCanvas = new Scope(0, 0, 400, 256);
 		initOneCanvas();
-		//startDataProviderTimer();
+		//startDataProviderTimer();*/
 		startPaintingCanvasTimer();
-		//changeToGreen();
+		
 	}
 
 	function initOneCanvas() {
-		echoCanvas1 = new EchoCanvas(0, 0, canvasWidth, canvasHeight);
+		echoCanvas1 = new EchoCanvas(echoCanvas1_x, echoCanvas1_y, canvasWidth, canvasHeight);
 		echoCanvas2 = null;
+		//echoCanvas1.resize(400, 0, 150, 450);
 	}
 
 	function initBothCanvas() {
 		echoCanvas1 = new EchoCanvas(0, 0, 450, canvasHeight);
 		echoCanvas2 = new EchoCanvas(450, 0, 450, canvasHeight);
+	}
+	
+	function changeToScopeScreen() {
+		scopeVisible = true;
+		canvasWidth = 150;
+		echoCanvas1.resize(406, 0, canvasWidth, canvasHeight);
+	}
+	
+	function changeToEchoScreen() {
+		scopeVisible = false;
+		canvasWidth = CANVAS_WIDTH;
+		canvasHeight = CANVAS_HEIGHT;
+		echoCanvas1.resize(0, 0, canvasWidth, canvasHeight);
 	}
 
 	//////////////////////////////////////////////////
@@ -95,6 +119,8 @@
 
 	function onPaintingCanvasTimer() {
 		if (dataReceived > 0) {
+			if (scopeVisible)
+				scopeCanvas.paint();
 			echoCanvas1.echoPainter_PaintCanvas();
 			if (echoCanvas2 != null)
 				echoCanvas2.echoPainter_PaintCanvas();
@@ -155,10 +181,10 @@
 	}
 	 */
 	////////////////////////////////////////////////
-	// Parse echo data received from php
+	// Parse echo data received from server
 	////////////////////////////////////////////////
 	function parseEchoData(data) {
-
+		
 		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
 			var range = data.charAt(1);
 
@@ -169,12 +195,19 @@
 				changeRange(currRange);
 			}
 
-			var chanelsArray = data.substring(2).split("CH");
-			newColorArrayCh1 = chanelsArray[0].split(",");
-			if (chanelsArray.length > 1)
-				newColorArrayCh2 = chanelsArray[1].split(",");
 
+			var chanelsArray = data.substring(2).split("CH"); // NOT USED YET
+			newColorArrayCh1 = chanelsArray[0].split(",");
+			if (chanelsArray.length > 1) // NOT USED, ALWAYS = 1
+				newColorArrayCh2 = chanelsArray[1].split(",");
+			
+			var buttom = newColorArrayCh1[0];
+			document.getElementById("depth").innerHTML = "" + buttom + "m";
+			
 			dataReceived = 1;
+			
+			if (scopeVisible)
+				scopeCanvas.setNewData(newColorArrayCh1);
 			echoCanvas1.setNewData(newColorArrayCh1);
 			if (echoCanvas2 != null)
 				echoCanvas2.setNewData(newColorArrayCh2);
@@ -184,7 +217,6 @@
 	
 	
 	function parseRecData(data){
-		//var myObject 
 		jsonDATA = JSON.parse(data);//, reviver);
 		setSignalData();
 	}
@@ -201,7 +233,7 @@
 
 			<div class="northsidebar"></div>
 			<div id="maincenter">
-				<div id="depth">???</div>
+				<div id="depth">??</div>
 				<canvas id="echoCanvas" width="556" height="400"></canvas>
 				<div id="rangeScale"></div>
 				<div id="timeScale"></div>
@@ -243,7 +275,7 @@
 		//var rangeSlider2 = new SliderVertical(1,1,100, 34,  document.getElementById("sss"),rangeText);//testCont"),rangeText);
 		var rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
 				document.getElementById("rangeSliderDiv"), rangeText);//testCont"),rangeText);
-		
+				
 				setSignalData();
 				
 		reconnectSocket();

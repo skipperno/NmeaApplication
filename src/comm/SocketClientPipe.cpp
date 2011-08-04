@@ -20,6 +20,7 @@
 //#include "../utility/ip.h"
 
 #include <signal.h>
+
 #include "../NmeaHandler.h"
 #include "Dispatcher.h"
 #include "../data/Data.h"
@@ -40,9 +41,6 @@ pthread_mutex_t webClient_mutex;
 char dummyBuf[400 * 4];
 int dummyBufLength;
 
-void sigpipe_handler(int nSignal);
-
-
 
 void * runClientSocket(void *ptr);
 
@@ -57,28 +55,29 @@ SocketClientPipe::~SocketClientPipe() {
 	m_sockd = -1;
 }
 
-void SocketClientPipe::catchClosedSocket() {
-	signal(SIGPIPE, sigpipe_handler); // catch socket closing
-}
+
 
 int SocketClientPipe::startClientSocket(int conn_s, int nSocketType) {
 	m_sockd = conn_s;
 	this->nSocketType = nSocketType;
 	int ret;
+
+
 	ret = pthread_create(&threadClient, NULL, runClientSocket, (void*) this);
 	return ret;
 }
 
 void * runClientSocket(void *ptr) {
 	SocketClientPipe * socketClientPipe = (SocketClientPipe *)ptr;
-//void SocketClientPipe::runClientSocket() {
-	socketClientPipe->catchClosedSocket(); //TODO: move to server
+	printf("starter thread 1\n");
 
+	printf("starter thread 2\n");
 	socketClientPipe->soketOk = 1;
+	printf("starter thread 3\n");
 	printf("Client CONNECTED, id: %d\n", socketClientPipe->m_sockd);
 
 	char dataMsg[1000];
-	if(socketClientPipe->nSocketType == SOCK_DATA) {
+	if(socketClientPipe->nSocketType == SOCK_CONFIG) {
 
 		Data::getInstance()->getJsonData(dataMsg);
 		socketClientPipe->socketClientPipe_send(dataMsg, strlen(dataMsg));
@@ -127,10 +126,7 @@ int SocketClientPipe::waitOnCommand(char* recCommand, int nLength) {
 	return 0;
 }
 
-void sigpipe_handler(int nSignal) {
-	printf("SIGPIPE caught\n");
-	//soketOk = 0;
-}
+
 
 int SocketClientPipe::socketClientPipe_send(const void *vptr, size_t nSize) {
 	ssize_t nwritten;

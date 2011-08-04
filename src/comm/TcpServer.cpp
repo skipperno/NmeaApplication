@@ -9,22 +9,28 @@
 #include "SocketClientPipe.h"
 #include "Dispatcher.h"
 
+
+#include <signal.h>
 #include <pthread.h>
 
 void * runServerThread(void *ptr);
 pthread_t thread1;
 
+
 TcpServer::TcpServer() {
 	// TODO Auto-generated constructor stub
-
 }
 
 TcpServer::~TcpServer() {
 	// TODO Auto-generated destructor stub
 }
 
+
 int TcpServer::serverSocket_start(int nServerPort) {
 	this->nServerPort = nServerPort;
+
+	signal(SIGPIPE, SIG_IGN);// catch socket closing
+
 	int ret;
 	ret = pthread_create(&thread1, NULL, runServerThread, (void*) this);
 	return ret;
@@ -63,6 +69,9 @@ void * runServerThread(void *ptr) {
 		}
 		fprintf(stderr, "TCP_SERVER: Listen successed\n");
 
+
+		//server->catchClosedSocket();
+
 		while (1) {
 			int conn_s; /*  connection socket         */
 			/*  Wait for a connection, then accept() it  */
@@ -75,11 +84,14 @@ void * runServerThread(void *ptr) {
 			fprintf(stderr, "TCP_SERVER, Client accepted\n");
 
 			SocketClientPipe* socketClient = new SocketClientPipe();
-if(server->nServerPort == 2005)
-			socketClient->startClientSocket(conn_s, SOCK_DATA);
-else
-	socketClient->startClientSocket(conn_s, SOCK_ECHO);
-			Dispatcher::addClient(socketClient);
+
+			if(server->nServerPort == 2005) {
+				socketClient->startClientSocket(conn_s, SOCK_CONFIG);
+				Dispatcher::addClient(socketClient, SOCK_CONFIG);
+			} else {
+				socketClient->startClientSocket(conn_s, SOCK_ECHO);
+				Dispatcher::addClient(socketClient, SOCK_ECHO);
+			}
 
 		//	socketClientPipe_handleRequest(conn_s);
 		}

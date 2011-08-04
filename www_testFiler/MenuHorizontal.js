@@ -56,7 +56,7 @@ function initHorisontalSubMenu(){
 	menuArray[7]=new HorizMenuItem(7, "small", "DIGITAL", subMenuDiv[2]);
 	menuArray[8]=new HorizMenuItem(8, "line", "MARK", subMenuDiv[2]);
 	menuArray[9]=new HorizMenuItem(9, "off", "PRINT", subMenuDiv[2]);
-	menuArray[10]=new HorizMenuItem(10, "off", "SYSTEM", subMenuDiv[2]);
+	menuArray[10]=new HorizMenuItem(10, "off", "Scope", subMenuDiv[2]);
 	menuArray[11]=new HorizMenuItem(11, "green", "COLOR", subMenuDiv[2]);
 	
 	for(i=0;i<3;i++){
@@ -70,6 +70,14 @@ function initHorisontalSubMenu(){
 	showHorizontalMenu(-1);
 }
 
+function deselectHorizontalMenu(menuIndex){
+	menuArray[i].select(false);
+}
+
+function changeHorMenuButtonValue(menuIndex, newValue){
+	menuArray[menuIndex].changeValueText(newValue);
+}
+/*
 function selectHorizontalMenu(menuIndex){
 	for(i=0;i<12;i++){
 		if(i != menuIndex)
@@ -77,7 +85,7 @@ function selectHorizontalMenu(menuIndex){
 		else
 			menuArray[i].select(true);
 	}
-}
+}*/
 
 /**
  * 

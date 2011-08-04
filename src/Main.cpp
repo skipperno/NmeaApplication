@@ -19,12 +19,14 @@
 
 #include <sstream>
 
+
+
+
 int nEchoSounderPort = 2004;
 int nDataPort = 2005;
 Data jsonData;
 
 int main(int argc, char **argv) {
-
 	char testCh[1000];
 	//jsonData.setGain(99);
 	/*jsonData.getJsonData(testCh);
