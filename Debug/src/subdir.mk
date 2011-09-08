@@ -5,18 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/Main.cpp \
+../src/MsgInHandler.cpp \
 ../src/NmeaComm.cpp \
-../src/NmeaHandler.cpp 
+../src/SysTime.cpp 
 
 OBJS += \
 ./src/Main.o \
+./src/MsgInHandler.o \
 ./src/NmeaComm.o \
-./src/NmeaHandler.o 
+./src/SysTime.o 
 
 CPP_DEPS += \
 ./src/Main.d \
+./src/MsgInHandler.d \
 ./src/NmeaComm.d \
-./src/NmeaHandler.d 
+./src/SysTime.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

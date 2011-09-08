@@ -79,26 +79,31 @@ void SerialPort::closeOutputPort() {
 
 void SerialPort::receive(char* pBuffer, int *length) {
 	int nNotReceivedCounter = 0;
-	char c;
-
+	//char c;
+int nLen;
 	*length = 0;
 	if (!inpstream.good()) {
 		printf("TODO: inputstream flags in not OK.\n");
 	}
 
 	while (true) {
-		if (inpstream.readsome(&c, 1) != 0) {
+		nLen=inpstream.readsome(pBuffer, 10023);
+		if (nLen > 0) {
+			*length=nLen;
+			pBuffer[*length] =0;
+		//if (inpstream.readsome(&c, 1) != 0) {
 			nNotReceivedCounter = 0;
 			//printf("%d ", c);
-			pBuffer[(*length)++] = c;
+		//	pBuffer[(*length)++] = c;
 
-		} else if(nNotReceivedCounter > 5) {
+		} else
+			return;/*if(nNotReceivedCounter > 5) {
 			//printf("END.\n");
 			return;
 		} else {
 			nNotReceivedCounter++;
-			usleep(3000);
-		}
+			usleep(30000);
+		}*/
 	}
 	//}
 }

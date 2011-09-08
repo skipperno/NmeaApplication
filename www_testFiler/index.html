@@ -19,20 +19,30 @@
 
 <link rel="stylesheet" type="text/css" href="SliderHorizontal.css" />
 <link rel="stylesheet" type="text/css" href="SliderVertical.css" />
+<link rel="stylesheet" type="text/css" href="ChoiceBoxHoriz.css" />
 
 <script src="jquery.js"></script>
-
+<script src="jquery.populate.pack.js"></script>
+<script type="text/javascript" src="json2.js"></script>
+<script type="text/javascript" src="SignalEmulator.js"></script>
 <script type="text/javascript" src="SliderHorizontal.js"></script>
 <script type="text/javascript" src="SliderVertical.js"></script>
+<script type="text/javascript" src="ChoiceBoxHoriz.js"></script>
+<script type="text/javascript" src="ChoiceBoxHoriz2.js"></script>
 
 <script type="text/javascript" src="Menu.js"></script>
 <script type="text/javascript" src="MenuVertical.js"></script>
 <script type="text/javascript" src="MenuHorizontal.js"></script>
 <script type="text/javascript" src="MenuItem.js"></script>
 <script type="text/javascript" src="Range.js"></script>
+<script type="text/javascript" src="Light.js"></script>
 <script type="text/javascript" src="TimeScale.js"></script>
 <script type="text/javascript" src="data.js"></script>
-<script type="text/javascript" src="json2.js"></script>
+<script type="text/javascript" src="Alarm.js"></script>
+<script type="text/javascript" src="NmeaList.js"></script>
+
+
+
 
 <!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
 <script type="text/javascript" src="swfobject.js"></script>
@@ -184,7 +194,6 @@
 	// Parse echo data received from server
 	////////////////////////////////////////////////
 	function parseEchoData(data) {
-		
 		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
 			var range = data.charAt(1);
 
@@ -205,6 +214,7 @@
 			document.getElementById("depth").innerHTML = "" + buttom + "m";
 			
 			dataReceived = 1;
+			alarmTest(buttom);
 			
 			if (scopeVisible)
 				scopeCanvas.setNewData(newColorArrayCh1);
@@ -213,17 +223,35 @@
 				echoCanvas2.setNewData(newColorArrayCh2);
 			//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
 		}
+		//updateSigBeam();
 	}
 	
 	
 	function parseRecData(data){
-		jsonDATA = JSON.parse(data);//, reviver);
-		setSignalData();
+		var recJson = JSON.parse(data); /*, reviver);*/
+		//jsonDATA = JSON.parse(data); /*, reviver);*/
+		if (recJson.type == "sig") {
+			jsonDATA = recJson;
+			setSignalData();
+		} else if (recJson.type == "top") {
+			jsonTOP  = recJson;
+			$('#tableTest').populate(jsonTOP.ins); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});		
+		}	else if (recJson.type == "nmea") {
+			jsonNmea = recJson;
+			if (getListCount() > 20) {
+				removeOptionFirst();
+			}
+			
+			appendOptionLast(jsonNmea.nmea);
+			//document.getElementById("gps").innerHTML = jsonNmea.nmea;
+		}
 	}
 	
 	function sendToServer(msgToServer) {
 		dataWebSock.send(msgToServer);// + "\n");
 	}
+	
+	
 </script>
 </head>
 
@@ -231,31 +259,96 @@
 	<div id="wrap">
 		<div id="container">
 
-			<div class="northsidebar"></div>
+			<div class="northsidebar">
+			<table name="tableTest" id="tableTest">
+				<tr><td width="80px">Time:</td><td id="time" width="100px"></td><td width="35px">GPS:</td><td id="gps" width="100px"></td></tr>
+				<tr><td>Picture speed:</td><td id="speed"></td><td>Frq:</td><td id="frq"></td></tr>
+			</table>
+				<div id="boatDiv"></div>
+				<div id="boatSensDiv"></div>
+			</div>
 			<div id="maincenter">
 				<div id="depth">??</div>
+				<script>
+					initAlarm(document.getElementById("maincenter"));
+				</script>
 				<canvas id="echoCanvas" width="556" height="400"></canvas>
 				<div id="rangeScale"></div>
 				<div id="timeScale"></div>
+				<div id="nmeaPanel">
+				<form id="nmeaOutputs">
+				<div class="nmeaHeaderText">NMEA OUTPUTS:</div>
+					<table>
+					<tr><td width="30px">DPT:</td><td width="45px"><input type="checkbox" name="bb[]" value="a" onclick="selectJsonRadioValue(0)"></input></td>
+					<td width="30px">DBS:</td><td width="45px"><input type="checkbox" name="bb[]" value="b" onclick="selectJsonRadioValue(1)"></input></td>
+					<td width="30px">DBA:</td><td width="45px"><input type="checkbox" name="bb[]" value="c" onclick="selectJsonRadioValue(2)"></input></td>
+					<td width="30px">PSWP:</td><td width="45px"><input type="checkbox" name="bb[]" value="d" onclick="selectJsonRadioValue(3)"></input></td></tr> 
+					</table>
+				</form>
+				<form id="nmeaOutputsSetup">
+				<div class="nmeaHeaderText">NMEA OUTPUTS SETUP:</div>
+					<table>
+					<tr><td width="60px">CHECK SUM:</td><td width="45px"><input type="checkbox" name="bb[]" value="a" onclick="selectJsonRadioValue(0)"></input></td>
+					<td width="60px">EN250</td><td width="45px"><input type="checkbox" name="bb[]" value="b" onclick="selectJsonRadioValue(1)"></input></td></tr> 
+					<tr><td width="60px">EN250 D#</td><td width="45px"><input type="checkbox" name="bb[]" value="c" onclick="selectJsonRadioValue(2)"></input></td>
+					<td width="60px">XDR</td><td width="45px"><input type="checkbox" name="bb[]" value="d" onclick="selectJsonRadioValue(3)"></input></td></tr> 
+					</table>
+				</form>
+				
+				<form id="comBaud">
+				<div class="nmeaHeaderText">BAUD RATE:</div>
+					<table>
+					<tr><td width="30px">4800</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(0)"></input></td>
+					<td width="30px">9600</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td></tr> 
+					</table>
+				</form>
+				
+				<form id="outputInput">
+				<div class="nmeaHeaderText">DISPLAY</div>
+					<table>
+					<tr><td width="20px">OUT</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(0)"></input></td>
+					<td width="20px">IN</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td>
+					<td width="20px">ON</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td></tr> 
+					</table>
+				</form>
+				
+				<div id="nmeaListDiv" border="1">
+					
+				<select id="nmeaList" size="15" multiple="multiple">
+					<!--  	<option value="a" selected="selected">PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option>
+							<option value="b">$PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option> -->
+				</select>
+		 		</div> 
+		 		</div> <!-- nmeaPanel end -->
+		 		<div id="day_night"></div>
 				<div id="sliderChoice"></div>
-			</div>
-
-			<div id="eastsidebar">
-				<div id="sss" style="margin: 0px auto; width: 60px;"></div>
-			</div>
-
-			<div id="menuBar">
-				<div id="menuOnOffBut" style="height: 100%; float: left">
-					<img src="images/menu.png" class="centerImg" id="enbMenuBut"
-						width="60" height="60" onmouseover="onSetupButtonOver()"
-						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;/>
+				<div id="alarmMsgDiv"></div>
+				
+				<div id="menuBar">
+				<div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
+						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;>Menu
+					
 				</div>
 				<!--  <div id="mainChoiceText">Range</div>-->
 				<div id="subMenu"></div>
-				<img src="images/boat_40_2.png"
-					style="float: right; margin-right: 10px;" width="62" height="40" />
+				
 				<!-- </div> -->
+			</div><!--  end menuBar -->
+			</div><!--  end main -->
+
+			<div id="eastsidebar">
+				<div id="sigDiv"></div>
+				<div id="eastContainer">
+					<div id="eastRange_Light">
+						<div id="eastRangeButton"; onmouseover="onRangeButtonOver()"
+						onmouseout="onRangeButtonOut()" onclick="onRangeButtonClick()";></div>
+						<div id="eastLightButton";onmouseover="onLightButtonOver()"
+						onmouseout="onLightButtonOut()" onclick="onLightButtonClick()";></div>
+					</div>
+				</div>
 			</div>
+
+			
 
 			<div id="rangeSliderDiv"></div>
 		</div>
@@ -265,25 +358,39 @@
 	<!-- wrap end -->
 
 	<script>
-		changeRange(0);
-		initVertMenu(document.getElementById("sss"));//eastsidebar"));
-		initMenu();
-		$('#sliderChoice').hide();
-		//showVertMenu(false);
+	function selectJsonRadioValue(selIndex){
+		jsonOutput.ins.bb = selIndex;
+	}
 
+
+	
+		createLightDiv(document.getElementById("day_night"));
+		
+		$("#nmeaPanel").hide();
+		$("#day_night").hide();
+		
+		changeRange(0);
+		initVertMenu(document.getElementById("eastContainer"));//eastsidebar"));
+		initMenu();
+		
+		
 		var rangeText = [ "10", "50", "100", "500", "1200", "1600" ];
-		//var rangeSlider2 = new SliderVertical(1,1,100, 34,  document.getElementById("sss"),rangeText);//testCont"),rangeText);
+	
 		var rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
 				document.getElementById("rangeSliderDiv"), rangeText);//testCont"),rangeText);
+		$("#rangeSliderDiv").hide();		
+		//setSignalData();
 				
-				setSignalData();
-				
+		showAlarmMsg(false);
+		$('#tableTest').populate(jsonTOP.myObject); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
+		$('#nmeaOutputs').populate(jsonOutputs.oms);
+		
 		reconnectSocket();
 
 		function reconnectSocket() {
 			//if (conn.readyState === undefined || conn.readyState > 1) {
 			//////// ECHO SOUNDER WEBSOCKET ////////
-			echoWebSock = new WebSocket('ws://10.31.1.119/echo');
+			echoWebSock = new MozWebSocket('ws://10.31.1.128/echo');
 
 			echoWebSock.onopen = function() { //e
 				//	alert("Connected");
@@ -308,7 +415,7 @@
 			};
 
 			//////// DATA WEBSOCKET ////////
-			dataWebSock = new WebSocket('ws://10.31.1.119/data');
+			dataWebSock = new MozWebSocket('ws://10.31.1.128/data');
 			dataWebSock.onopen = function() { //e
 					//alert("Connected dataWebSock");
 			};

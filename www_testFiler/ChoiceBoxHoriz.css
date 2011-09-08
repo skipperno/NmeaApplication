@@ -1,0 +1,67 @@
+@charset "utf-8";
+
+/************* Horizontal ChoiceBox ********************/
+
+
+
+.horisChoice{
+	margin:0px auto;
+	width:400px;
+	height:70px;
+	/*height:60px;*/
+	display:inline;
+	float:left;
+}
+
+.horisChoiceCenter{
+	width:400px;
+	height:70px;
+	/*background:#1c1c1c;*/
+	/*height:60px;*/
+	background: url(images/horisChoiceCenter.png);
+	background-repeat:repeat-x;
+	position:relative;
+	float:left;
+} 
+
+.horChoiceIcon{
+	/*width:32px;
+	height:32px;*/
+	width:70px;
+	height:70px;
+	background: url(images/but.png);
+	/*background: url(images/Checkbox.png);*/
+	position:absolute;
+	left:0px;
+	top:20px;
+}
+
+.horChoiceSelectedIcon{
+	/*width:32px;
+	height:32px;*/
+	width:70px;
+	height:70px;
+	background: url(images/but_push.png);
+	/*background: url(images/CheckboxFull.png);*/
+	position:absolute;
+	left:0px;
+	top:20px;
+}
+
+.horChoiceText{
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:100px;
+	text-align:center;
+}
+
+
+/********** TEST ****************/
+.choiceIc{
+		position:absolute;
+	}
+
+	
+
+

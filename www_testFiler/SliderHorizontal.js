@@ -57,10 +57,10 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart, parentCont
     }
 	
 	this.nameDiv = this.document.createElement("DIV");
-	this.nameDiv.className = "horisSlidText";
+	this.nameDiv.className = "horisSlidName";
 	this.nameDiv.unselectable = "on";
 	this.nameDiv.innerHTML = slidName;
-	this.nameDiv.style.left = "120px";
+	this.nameDiv.style.left = "75px";
 	this.nameDiv.style.top = "45px";
 	this.slidCenter.appendChild(this.nameDiv);
 	
@@ -204,6 +204,7 @@ SliderHorizontal.prototype.convertPosToValue = function(newX) {
 	//var calcX = this.currentValue * this.stepWidth - HANDL_BUTTON_IMAGE_WIDTH/2;
 }
 
+// !!! newX is pixel postiton. If you don't have, use "setHandButtValue"
 SliderHorizontal.prototype.setHandlButtPos = function(newX, anim) {
 	calcX = newX - HANDL_BUTTON_IMAGE_WIDTH/2;
 	
@@ -216,6 +217,21 @@ SliderHorizontal.prototype.setHandlButtPos = function(newX, anim) {
 		this.myHandlBut.setAttribute("style", "left:" + calcX + "px");
 	}
 }
+
+SliderHorizontal.prototype.setHandlButtValue = function(newValue, anim) {
+	var newX = this.stepWidth*newValue;
+	calcX = newX; // - HANDL_BUTTON_IMAGE_WIDTH/2;
+	
+	if (anim) {
+		var strNewX = "" + calcX;
+		$(this.myHandlBut).animate({
+			left : strNewX
+		}, 200);
+	} else {
+		this.myHandlBut.setAttribute("style", "left:" + calcX + "px");
+	}
+}
+
 
 function preventEv(e) {
 	if (e.preventDefault)

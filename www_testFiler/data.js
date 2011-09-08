@@ -1,5 +1,5 @@
 var jsonDATA = 
-	{ "type": "ALL",
+	{ "type": "sig",
 	  "signal" : 
 		{ "GAIN" : 0,
           "TVG"  : 0,
@@ -7,21 +7,53 @@ var jsonDATA =
           "POW" : "50"},
       "alarm" : 
   		{ "L" : 44,
-          "H" : 55}
+          "H" : 400},
+       "range" : 0
     };
-/*
-var jsonGAIN = 
-{ "type": "G",
-  "signal" : 
-	{ "GAIN" : 0}
+
+var jsonLIGHT = 
+{ "type": "LIGHT",
+  "brighDay" :[10,20,30,40,50],
+  "brighNight" :[0,10,20,30,40],
 };
-*/
+
+var jsonTOP = 
+{ "type": "top",
+  "ins" :{"time":"?","gps":"?","speed":"?","frq":"?"}
+};
+
+var jsonNmea = 
+{ "type": "nmea",
+  "nmea" :""
+};
+/*
+var jsonOutput = 
+{ 'type': 'out',
+  'source':1,
+  'omt':['dpt','dbs'],
+  'br':{"brRadio":0},
+  'dis':{"disRadio":1}
+};*/
+
+var jsonOutputs = 
+{ 'type': 'out',
+  'oms':['dpt','dbs'] // active output msg types
+};
+
+var jsonDisplay = 
+{ 'type': 'dis',
+  'disp':{"disRadio":1}
+};
+
+var jsonBaud = 
+{ 'type': 'baud',
+  'br':{"brRadio":0},
+};
+
 function setSignalData(){
-	menuArray[0].changeValueText(""+jsonDATA.signal.GAIN +"%");
-	menuArray[1].changeValueText(""+jsonDATA.signal.TVG +"%");
-	menuArray[2].changeValueText(""+jsonDATA.signal.FREQ +"kHz");
-	menuArray[3].changeValueText(""+jsonDATA.signal.POW +"%");
-	//menuArray[4].changeValueText(""+dataJSON.signal.DRA +"m");
-	menuArray[5].changeValueText(""+jsonDATA.alarm.L +"m");
-	menuArray[6].changeValueText(""+jsonDATA.alarm.H +"m");
+	updateMenuValues();
+	updateAlarmIcons(); 
 }
+
+
+

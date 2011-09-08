@@ -1,7 +1,68 @@
 var menuShown = false;
 var selectedHorizMenuIndex = -1;
+var selectedVerticalMenuIndex = 0;
 
 var shownScope = false;
+
+function initMenu() {
+
+	initHorisontalSubMenu();
+	setMenuShown(false);
+}
+
+/** ******************************************** */
+/** ******* Button Setup/Exit Menu ****** */
+/** ******************************************** */
+function onSetupButtonClick() {
+	var myElement = document.getElementById('menuOnOffBut');
+
+	if (menuShown) {
+		setMenuShown(false);
+		//myElement.src = "images/MenuShow.png";
+		myElement.style.backgroundImage='url(images/MenuShow.png)';
+	} else {
+		setMenuShown(true);
+		onMainMenuClickCallback(selectedVerticalMenuIndex);
+		
+		myElement.style.backgroundImage='url(images/MenuBack.png)';
+	}
+}
+
+function onSetupButtonOver() {
+	if (!menuShown) {
+		var myElement = document.getElementById('menuOnOffBut');
+		myElement.style.backgroundImage='url(images/MenuShow_2.png)';
+		//myElement.src = "images/MenuShow_2.png";
+	}
+}
+function onSetupButtonOut() {
+	if (!menuShown) {
+		var myElement = document.getElementById('menuOnOffBut');
+		myElement.style.backgroundImage='url(images/MenuShow.png)';
+		//myElement.src = "images/MenuShow.png";
+	}
+}
+
+function setMenuShown(show) {
+	if (show) {
+		showHorizontalMenu(0);
+		$(vertMenuSliding).show();
+	} else {
+		showHorizontalMenu(-1);
+		$(vertMenuSliding).hide();
+	}
+	menuShown = show;
+}
+
+
+/** ******************************************** */
+/** *******         Callback              ****** */
+/** ******************************************** */
+function onMainMenuClickCallback(menuIndex) {
+	selectVerticalMenu(menuIndex);
+	showHorizontalMenu(menuIndex);
+	selectedVerticalMenuIndex = menuIndex;
+}
 
 function onHorisontalMenuCallback(menuIndex, pushed) {
 	/*if (!pushed) { // the same button released
@@ -23,23 +84,94 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			
 		}
 		selectedHorizMenuIndex = menuIndex;
-	} else
+	} else {
 		selectedHorizMenuIndex = -1;
+		$('#sliderChoice').hide();
+	}
 	
 	switch(menuIndex){
 	case 0:
 		if (pushed)
-			showGain();
+			showAlarm_L();  
 		else
 			$('#sliderChoice').empty();
 		break;
 	case 1:
 		if (pushed)
+			showAlarm_H(); 
+		else
+			$('#sliderChoice').empty();
+		break;
+	/*case 2: //MARK
+		if (pushed)
+			showPosition();
+		else
+			$('#sliderChoice').empty();
+		break;*/
+	case 3: //POSITION
+		if (pushed)
+			showPosition();
+		else
+			$('#sliderChoice').empty();
+		break;
+	/*case 4: //DRAUGHT
+		if (pushed)
+			// 
+		else
+			$('#sliderChoice').empty();
+		break;*/
+		
+	case 5: //MODE
+		/*if (pushed)
+			showAlarm_L();
+		else
+			$('#sliderChoice').empty();
+		break;*/
+	case 6: // GAIN
+		if (pushed)
+			showGain();
+		else
+			$('#sliderChoice').empty();
+		break;
+	case 7: // TVG
+		if (pushed)
 			showTVG();
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 10:
+	case 8: // PWR
+		if (pushed)
+			showPOW();
+		else
+			$('#sliderChoice').empty();
+		break;
+	case 9: // FREQ
+		if (pushed)
+			showFREQ();
+		else
+			$('#sliderChoice').empty();
+		break;
+	case 10: //COM1
+		if (pushed) {
+			$("#nmeaPanel").show();
+		} else {
+			$("#nmeaPanel").hide();
+		}
+		break;
+	case 11: //COM2
+		if (pushed) {
+			$("#nmeaPanel").show();
+		} else {
+			$("#nmeaPanel").hide();
+		}
+		break;
+		
+	case 12: //LAN // !!! Now is Green-Blue
+		if (pushed) {
+			changeToGreen();
+		} else {}
+		break;
+	case 13: //CAN //!!! Now is Scope
 		if (pushed) {
 			changeHorMenuButtonValue(menuIndex, "On");
 			changeToScopeScreen();
@@ -48,72 +180,108 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			changeToEchoScreen();
 		}
 		break;
-	case 11:
+	case 14:
 		if (pushed) {
+			showParity();
+		} else {$('#sliderChoice').empty();}
+		break;
+		/*   SCOPE
+		 if (pushed) {
+			changeHorMenuButtonValue(menuIndex, "On");
+			changeToScopeScreen();
+		} else {
+			changeHorMenuButtonValue(menuIndex, "Off");
+			changeToEchoScreen();
+		}
+		break;
+		 */
+		
+		/*  GREEN/BLUE
+		  if (pushed) {
 			changeToGreen();
 		} else {}
 		break;
+		 */
+		
 	default:
 		alert("NOT IMPELMENTED");
 		break;
 	}
 }
 
-function onMainMenuClickCallback(menuIndex) {
-	selectVerticalMenu(menuIndex);
-	showHorizontalMenu(menuIndex);
-}
+
 
 function onSliderMoved(sliderIndex, pos) {
-	if (sliderIndex >= 0 && sliderIndex < 3) {    //GAIN, TVG or POWER
-		 //menuArray[sliderIndex].changeValueText(""+pos+"%"); // don't. Wait on new values from server
-		 if (pos >= 0 && pos <= 100) {
-			 if (sliderIndex == 0)
-				 jsonDATA.signal.GAIN=pos;
-			 else if (sliderIndex == 1)
-				 jsonDATA.signal.TVG=pos;
-			 else
-				 jsonDATA.signal.POW=pos;
-			 sendToServer(JSON.stringify(jsonDATA));
-		 }
-			 
-		 else
-			 alert("onSliderMoved Error value: " + pos);
-	}	 
-	/* if (sliderIndex == 0) {    //GAIN
-		 menuArray[0].changeValueText(""+pos+"%");
-		 if (pos >= 0 && pos <= 100) {
-			 //sendToServer("G" + pos);
-			 jsonGAIN.signal.GAIN=pos;
-			 sendToServer(JSON.stringify(jsonGAIN));//jsonGAIN.toJSONString());
-			 jsonDATA.signal.GAIN=pos; // TODO: save or get from server?
-		 }
-			 
-		 else
-			 alert("Gain Error: " + pos);
-	 } else if (sliderIndex == 1) {    //GAIN
-		 menuArray[1].changeValueText(""+pos+"%");
-		 if (pos >= 0 && pos <= 100) {
-			// jsonGAIN.signal.TVG=pos;
-			// sendToServer(JSON.stringify(jsonGAIN));//jsonGAIN.toJSONString());
-			 jsonDATA.signal.TVG=pos; // TODO: save or get from server?
-		 }
-			 
-		 else
-			 alert("TVG Error: " + pos);
-	 } */else if (sliderIndex == 100){ 
-		 changeTimeRange(pos); 
+
+	if (sliderIndex == 0) {
+		jsonDATA.alarm.L = pos;
+		updateAlarmIcons();
+		sendToServer(JSON.stringify(jsonDATA));
+	} else  if (sliderIndex == 1) {
+		jsonDATA.alarm.H = pos;
+		updateAlarmIcons();
+		sendToServer(JSON.stringify(jsonDATA));
+	} else  if (sliderIndex == 3) { // position
+		//jsonDATA.alarm.H = pos;
+		changeSignalBeamIconPos(4 - pos);
+		//sendToServer(JSON.stringify(jsonDATA));
+	}  else if (sliderIndex == 6){
+		jsonDATA.signal.GAIN=pos;
+		sendToServer(JSON.stringify(jsonDATA));
+	} else if (sliderIndex == 7){
+		jsonDATA.signal.TVG=pos;
+		sendToServer(JSON.stringify(jsonDATA));
+	} else if (sliderIndex == 8){
+		jsonDATA.signal.POW=pos;
+		sendToServer(JSON.stringify(jsonDATA));
+	} else if (sliderIndex == 100){ 
+		changeTimeRange(pos); 
 	} else if (sliderIndex == 101) {
 		changeRange(pos); 
+	} else if (sliderIndex == 51) { // BRIGHTNES
+		onBrightnes(pos);  // defined in Light.js
+	} else if (sliderIndex == 52) { // LIGHT PRESETS
+		onLightPresets(pos); 
+	} else if (sliderIndex == 53) { // DAY/NIGHT
+		onDayNight(pos); 
 	}
 
 }
+
+function showAlarm_L(){
+	$('#sliderChoice').empty();
+
+	var alarmText = [ "0m", "320m", "640m", "960m", "1280m", "1600m" ];
+	var mySlider = new SliderHorizontal(0, "Alarm Shallow",0, 1600, jsonDATA.alarm.L, document
+			.getElementById("sliderChoice"), alarmText, false);
+
+	$('#sliderChoice').show();
+}
+
+function showAlarm_H(){
+	$('#sliderChoice').empty();
+
+	var alarmText = [ "0m", "320m", "640m", "960m", "1280m", "1600m" ];
+	var mySlider = new SliderHorizontal(1, "Alarm Deep",0, 1600, jsonDATA.alarm.H, document
+			.getElementById("sliderChoice"), alarmText, false);
+
+	$('#sliderChoice').show();
+}
+
+function showPosition(){
+	$('#sliderChoice').empty();
+	var choiseTextArray = ["fwd", "port", "stb", "aft"];
+	var testChoice = new ChoiceBoxHoriz(3, "Position", 1, document.getElementById("sliderChoice"), 4, choiseTextArray);
+
+	$('#sliderChoice').show();
+}
+
 
 function showGain() {
 	$('#sliderChoice').empty();
 
 	var gainText = [ "0%", "20%", "40%", "60%", "80%", "100%" ];
-	var mySlider = new SliderHorizontal(0, "GAIN",0, 100, jsonDATA.signal.GAIN, document
+	var mySlider = new SliderHorizontal(6, "GAIN",0, 100, jsonDATA.signal.GAIN, document
 			.getElementById("sliderChoice"), gainText, false);
 
 	$('#sliderChoice').show();
@@ -123,59 +291,48 @@ function showTVG(){
 	$('#sliderChoice').empty();
 
 	var tvgText = [ "0%", "20%", "40%", "60%", "80%", "100%" ];
-	var mySlider = new SliderHorizontal(1, "TVG",0, 100, jsonDATA.signal.TVG, document
-			.getElementById("sliderChoice"), tvgText, true);
+	var mySlider = new SliderHorizontal(7, "TVG",0, 100, jsonDATA.signal.TVG, document
+			.getElementById("sliderChoice"), tvgText, false);
 
 	$('#sliderChoice').show();
 }
 
-function onSetupButtonClick() {
-	var myElement = document.getElementById('enbMenuBut');
+function showPOW(){
+	$('#sliderChoice').empty();
 
-	if (menuShown) {
-		$("#rangeSliderDiv").animate({
-			left : 570
-		}, 500);
-		setMenuShown(false);
-		myElement.src = "images/menu.png";
-	} else {
-		$("#rangeSliderDiv").animate({
-			left : 20
-		}, 500);
-		setMenuShown(true);
-		myElement.src = "images/go-back-icon_black.png";
-	}
+	var tvgText = [ "0%", "20%", "40%", "60%", "80%", "100%" ];
+	var mySlider = new SliderHorizontal(8, "POWER",0, 100, jsonDATA.signal.TVG, document
+			.getElementById("sliderChoice"), tvgText, false);
+
+	$('#sliderChoice').show();
 }
 
-function initMenu() {
+function showFREQ(){
+	$('#sliderChoice').empty();
 
-	initHorisontalSubMenu();
-	setMenuShown(false);
-}
+	var tvgText = [ "0%", "20%", "40%", "60%", "80%", "100%" ];
+	var mySlider = new SliderHorizontal(9, "FREQ",0, 100, jsonDATA.signal.TVG, document
+			.getElementById("sliderChoice"), tvgText, false);
 
-/** ******************************************** */
-/** ******* Button Setup/Exit Menu ****** */
-/** ******************************************** */
-function onSetupButtonOver() {
-	if (!menuShown) {
-		var myElement = document.getElementById('enbMenuBut');
-		myElement.src = "images/menu_foc.png";
-	}
+	$('#sliderChoice').show();
 }
-function onSetupButtonOut() {
-	if (!menuShown) {
-		var myElement = document.getElementById('enbMenuBut');
-		myElement.src = "images/menu.png";
-	}
+/*
+function showBaudRate(){
+	$('#sliderChoice').empty();
+	var choiseTextArray = [ "9600", "2400", "19200", "56000", "115200", "256000"];
+	var testChoice = new ChoiceBoxHoriz(13, "Baud rate", 2, document.getElementById("sliderChoice"), 6, choiseTextArray);
+
+	$('#sliderChoice').show();
 }
 
-function setMenuShown(show) {
-	if (show) {
-		showHorizontalMenu(0);
-		$(vertMenuSliding).show();
-	} else {
-		showHorizontalMenu(-1);
-		$(vertMenuSliding).hide();
-	}
-	menuShown = show;
-}
+function showParity(){
+	$('#sliderChoice').empty();
+	var choiseTextArray = [ "odd", "even"];
+	var testChoice = new ChoiceBoxHoriz(14, "Baud rate", 1, document.getElementById("sliderChoice"), 2, choiseTextArray);
+
+	$('#sliderChoice').show();
+}*/
+
+
+
+

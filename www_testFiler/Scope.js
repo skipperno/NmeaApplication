@@ -85,9 +85,9 @@ Scope.prototype.paint = function() {
 		
 		// Paint depth (bottom)
 		myCanvasContext.beginPath();
-		myCanvasContext.strokeStyle = '#fff';;
-		myCanvasContext.moveTo(this.dataArray[0], 0);
-		myCanvasContext.lineTo(this.dataArray[0], 255);
+		myCanvasContext.strokeStyle = '#fff';
+		myCanvasContext.moveTo(this.dataArray[0]*400/1600, 0);
+		myCanvasContext.lineTo(this.dataArray[0]*400/1600, 255);
 		
 		myCanvasContext.stroke();
 		//this.canvasDoubleBuffer2Dcontext.putImageData(

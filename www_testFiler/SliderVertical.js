@@ -31,15 +31,7 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 	this.verticalSliderConteiner = this.document.createElement("DIV");
 	this.verticalSliderConteiner.className = "verticalSliderConteiner";
 	this.verticalSliderConteiner.unselectable = "on";
-	/*
-	this.mySlidImg = this.document.createElement("img");
-	this.mySlidImg.setAttribute('src', imgUrl);
-	this.mySlidImg.setAttribute('alt', 'alternate text');
-	this.mySlidImg.setAttribute('width', '50px');
-	this.mySlidImg.setAttribute('height', '80px');
-	this.mySlidImg.setAttribute('margin-right', '20px');
-	//this.mySlidImg.setAttribute('width', '100px');
-*/
+
 	this.verticalSliderBody = this.document.createElement("DIV");
 	
 	this.verticalSliderBody.className = "verticalSliderBody";
@@ -48,14 +40,14 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 	this.verticalSliderBody.myObject = this;
 	//this.verticalSliderBody.style.background='#bbe';
 	
-	this.sliderTopButton = this.document.createElement("DIV");
+	/*this.sliderTopButton = this.document.createElement("DIV");
 	this.sliderTopButton.className = "sliderTopButton";
 	this.sliderTopButton.myObject = this;
 	
 		
 	this.sliderDownButton = this.document.createElement("DIV");
 	this.sliderDownButton.className = "sliderDownButton";
-	this.sliderDownButton.myObject = this;
+	this.sliderDownButton.myObject = this;*/
 	
 	this.verticalSliderCenter = this.document.createElement("DIV");
 	this.verticalSliderCenter.className = "verticalSliderCenter";
@@ -93,24 +85,17 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 		
 		this.verticalSliderCenter.appendChild(this.verticalSliderHandleButton);
 		
-		this.verticalSliderBody.appendChild(this.sliderTopButton);
+		//this.verticalSliderBody.appendChild(this.sliderTopButton);
 		this.verticalSliderBody.appendChild(this.verticalSliderCenter);
-		this.verticalSliderBody.appendChild(this.sliderDownButton);
-		
+		//this.verticalSliderBody.appendChild(this.sliderDownButton);
 
-		//this.verticalSliderConteiner.appendChild(this.verticalSliderBody);
-		
 		this.parentContainer.appendChild(this.verticalSliderBody);//this.verticalSliderConteiner);
 		
 		
 		
 		this.setNewPos(slStart);
 
-	//this.verticalSliderHandleButton.onmouseover	= MySliding.eventHandlers.onmouseover;
-	//this.verticalSliderHandleButton.onmouseout		= MySliding.eventHandlers.onmouseout;
-	//this.verticalSliderHandleButton.onmousedown		= MySliding.eventHandlers.onmousedown;
-
-	$(this.sliderTopButton).mousedown(function(e){
+	/*$(this.sliderTopButton).mousedown(function(e){
 		if(this.myObject.currentStep > 0)
 			this.myObject.setNewPos((this.myObject.currentStep - 1)*segmentHeight, true);
 	});
@@ -118,7 +103,7 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 	$(this.sliderDownButton).mousedown(function(e){
 		if(this.myObject.currentStep < 5)
 			this.myObject.setNewPos((this.myObject.currentStep + 1)*segmentHeight, true);
-	});
+	});*/
 
 	$(this.verticalSliderCenter).mousedown(function(e){
 		var offset = $(this).offset();

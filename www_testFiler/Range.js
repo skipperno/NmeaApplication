@@ -2,6 +2,8 @@
  * Class Range
  * 
  */
+var rangeShown = false;
+
 var arrColor_1 = "#fff";//"#FFE772";//"#FBFF38";
 var arrColor_2 = "#000";//#772";
 var arrowLength = 30;
@@ -10,8 +12,39 @@ var myFont = "normal 12px Verdana,\"BitStream vera Sans\",Tahoma,Helvetica,Sans-
 var rangeText = [  ["0", "320", "640", "960", "1280", "1600"], ["0", "200", "400", "600", "800", "1000"], ["0", "100", "200", "300", "400", "500"], 
 ["0", "20", "40", "60", "80", "100"], ["0", "10", "20", "30", "40", "50"], ["0", "2", "4", "6", "8", "10"]];
 
+// !!! Must be same as in file "DataProcessing.cpp"
+var rangeMaxValues=[1600,1000,500,100,50,10]; //the same values as max values in "rangeText"
+
 var rangePos_Y= [20, 80, 160, 240, 320, 400];
 
+function onRangeButtonOver(){
+	var myElement = document.getElementById('eastRangeButton');
+	myElement.style.backgroundImage='url(images/rangeIconOver2.png)';
+}
+
+function onRangeButtonOut(){
+	var myElement = document.getElementById('eastRangeButton');
+	myElement.style.backgroundImage='url(images/rangeIcon2.png)';
+}
+	
+
+
+function onRangeButtonClick(){
+if (rangeShown) {
+		
+		$("#rangeSliderDiv").animate({
+			left : 570
+		}, 500);
+		$("#rangeSliderDiv").hide();
+		rangeShown = false;
+	} else {
+		$("#rangeSliderDiv").show();
+		$("#rangeSliderDiv").animate({
+			left : 20
+		}, 500);
+		rangeShown = true;
+	}
+}
 
 function changeRange(range){
 	var myElement = document.getElementById('rangeScale');

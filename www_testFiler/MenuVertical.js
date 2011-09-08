@@ -39,17 +39,19 @@ function initVertMenu(parentConteiner){
 	
 	
 	
-	verMenuArray[0]=new VerMenuItem(0, "Signal", vertMenuSlidingBlock_1);
-	verMenuArray[1]=new VerMenuItem(1, "Alarm", vertMenuSlidingBlock_1);
-	verMenuArray[2]=new VerMenuItem(2, "Display", vertMenuSlidingBlock_1);
+	verMenuArray[0]=new VerMenuItem(0, "User setup", vertMenuSlidingBlock_1);
+	verMenuArray[1]=new VerMenuItem(1, "Signal", vertMenuSlidingBlock_1);
+	verMenuArray[2]=new VerMenuItem(2, "Setup", vertMenuSlidingBlock_1);
 	vertMenuSlidingBlock_1.appendChild(westMenuDownButt);
 	
 	vertMenuSlidingBlock_2.appendChild(westMenuTopButt);
-	verMenuArray[3]=new VerMenuItem(3, "Skjerm 4", vertMenuSlidingBlock_2);
-	verMenuArray[4]=new VerMenuItem(4, "Skjerm 5", vertMenuSlidingBlock_2);
-	verMenuArray[5]=new VerMenuItem(5, "Skjerm 6", vertMenuSlidingBlock_2);
-	verMenuArray[6]=new VerMenuItem(6, "Skjerm 7", vertMenuSlidingBlock_2);
-	verMenuArray[7]=new VerMenuItem(7, "Skjerm 8", vertMenuSlidingBlock_2);
+	verMenuArray[3]=new VerMenuItem(3, "Status", vertMenuSlidingBlock_2);
+	verMenuArray[4]=new VerMenuItem(4, "Com", vertMenuSlidingBlock_2);
+	verMenuArray[5]=new VerMenuItem(5, "Diagnostic", vertMenuSlidingBlock_2);
+	verMenuArray[6]=new VerMenuItem(6, "Screen", vertMenuSlidingBlock_2);
+	verMenuArray[7]=new VerMenuItem(7, "System", vertMenuSlidingBlock_2);
+	
+	
 	verMenuArray[8]=new VerMenuItem(8, "Skjerm 9", vertMenuSlidingBlock_2);
 	verMenuArray[9]=new VerMenuItem(9, "Skjerm 10", vertMenuSlidingBlock_2);
 	verMenuArray[10]=new VerMenuItem(10, "Skjerm 11", vertMenuSlidingBlock_3);
@@ -58,6 +60,8 @@ function initVertMenu(parentConteiner){
 	verMenuArray[13]=new VerMenuItem(13, "Skjerm 14", vertMenuSlidingBlock_3);
 	
 	parentConteiner.appendChild(vertMenuSliding);
+	
+	verMenuArray[0].select(true);
 }
 
 
@@ -65,7 +69,8 @@ function selectVerticalMenu(submenuIndex){
 	for(i=0;i<14;i++){
 		if(i != submenuIndex)
 			verMenuArray[i].select(false);
-		else
+		else {
 			verMenuArray[i].select(true);
+		}
 	}
 }

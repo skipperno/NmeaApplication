@@ -1,5 +1,58 @@
 @CHARSET "UTF-8";
 
+#boatDiv{
+	width:62px;
+	height:40px;
+	background: url(images/boat_40.png);
+	position:absolute;
+	right:45px; /*7+18 or 27+18 or 35+18 or 55+18*/
+	top:40px;
+}
+
+#boatSensDiv{
+	width:3px;
+	height:6px;
+	background-color: #f00;
+	position:absolute;
+	right:80px; /*7+18 or 27+18 or 35+18 or 55+18*/
+	top:74px;
+}
+
+
+#sigDiv{ /*TODO: not used */
+	 margin: 0px; 
+	 width: 2px;
+	 float:left;
+	 height:100%;
+}
+
+#eastRange_Light{
+	margin-left:18px;
+	width: 48px;
+	float:left;
+	height:120px;
+	position:absolute;
+	bottom: 0px;
+	display: block;
+}
+#eastRangeButton {
+	float: left;
+	background: url(images/rangeIcon2.png);
+	width: 48px;
+	height: 48px;
+	text-align: center;
+	margin-bottom:20px;
+}
+
+#eastLightButton {
+	float: left;
+	background: url(images/contrast_48.png);
+	width: 48px;
+	height: 48px;
+	text-align: center;
+	margin-bottom:10px;
+}
+
 #timeScale
 {
 	height: 15px;
@@ -16,16 +69,16 @@
 	width:40px;
 	height: 400px;
 	display:block;
+	color:#fff;
+	font-size:16px;
 	position:absolute;
 	top:0px;
 	right:0px;
-	color:#fff;
-	font-size:16px;
 }
 
 #rangeSliderDiv{
 	position:absolute;
-	top:20px;
+	top:120px;
 	left:570px;
 }
 
@@ -39,7 +92,7 @@
 	
 #sliderChoice{
 	position:absolute;
-	top:300px;
+	top:280px;
 	left:90px;
 	color:#fff;
 	font-size:16px;
@@ -48,3 +101,156 @@
 	background: url(images/backHSlid.png);
 	background-repeat:repeat-x;
 	}
+	
+#alarmMsgDiv{
+	position:absolute;
+	top:200px;
+	left:90px;
+	color:#f00;
+	font-size:26px;
+	width:400px;
+	height:70px;
+	line-height:70px;
+	background: url(images/AlarmBcg.png);
+	background-repeat:repeat-x;
+	text-align:center;
+}
+	
+	#alarmLowDiv{
+		position:absolute;
+		left:520px;
+		width:38px;
+		height:12px;
+		background: url(images/AlarmLow2.png);
+	}
+	
+	#alarmHighDiv{
+		position:absolute;
+		left:520px;
+		width:40px;
+		height:12px;
+		background: url(images/AlarmHigh2.png);
+	}
+	
+	
+	/* DAY/NIGHT - BRITHNES */
+	#day_night{
+	position:absolute;
+	top:50px;
+	left:90px;
+
+	font-size:16px;
+	width:400px;
+	height:260px;
+	background: url(images/backHSlid.png);
+	background-repeat:repeat-x;
+	display:block;
+	}
+	
+	#lightSliderDiv{
+	position:relative;
+	/*position:absolute;
+	top:280px;
+	left:90px;
+	color:#fff;*/
+	font-size:16px;
+	width:400px;
+	height:70px;
+	background: url(images/backHSlid.png);
+	background-repeat:repeat-x;
+	float:left;
+	
+	}
+	
+	#lightPresetDiv{
+	position:relative;
+	font-size:16px;
+	/*width:400px; 
+	height:80px;*/
+	background: url(images/backHSlid.png);
+	background-repeat:repeat-x;
+	float:left;
+	color:#bbbbbb;
+	}
+	
+	#lightDay_NightDiv{
+	position:relative;
+	width:400px;
+	height:80px;
+	background: url(images/backHSlid.png);
+	background-repeat:repeat-x;
+	float:left;
+	color:#bbbbbb;
+	}
+	
+	#nmeaPanel{
+	position:absolute;
+	left:0px;
+	top:0px;
+	background:#deecf2;
+	height:90%;
+	width:100%;
+	}
+	.nmeaHeaderText{
+	background:#cdd6da;
+	text-align:center;
+	width:100%;
+	font-size:12;
+	}
+	
+	#nmeaListDiv{
+	position:absolute;
+	right:0px;
+	top:49px;
+	height:300px;
+	width:200px;
+	overflow-x:scroll;
+	overflow-y:hidden;
+	border:2px ridge #C90;
+	}
+	#outputInput{
+	position:absolute;
+	right:0px;
+	top:5px;
+	background:#fff;
+	border:2px ridge #C90;
+	width:200px;
+	/*border:1px solid #646464;*/
+	}
+	
+	
+	#nmeaList{
+	overflow-y:hidden;
+	}
+	
+	#nmeaOutputs{
+	position:absolute;
+	left:5px;
+	top:5px;
+	background:#fff;
+	border:2px ridge #C90;
+	/*border:1px solid #646464;*/
+	}
+	
+	#nmeaOutputsSetup{
+	position:absolute;
+	left:5px;
+	top:55px;
+	background:#fff;
+	border:2px ridge #C90;
+	/*border:1px solid #646464;*/
+	}
+	
+	#comBaud{
+	position:absolute;
+	left:5px;
+	top:140px;
+	background:#fff;
+	border:2px ridge #C90;
+	/*border:1px solid #646464;*/
+	}
+	
+	
+	
+	
+	

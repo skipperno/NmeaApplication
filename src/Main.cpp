@@ -9,9 +9,10 @@
 #include <stdio.h>
 
 #include "comm/TcpServer.h"
-#include "NmeaHandler.h"
+#include "MsgInHandler.h"
 
 #include "data/Data.h"
+#include "data/DataProvider.h"
 
 #include "json/reader.h"
 #include "json/writer.h"
@@ -25,9 +26,10 @@
 int nEchoSounderPort = 2004;
 int nDataPort = 2005;
 Data jsonData;
+DataProvider dataProvider;
 
 int main(int argc, char **argv) {
-	char testCh[1000];
+	//char testCh[1000];
 	//jsonData.setGain(99);
 	/*jsonData.getJsonData(testCh);
 
@@ -69,6 +71,8 @@ int main(int argc, char **argv) {
 	TcpServer tcpServerData;
 	tcpServerData.serverSocket_start(nDataPort);
 
-	NmeaHandler nmeaHandler;
-	nmeaHandler.runHandler(); // !!! Blocking function
+	dataProvider.startDataProvider();
+
+	MsgInHandler msgInHandler;
+	msgInHandler.runHandler(); // !!! Blocking function
 }

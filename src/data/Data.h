@@ -18,14 +18,25 @@ public:
 	virtual ~Data();
 
 	void setGain(int newGain);
+	void setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon);
+	void setNmeaMsg(char* nmeaMsg);
+
 	void getJsonData(char* msg);
+	void getJsonTop(char* msg);
 	void parseJsonMsg(char* msg);
 	int getGain();
 	int getTvg();
+	int getRange();
+	void getNmeaData(char* msg);
+
 	static Data* getInstance();
 private:
 	Object jsonDATA;
-	void initData();
+	Object jsonTop;
+	Object jsonNmea;
+	void initSignalData();
+	void initTopInfoData();
+	void initNmeaScreenData();
 
 
 /*

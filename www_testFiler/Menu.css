@@ -9,18 +9,23 @@
 	OVERFLOW: hidden;
 	margin: 0px;
 	display: inline;
+	position:absolute;
+	top:360px;
+	left:0px;
+	
 }
 
 #subMenu {
-	height: 60px;
-	width: 500px;
+	height: 40px;
+	width: 450px;
 	float: left;
 	OVERFLOW: hidden;
 	position:relative;
+	
 }
 
 #fastSubMenu {
-	height: 60px;
+	height: 40px;
 	width: 430px;
 	position: relative;
 	overflow: hidden;
@@ -30,11 +35,13 @@
 }
 
 .subMenuDiv{
-	height: 60px;
+	height: 40px;
 	width: 430px;
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	background: url(images/MenuBcg.png);
+	background-repeat:repeat-x;
 }
 
 #mainChoiceText {
@@ -45,12 +52,12 @@
 
 #menuOnOffBut {
 	float: left;
-}
-
-#menuOnOffBut IMG {
-	float: left;
 	margin-right: 5px;
-	padding: 0px;
+	background: url(images/MenuShow.png);
+	width: 60px;
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
 }
 
 #slidingMenu {
@@ -107,12 +114,12 @@
 }*/
 
 #vertMenuSliding {
-	width: 100%;
+	width: 70px;
 	height: 1200px;
 	position: absolute;
 	overflow: hidden;
 	top: 0px;
-	left: 0px;
+	right: 4px;
 	display: block;
 }
 .vertMenuSlidingBlock{
@@ -124,19 +131,19 @@
 
 #westMenuTopButt {
 	height: 40px;
-	width: 80px;
+	width: 70px;
 	background: url(images/up.png);
 }
 
 #westMenuDownButt {
 	height: 40px;
-	width: 80px;
+	width: 70px;
 	background: url(images/down.png);
 }
 
 .verMenuItem {
 	height: 40px;
-	width: 80px;
+	width: 70px;
 	background: url(images/VerMenuItemBackround.png);
 	margin-top: 5px;
 	color: #fff;

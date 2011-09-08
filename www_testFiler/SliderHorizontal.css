@@ -54,5 +54,12 @@
 	width:50px;
 	text-align:center;
 }
-
+.horisSlidName{
+	position:absolute;
+	left:0px;
+	top:0px;
+	color:#fff;
+	width:150px;
+	text-align:center;
+}
 

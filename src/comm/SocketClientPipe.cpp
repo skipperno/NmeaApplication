@@ -21,7 +21,7 @@
 
 #include <signal.h>
 
-#include "../NmeaHandler.h"
+#include "../MsgInHandler.h"
 #include "Dispatcher.h"
 #include "../data/Data.h"
 
@@ -78,8 +78,8 @@ void * runClientSocket(void *ptr) {
 
 	char dataMsg[1000];
 	if(socketClientPipe->nSocketType == SOCK_CONFIG) {
-
-		Data::getInstance()->getJsonData(dataMsg);
+		Data::getInstance()->getJsonTop(dataMsg);
+		//Data::getInstance()->getJsonData(dataMsg);
 		socketClientPipe->socketClientPipe_send(dataMsg, strlen(dataMsg));
 		printf("SENT: %s\n", dataMsg);
 		printf("SENT: %d\n", (strlen(dataMsg)));
@@ -93,10 +93,10 @@ void * runClientSocket(void *ptr) {
 			//socketClientPipe->socketClientPipe_send(dataMsg, strlen(dataMsg));
 
 			/*if(recCommand[0] == 'R') {
-				NmeaHandler::setRange(recCommand[1] - 0x30);
+				MsgInHandler::setRange(recCommand[1] - 0x30);
 			} else if(recCommand[0] == 'G') {
 				int nGain = atoi(&recCommand[1]);
-				NmeaHandler::setGain(nGain);
+				MsgInHandler::setGain(nGain);
 			} else {
 				printf("Received unknown command: %s\n", recCommand);
 			}*/
@@ -191,8 +191,7 @@ ssize_t SocketClientPipe::socketClientPipe_write(int sockd, const void *vptr,
 /*  Read a line from a socket  */
 
 ssize_t SocketClientPipe::readAvailable(int sockd, char *buffer, size_t maxlen) {
-	size_t n, rc;
-	char c;
+	size_t rc;
 
 	if (sockd < 0)
 		return 0;

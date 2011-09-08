@@ -32,6 +32,9 @@ BODY
 .northsidebar {
 	width:100%;
 	float: left;
+	height:80px;
+	position:realtive;
+	background:#eee;
 }
 
 
@@ -44,21 +47,22 @@ BODY
     OVERFLOW: hidden;
     position:relative;
 	margin:0px;
+	display:inline;
 }
 
-/*
-.eastsidebar
-{
-	width:2px;
-    FLOAT: left;
-    OVERFLOW: hidden;
-	margin:0px;
+#eastContainer{
+	margin: 0px;
+	width: 78px;
+	float:left;
+	height:100%;
+	position: relative;
 }
-*/
+
+
 #maincenter
 {
 	width:556px;
-	height: 420px;
+	height: 400px;
     /*BACKGROUND: url(img/main_shadow.gif) #fff repeat-x 50% top;*/
     FLOAT: left;
     OVERFLOW: hidden;
@@ -67,6 +71,7 @@ BODY
 	BACKGROUND: #fff;
 	position:relative;
 }
+
 
 
 h1 {

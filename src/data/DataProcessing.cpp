@@ -6,10 +6,13 @@
  */
 
 #include "DataProcessing.h"
+#include "Data.h"
 
 #include <stdio.h>
 
 #define SAMPLE_FILTER_COUNT 20
+// !!! Must be same as in file "DataProcessing.cpp"
+int rangeMaxValues[]={1600,1000,500,100,50,10}; //the same values as max values in "Range.js"
 
 DataProcessing::DataProcessing() {
 	// TODO Auto-generated constructor stub
@@ -51,11 +54,15 @@ int DataProcessing::bottomDetection(char* inArray, int dataLength) {
 			nSegmArray); // 16* 25 = 400
 
 	int nMaxSegInd = getTopSegment(nSegmArray, nSegmsCount);
-	printf("MAX %d, depth: %d\n", nMaxSegInd, nMaxSegInd * nSegmentLength);
+
 
 	int bottom = getBottomStartIndex((unsigned char*) inArray, dataLength,
 			nMaxSegInd, nSegmentLength);
-	printf("BOTTOM: %d\n", bottom);
+	//printf("MAX %d, depth: %d\n", nMaxSegInd, bottom);
+
+	bottom = rangeMaxValues[Data::getInstance()->getRange()] * bottom / 400;
+
+	//printf("BOTTOM: %d\n", bottom);
 	return bottom; // nMaxSegInd*nSegmentLength;
 }
 
@@ -138,9 +145,9 @@ int DataProcessing::getSum(unsigned char* inArray, int arrayLenght) {
 }*/
 
 int DataProcessing::getIncreasingStart(unsigned char* inArray, int arrayLenght, int topIndex, int maxSearchLength) {
-	int nTempSum = 0;
-	int sumMax = 1000000;
-	int nStep = 8;
+	//int nTempSum = 0;
+	//int sumMax = 1000000;
+	//int nStep = 8;
 	int nMinInd, nMaxInd;
 	int nMin, nMax;
 

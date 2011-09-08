@@ -116,7 +116,19 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
 
 			this.canvasDoubleBuff_1pixData.data[i * 4 + 3] = 0xff; // opaque
 		}
-
+		var alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.L / rangeMaxValues[jsonDATA.range]) ;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint* 4] = 0xff;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 1] = 0x65;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 2] = 0x1E;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0x50; // opaque
+		
+		alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.H / rangeMaxValues[jsonDATA.range]) ;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint* 4] = 0xff;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 1] = 0x65;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 2] = 0x1E;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0x50; // opaque
+		
+		
 		this.canvasDoubleBuffer2Dcontext.putImageData(
 				this.canvasDoubleBuff_1pixData, this.canWidth - 1, this.y);
 
