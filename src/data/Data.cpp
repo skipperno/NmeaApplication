@@ -47,6 +47,8 @@ Data::Data() {
 	initSignalData();
 	initTopInfoData();
 	initNmeaScreenData();
+	initJsonDisplayData();
+	initJsonBaudData();
 }
 
 Data::~Data() {
@@ -86,7 +88,15 @@ void Data::initNmeaScreenData(){ // TODO read data from config fil
 	jsonNmea["nmea"]	= String("");
 }
 
+void Data::initJsonDisplayData(){ // TODO read data from config fil
+	jsonDisplay["type"]			= String("disp");
+	jsonDisplay["disRadio"]["dis"]	= Number(2); //TODO: get from config
+}
 
+void Data::initJsonBaudData(){ // TODO read data from config fil
+	jsonBaud["type"]			= String("nmea");
+	jsonBaud["baudR"]["ba"]	= Number(0);
+}
 
 /*
 var jsonLIGHT =
@@ -142,14 +152,9 @@ void Data::parseJsonMsg(char* msg){
 	 	 char msgToSend[1000];
 	 	 getJsonData(msgToSend);
 	 	 Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+	 } else if(strcmp(ddd.Value().c_str(), "baud") == 0){
+		 jsonBaud = newJson;
 	 }
-	 /*
-	 if(strcmp(ddd.Value().c_str(), "G") == 0){
-		 const Number gain = newJson["signal"]["GAIN"];
-		 setGain((int)gain.Value());
-		 printf ("New GAIN = %d\n", (int)gain.Value());
-		 MsgInHandler::setGain((int)gain.Value());
-	 }*/
 }
 
 void Data::setNmeaMsg(char* nmeaMsg){
