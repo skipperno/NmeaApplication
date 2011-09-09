@@ -7,7 +7,7 @@ var jsonDATA =
           "POW" : "50"},
       "alarm" : 
   		{ "L" : 44,
-          "H" : 400},
+          "H" : 1200},
        "range" : 0
     };
 
@@ -41,13 +41,13 @@ var jsonOutputs =
 };
 
 var jsonDisplay = 
-{ 'type': 'dis',
-  'disp':{"disRadio":1}
+{ 'type': 'disp',
+  'disRadio':{'dis':2}
 };
 
 var jsonBaud = 
 { 'type': 'baud',
-  'br':{"brRadio":0},
+  'baudR':{'ba':1}
 };
 
 function setSignalData(){

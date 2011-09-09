@@ -34,6 +34,8 @@ int SerialCom::openSerial(const char* portName, int baudRate)
 
         if (baudRate == 4800)
         	bRate = B4800;
+        else if (baudRate == 9600)
+        	bRate = B9600;
         else if (baudRate == 115200)
         	bRate = B115200;
 

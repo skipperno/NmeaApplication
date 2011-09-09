@@ -34,11 +34,14 @@ private:
 	Object jsonDATA;
 	Object jsonTop;
 	Object jsonNmea;
+	Object jsonDisplay;
+	Object jsonBaud;
+
 	void initSignalData();
 	void initTopInfoData();
 	void initNmeaScreenData();
-
-
+	void initJsonDisplayData();
+	void initJsonBaudData();
 /*
 	int nGain;
 	int nTvg;

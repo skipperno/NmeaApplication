@@ -24,11 +24,15 @@ public:
 	void getLastXXMessage(char* pStream);
 	void getLastWeatherMessage(char* pStream);
 	bool getLastEchoMessage(char* pStream);
-	static void setRange(int nRange);
-	static void setGain(int newGain);
+	bool changeBaudRate_serial3(int newBaud);
+
+	//static void setRange(int nRange);
+	//static void setGain(int newGain);
 
 	static MsgInHandler* getInstance();
 
+	//SerialCom serialPortEcholodd;
+	SerialCom serialPort3;
 private:
 	/*void parseRecBuffer();
 	void removeFromBuffer(int nRemoveLength);
@@ -46,6 +50,7 @@ private:
 	int nStram_1_length;
 	char lastMsgStream_2[MAX_NMEA_BUFF];
 	int nStram_2_length;
+
 
 
 	pthread_t threadCurtis;

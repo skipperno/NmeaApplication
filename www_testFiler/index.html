@@ -298,23 +298,23 @@
 				<form id="comBaud">
 				<div class="nmeaHeaderText">BAUD RATE:</div>
 					<table>
-					<tr><td width="30px">4800</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(0)"></input></td>
-					<td width="30px">9600</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td></tr> 
+					<tr><td width="30px">4800</td><td width="45px"><input type="radio" name="ba" onclick="onBaudChanged(0)" value=0></input></td>
+					<td width="30px">9600</td><td width="45px"><input type="radio" name="ba" onclick="onBaudChanged(1)" value=1></input></td></tr> 
 					</table>
 				</form>
 				
-				<form id="outputInput">
+				<form id="diplayForm">
 				<div class="nmeaHeaderText">DISPLAY</div>
 					<table>
-					<tr><td width="20px">OUT</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(0)"></input></td>
-					<td width="20px">IN</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td>
-					<td width="20px">ON</td><td width="45px"><input type="radio" name="baud" onclick="selectJsonRadioValue(1)"></input></td></tr> 
+					<tr><td width="20px">OUT</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(0)" value=0></input></td>
+					<td width="20px">IN</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(1)" value=1></input></td>
+					<td width="20px">OFF</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(2)" value=2></input></td></tr> 
 					</table>
 				</form>
 				
 				<div id="nmeaListDiv" border="1">
 					
-				<select id="nmeaList" size="15" multiple="multiple">
+				<select id="nmeaList" size="17" multiple="multiple">
 					<!--  	<option value="a" selected="selected">PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option>
 							<option value="b">$PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option> -->
 				</select>
@@ -358,9 +358,25 @@
 	<!-- wrap end -->
 
 	<script>
+	
+	// TODO
 	function selectJsonRadioValue(selIndex){
-		jsonOutput.ins.bb = selIndex;
+		
 	}
+	
+	// baud rate pushed
+	function onBaudChanged(selIndex){
+		jsonBaud.baudR.ba = selIndex;
+		sendToServer(JSON.stringify(jsonBaud));
+	}
+	
+	// radio button pushed
+	function onDisplayChanged(selIndex){
+		jsonDisplay.disRadio.dis = selIndex;
+		sendToServer(JSON.stringify(jsonDisplay));
+	}
+	
+	
 
 
 	
@@ -384,6 +400,8 @@
 		showAlarmMsg(false);
 		$('#tableTest').populate(jsonTOP.myObject); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
 		$('#nmeaOutputs').populate(jsonOutputs.oms);
+		$('#diplayForm').populate(jsonDisplay.disRadio);
+		$('#comBaud').populate(jsonBaud.baudR);
 		
 		reconnectSocket();
 

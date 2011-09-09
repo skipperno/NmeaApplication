@@ -208,7 +208,7 @@
 	overflow-y:hidden;
 	border:2px ridge #C90;
 	}
-	#outputInput{
+	#diplayForm{
 	position:absolute;
 	right:0px;
 	top:5px;
@@ -221,6 +221,7 @@
 	
 	#nmeaList{
 	overflow-y:hidden;
+	width:300px;
 	}
 	
 	#nmeaOutputs{
