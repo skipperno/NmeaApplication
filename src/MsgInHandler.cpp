@@ -28,6 +28,7 @@
 #include "utility/EByteArray.h"
 #include "data/Data.h"
 
+////////////////////////////////////////
 MsgInHandler* thisInstance;
 pthread_mutex_t lastMsgMutex;
 
