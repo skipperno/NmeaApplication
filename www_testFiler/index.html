@@ -244,6 +244,8 @@
 			
 			appendOptionLast(jsonNmea.nmea);
 			//document.getElementById("gps").innerHTML = jsonNmea.nmea;
+		} else if (recJson.type == "ioAll") {
+			jsonIO  = recJson;	
 		}
 	}
 	
@@ -279,13 +281,14 @@
 				<form id="nmeaOutputs">
 				<div class="nmeaHeaderText">NMEA OUTPUTS:</div>
 					<table>
-					<tr><td width="30px">DPT:</td><td width="45px"><input type="checkbox" name="bb[]" value="a" onclick="selectJsonRadioValue(0)"></input></td>
-					<td width="30px">DBS:</td><td width="45px"><input type="checkbox" name="bb[]" value="b" onclick="selectJsonRadioValue(1)"></input></td>
-					<td width="30px">DBA:</td><td width="45px"><input type="checkbox" name="bb[]" value="c" onclick="selectJsonRadioValue(2)"></input></td>
-					<td width="30px">PSWP:</td><td width="45px"><input type="checkbox" name="bb[]" value="d" onclick="selectJsonRadioValue(3)"></input></td></tr> 
+					<tr><td width="30px">DPT:</td><td width="45px"><input type="checkbox" id="ch1" name="oms[]" value="a" onclick="onOutputsCheckboxEvent()"></input></td>
+					<td width="30px">DBS:</td><td width="45px"><input type="checkbox" id="ch2" name="oms[]" value="b" onclick="onOutputsCheckboxEvent()"></input></td>
+					<td width="30px">DBA:</td><td width="45px"><input type="checkbox" id="ch3" name="oms[]" value="c" onclick="onOutputsCheckboxEvent()"></input></td></tr>
+					<tr><td width="30px">PSWP:</td><td width="45px"><input type="checkbox" id="ch4" name="oms[]" value="d" onclick="onOutputsCheckboxEvent()"></input></td>
+					<td width="30px">XDR</td><td width="45px"><input type="checkbox" id="ch5" name="oms[]" value="e" onclick="onOutputsCheckboxEvent()"></input></td></tr> 
 					</table>
 				</form>
-				<form id="nmeaOutputsSetup">
+				<!--  <form id="nmeaOutputsSetup">
 				<div class="nmeaHeaderText">NMEA OUTPUTS SETUP:</div>
 					<table>
 					<tr><td width="60px">CHECK SUM:</td><td width="45px"><input type="checkbox" name="bb[]" value="a" onclick="selectJsonRadioValue(0)"></input></td>
@@ -293,13 +296,15 @@
 					<tr><td width="60px">EN250 D#</td><td width="45px"><input type="checkbox" name="bb[]" value="c" onclick="selectJsonRadioValue(2)"></input></td>
 					<td width="60px">XDR</td><td width="45px"><input type="checkbox" name="bb[]" value="d" onclick="selectJsonRadioValue(3)"></input></td></tr> 
 					</table>
-				</form>
+				</form>-->
 				
 				<form id="comBaud">
 				<div class="nmeaHeaderText">BAUD RATE:</div>
 					<table>
-					<tr><td width="30px">4800</td><td width="45px"><input type="radio" name="ba" onclick="onBaudChanged(0)" value=0></input></td>
-					<td width="30px">9600</td><td width="45px"><input type="radio" name="ba" onclick="onBaudChanged(1)" value=1></input></td></tr> 
+					<tr><td width="30px">4800</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(0)" value=0></input></td>
+					<td width="30px">9600</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(1)" value=1></input></td>
+					<td width="30px">38400</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(2)" value=2></input></td>
+					<td width="30px">115200</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(3)" value=3></input></td></tr> 
 					</table>
 				</form>
 				
@@ -360,20 +365,48 @@
 	<script>
 	
 	// TODO
+	function onOutputsCheckboxEvent(){
+		var tempArray = new Array();
+		if($('#ch1').attr('checked'))
+			tempArray.push($('#ch1').attr('value'));
+		if($('#ch2').attr('checked'))
+			tempArray.push($('#ch2').attr('value'));
+		if($('#ch3').attr('checked'))
+			tempArray.push($('#ch3').attr('value'));
+		if($('#ch4').attr('checked'))
+			tempArray.push($('#ch4').attr('value'));
+		if($('#ch5').attr('checked'))
+			tempArray.push($('#ch5').attr('value'));
+	
+		jsonIO.set[selectedIO_source-1].oms = tempArray;
+		//alert("source: " + (selectedIO_source-1) + ". " + JSON.stringify(jsonIO.set[selectedIO_source-1]));
+		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
+}
+
 	function selectJsonRadioValue(selIndex){
-		
+		jsonIO.set[selectedIO_source-1].baudR.ba = selIndex;
+		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
 	}
 	
 	// baud rate pushed
 	function onBaudChanged(selIndex){
-		jsonBaud.baudR.ba = selIndex;
+		/*jsonBaud.baudR.ba = selIndex;
 		sendToServer(JSON.stringify(jsonBaud));
+		*/
+		jsonIO.set[selectedIO_source-1].baudR.ba = selIndex;
+		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
 	}
 	
-	// radio button pushed
+	// Changed Displays "Input", "Output" or "Off" 
 	function onDisplayChanged(selIndex){
-		jsonDisplay.disRadio.dis = selIndex;
-		sendToServer(JSON.stringify(jsonDisplay));
+		jsonIO.set[selectedIO_source-1].disRadio.dis = selIndex;
+		if(selIndex == 0 || selIndex == 1){
+			while(getListCount() > 0) { // TODO: remove all
+				removeOptionLast();
+			}
+		}
+			
+		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
 	}
 	
 	
@@ -399,7 +432,7 @@
 				
 		showAlarmMsg(false);
 		$('#tableTest').populate(jsonTOP.myObject); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
-		$('#nmeaOutputs').populate(jsonOutputs.oms);
+		//$('#nmeaOutputs').populate(jsonOutputs.oms);
 		$('#diplayForm').populate(jsonDisplay.disRadio);
 		$('#comBaud').populate(jsonBaud.baudR);
 		

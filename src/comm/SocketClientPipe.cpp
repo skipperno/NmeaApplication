@@ -134,7 +134,7 @@ int SocketClientPipe::socketClientPipe_send(const void *vptr, size_t nSize) {
 	//char bb []= {22,33,44,33,44,44,44};
 
 	if (m_sockd <= 0 || soketOk == 0) {
-		printf("!!! Cannot write to socket. Closed\n");
+		printf("!!! Cannot write to socket. Closed. (socketClientPipe_send)\n");
 		return 0;
 	}
 
@@ -143,7 +143,7 @@ int SocketClientPipe::socketClientPipe_send(const void *vptr, size_t nSize) {
 			nwritten = 0;
 			printf("nwritten = 0 !!!!\n");
 		} else {
-			printf("Else !!!!\n");
+			printf("Else !!!! socketClientPipe_send\n");
 			soketOk = 0;
 			close(m_sockd);
 			m_sockd = 0;
@@ -164,7 +164,7 @@ ssize_t SocketClientPipe::socketClientPipe_write(int sockd, const void *vptr,
 	const void * buffer = vptr;
 
 	if (sockd < 0 || soketOk == 0) {
-		printf("!!! Cannot write to socket. Closed\n");
+		printf("!!! Cannot write to socket. Closed. (socketClientPipe_write)\n");
 		return 0;
 	}
 
@@ -174,7 +174,7 @@ ssize_t SocketClientPipe::socketClientPipe_write(int sockd, const void *vptr,
 			nwritten = 0;
 			printf("nwritten = 0 !!!!\n");
 		} else {
-			printf("Else !!!!\n");
+			printf("Else !!!! socketClientPipe_write\n");
 			return -1;
 		}
 	}

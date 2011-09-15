@@ -200,7 +200,7 @@
 	
 	#nmeaListDiv{
 	position:absolute;
-	right:0px;
+	right:5px;
 	top:49px;
 	height:300px;
 	width:200px;
@@ -210,7 +210,7 @@
 	}
 	#diplayForm{
 	position:absolute;
-	right:0px;
+	right:5px;
 	top:5px;
 	background:#fff;
 	border:2px ridge #C90;
@@ -232,20 +232,19 @@
 	border:2px ridge #C90;
 	/*border:1px solid #646464;*/
 	}
-	
+	/*
 	#nmeaOutputsSetup{
 	position:absolute;
 	left:5px;
 	top:55px;
 	background:#fff;
 	border:2px ridge #C90;
-	/*border:1px solid #646464;*/
 	}
-	
+	*/
 	#comBaud{
 	position:absolute;
 	left:5px;
-	top:140px;
+	top:100px;
 	background:#fff;
 	border:2px ridge #C90;
 	/*border:1px solid #646464;*/

@@ -22,11 +22,14 @@
 
 #include "utility/NmeaParser.h"
 #include "utility/CurtisFormatParser.h"
+#include "utility/NmeaMsgCreator.h"
 
 #include "utility/SignalGenerator.h"
 #include "utility/ESignal.h"
 #include "utility/EByteArray.h"
 #include "data/Data.h"
+
+
 
 ///////////hei Ernad /////////
 MsgInHandler* thisInstance;
@@ -36,6 +39,9 @@ int nRange;
 int nGain = 1;
 
 bool serialPort3Running = false;
+int com3baudRate = 4800; //TODO: get from config
+
+void * runCom3listener(void *ptr);
 
 MsgInHandler::MsgInHandler() {
 	memset(lastMsgStream_1, 0, 17000);
@@ -48,6 +54,8 @@ MsgInHandler::MsgInHandler() {
 	nStram_2_length = 0;
 
 	totalReceived = 0;
+
+	//nForwardNmeaMsgsSource = -1;
 }
 
 MsgInHandler::~MsgInHandler() {
@@ -90,25 +98,40 @@ bool MsgInHandler::getLastEchoMessage(char* pStream) {
 }
 
 bool MsgInHandler::changeBaudRate_serial3(int newBaud) {
-	printf("************************************************\n");
+	/*printf("************************************************\n");
 	printf("***       RESTART SERIAL PORT 3 (ttyS2)?    ****\n");
 	printf("************************************************\n");
 	serialPort3.closeSerial();
+	com3baudRate = newBaud;
+
 	while(serialPort3Running){ //TODO: if never false?
 		usleep(10000); // sleep 10 ms
 	}
-	serialPort3.openSerial("/dev/ttyS2", newBaud);
+	pthread_create(&threadCom3,   NULL, runCom3listener, (void*) this);*/
 	return true;
 }
+/*
+void MsgInHandler::onReceivedNewDisplayChoice(int nSource, int selectedChoice) {
+	printf("************************************************\n");
+	printf("***       SOURCE: %d, choice: %d     ****\n", nSource, selectedChoice);
+	printf("************************************************\n");
 
-void * runCom3listener(void *ptr);
+	if (selectedChoice == 1) { // Selected "IN"
+		Data::setForwardSourceIndex(nSource);
+		//nForwardNmeaMsgsSource = nSource;
+	} else {					 // Selected "OUT" (0) or "OFF" (2)
+		Data::setForwardSourceIndex(-1);
+		//nForwardNmeaMsgsSource = -1;
+	}
+}*/
+
 
 void * runCom3listener(void *ptr) {
 	char buffer[10024]; // Storage of NMEA data stream
 	SerialCom* pserialPort3 = &((MsgInHandler*)ptr)->serialPort3;
 	int nRec;
 
-	pserialPort3->openSerial("/dev/ttyS2", 4800);
+	pserialPort3->openSerial("/dev/ttyS2", com3baudRate);
 
 	NmeaParser nmeaParser;
 	nmeaParser.init(3); // COM 3
@@ -163,6 +186,8 @@ void MsgInHandler::runHandler() {
 	NmeaComm stream1;
 	NmeaComm stream2;
 	char nmeaAsciBuffer[17000];
+	char nmeaOutBuffer[1000];
+
 	int nmeaAsciBufferLength;
 
 
@@ -187,16 +212,27 @@ void MsgInHandler::runHandler() {
 						&eByteArray->data()[1], 400, nmeaAsciBuffer,
 						&nmeaAsciBufferLength);
 
+				//NmeaMsgCreator::getDptMsgBuffer(nmeaOutBuffer, (float)nButtom, true, 0.f, false, 0.f, false);
+				//Data::getInstance()->setNmeaMsg(nmeaOutBuffer);
+
 				//BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 
 				Dispatcher::sendEchoMsg(nmeaAsciBuffer, nmeaAsciBufferLength);
 
+			} else if (eSignal->signalType == 2) {
+				eByteArray = (EByteArray*) eSignal->msg;
+				eByteArray->data()[eByteArray->length() - 1] = 0;
+				printf("COM 3, NMEA: %s\n", eByteArray->data());
+
+				if(Data::getActiveDisplayIndex() == 2 && Data::getDisplayIoChoice() == 1)
+					Data::getInstance()->setNmeaMsg(eByteArray->data());
 			} else if (eSignal->signalType == 3) {
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
 				printf("COM 3, NMEA: %s\n", eByteArray->data());
 
-				Data::getInstance()->setNmeaMsg(eByteArray->data());
+				if(Data::getActiveDisplayIndex() == 3 && Data::getDisplayIoChoice() == 1)
+					Data::getInstance()->setNmeaMsg(eByteArray->data());
 			}
 		}
 	}

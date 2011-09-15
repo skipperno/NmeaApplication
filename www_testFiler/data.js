@@ -26,23 +26,46 @@ var jsonNmea =
 { "type": "nmea",
   "nmea" :""
 };
-/*
-var jsonOutput = 
-{ 'type': 'out',
-  'source':1,
-  'omt':['dpt','dbs'],
-  'br':{"brRadio":0},
-  'dis':{"disRadio":1}
-};*/
+
+var jsonIO = // used only in start to set saved values
+{ 
+		'type': 'ioAll',
+		'set':[   		
+		       		{'type':'1', //COM1
+		       		'oms':['a','b','e'], 	// active output msg types
+		    	   'disRadio':{'dis':2},	// display: in, out or off
+		    	   'baudR':{'ba':1}},
+		    	    
+		    	   	{'type':'2', //COM2
+		    		   "oms":["a","b","e"], 	// active output msg types
+			    	 'disRadio':{'dis':2},
+			    	 'baudR':{'ba':1}},
+			    	 
+			    	{'type':'3', //COM3
+			    		 "oms":["a","b","e"], 	// active output msg types
+				    	 'disRadio':{'dis':2},
+				    	 'baudR':{'ba':1}},
+				    	 
+			    	{'type':'4', //LAN
+				     'oms':['a','b','e'], 	// active output msg types
+				     'disRadio':{'dis':2}},
+				     
+				    {'type':'5', //CAN
+				    'oms':['a','b','e'], 	// active output msg types
+				     'disRadio':{'dis':2},
+				     'baudR':{'ba':1}}
+			    	]
+};
 
 var jsonOutputs = 
 { 'type': 'out',
-  'oms':['dpt','dbs'] // active output msg types
+  'oms':['a','b','e'] // active output msg types
 };
 
 var jsonDisplay = 
 { 'type': 'disp',
-  'disRadio':{'dis':2}
+  'disRadio':{'dis':2},
+  's':1    // source
 };
 
 var jsonBaud = 

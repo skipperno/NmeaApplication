@@ -46,6 +46,7 @@ enum NMEA_TALKER_ID {
 	VBW, //   Water referenced and ground referenced speed
 	XDR, //   Transducer measurements
 	ZDA, //   Time and date
+	DPT, //   Depth (Ernad)
 	UNKNOWN
 };
 

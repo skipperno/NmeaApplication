@@ -29,27 +29,59 @@ public:
 	int getRange();
 	void getNmeaData(char* msg);
 
+	Array getOutputSettingsObject(int inputIndex);
+
+	///////////////////////////////////////////////
+	// DEPTH
+	///////////////////////////////////////////////
+	void setDepthMeters(float fDepth);
+	void setSurfaceOffsetMeters(float fOffset);
+	void setKeelOffsetMeters(float fOffset);
+	float getSurfaceOffsetMeters();
+	float getKeelOffsetMeters();
+
+	float getDepthTransMeters();
+	float getDepthTransFeet();
+	float getDepthTransFathoms();
+
+	float getDepthSurfaceMeters();
+	float getDepthSurfaceFeet();
+	float getDepthSurfaceFathoms();
+
+	float getDepthKeelMeters();
+	float getDepthKeelFeet();
+	float getDepthKeelFathoms();
+
 	static Data* getInstance();
+
+	static int getActiveDisplayIndex();
+	static int getDisplayIoChoice();
+	//static int getForwardSourceIndex();
+	//static void setForwardSourceIndex(int newIndex);
+
 private:
 	Object jsonDATA;
 	Object jsonTop;
 	Object jsonNmea;
 	Object jsonDisplay;
 	Object jsonBaud;
+	Object jsonIO;
 
 	void initSignalData();
 	void initTopInfoData();
 	void initNmeaScreenData();
 	void initJsonDisplayData();
 	void initJsonBaudData();
-/*
-	int nGain;
-	int nTvg;
-	int nFreq;
-	int nPower;
+	void initIoData();
 
-	int nAlarm_L;
-	int nAlarm_H;*/
+	void changeBaud(int sourceNo, int newBaudIndex);
+
+	///////////////////////////////////////////////
+	// DEPTH
+	///////////////////////////////////////////////
+	float fDepthTransMeters;
+	float fSurfaceOffsetMeters;
+	float fKeelOffsetMeters;
 };
 
 #endif /* DATA_H_ */

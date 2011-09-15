@@ -2,6 +2,8 @@ var menuShown = false;
 var selectedHorizMenuIndex = -1;
 var selectedVerticalMenuIndex = 0;
 
+var selectedIO_source = -1;
+
 var shownScope = false;
 
 function initMenu() {
@@ -152,6 +154,9 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			$('#sliderChoice').empty();
 		break;
 	case 10: //COM1
+		selectedIO_source = 2; // COM2
+		nmeaIO_PanelPopulate();
+		
 		if (pushed) {
 			$("#nmeaPanel").show();
 		} else {
@@ -159,6 +164,9 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		}
 		break;
 	case 11: //COM2
+		selectedIO_source = 3; // COM3
+		nmeaIO_PanelPopulate();
+		
 		if (pushed) {
 			$("#nmeaPanel").show();
 		} else {
@@ -167,11 +175,15 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		break;
 		
 	case 12: //LAN // !!! Now is Green-Blue
+		selectedIO_source = 4; // LAN
+		nmeaIO_PanelPopulate();
+		
 		if (pushed) {
 			changeToGreen();
 		} else {}
 		break;
 	case 13: //CAN //!!! Now is Scope
+		selectedIO_source = 5; // CAN
 		if (pushed) {
 			changeHorMenuButtonValue(menuIndex, "On");
 			changeToScopeScreen();
@@ -207,6 +219,12 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		alert("NOT IMPELMENTED");
 		break;
 	}
+}
+
+function nmeaIO_PanelPopulate(){
+	$('#nmeaOutputs').populate(jsonIO.set[selectedIO_source - 1]);
+	$('#diplayForm').populate(jsonIO.set[selectedIO_source - 1].disRadio);
+	$('#comBaud').populate(jsonIO.set[selectedIO_source - 1].baudR);
 }
 
 

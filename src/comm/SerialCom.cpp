@@ -36,6 +36,8 @@ int SerialCom::openSerial(const char* portName, int baudRate)
         	bRate = B4800;
         else if (baudRate == 9600)
         	bRate = B9600;
+        else if (baudRate == 38400)
+            bRate = B38400;
         else if (baudRate == 115200)
         	bRate = B115200;
 
@@ -79,6 +81,8 @@ int SerialCom::openSerial(const char* portName, int baudRate)
 
         close(tty_fd);*/
 
+        printf("Serial port: %s is open. Baud rate: %d\n", portName, baudRate);
+
         return 1;
 }
 
@@ -87,6 +91,7 @@ int SerialCom::receiveSerial(char* pBuffer, int maxLength) {
 	//*length = 0;
 
 		nLen=read(tty_fd, pBuffer, maxLength); //inpstream.readsome(pBuffer, 10023);
+		//printf("rec: %d\n", nLen);
 		return nLen;
 		/*if (nLen > 0) {
 			*length=nLen;

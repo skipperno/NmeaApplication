@@ -25,6 +25,7 @@ public:
 	void getLastWeatherMessage(char* pStream);
 	bool getLastEchoMessage(char* pStream);
 	bool changeBaudRate_serial3(int newBaud);
+	//void onReceivedNewDisplayChoice(int nSource, int selectedChoice);
 
 	//static void setRange(int nRange);
 	//static void setGain(int newGain);
@@ -40,6 +41,7 @@ private:
 	int fineMsgStart();
 	int fineMsgEnd(int nStartPos);
 */
+
 	char totalNmeaBuffer[MAX_NMEA_BUFF];
 	int totalReceived;
 

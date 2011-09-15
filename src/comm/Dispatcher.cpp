@@ -52,7 +52,9 @@ void Dispatcher::sendConfigMsg(const void *vptr, size_t nSize) {
 	for (socketIterator = socketDispatcherConfigData.begin(); socketIterator
 			!= socketDispatcherConfigData.end();) {
 		socketClientPipe = (*socketIterator).second;
-		socketClientPipe->socketClientPipe_send(vptr, nSize);
+		if(socketClientPipe->socketClientPipe_send(vptr, nSize) <= 0) {
+			onDisconnected(socketClientPipe);
+		}
 		socketIterator++;
 		clientsCount++;
 	}
