@@ -98,16 +98,19 @@ bool MsgInHandler::getLastEchoMessage(char* pStream) {
 }
 
 bool MsgInHandler::changeBaudRate_serial3(int newBaud) {
-	/*printf("************************************************\n");
+	printf("************************************************\n");
 	printf("***       RESTART SERIAL PORT 3 (ttyS2)?    ****\n");
 	printf("************************************************\n");
 	serialPort3.closeSerial();
 	com3baudRate = newBaud;
-
+printf("Wait\n");
 	while(serialPort3Running){ //TODO: if never false?
 		usleep(10000); // sleep 10 ms
 	}
-	pthread_create(&threadCom3,   NULL, runCom3listener, (void*) this);*/
+	printf("Wait end. Create new thread\n");
+	usleep(100000);
+	pthread_create(&threadCom3,   NULL, runCom3listener, (void*) this);
+	printf("Wait end. Create new thread\n");
 	return true;
 }
 /*
@@ -204,16 +207,13 @@ void MsgInHandler::runHandler() {
 		if (eSignal != NULL) {
 			if (eSignal->signalType == 1) {
 				eByteArray = (EByteArray*) eSignal->msg;
-				//DataProcessing::kalmanFilter(pBuffer, 400, outArray);
+				// DataProcessing::kalmanFilter(pBuffer, 400, outArray);
 				// ButterworthLowPassFilter::test(outArray, 400, outArray);
 				int nButtom = DataProcessing::bottomDetection(
 						&eByteArray->data()[1], 400);
 				NewEchoParser::convertDataToAsciNmea(nButtom, nRange, nGain,
 						&eByteArray->data()[1], 400, nmeaAsciBuffer,
 						&nmeaAsciBufferLength);
-
-				//NmeaMsgCreator::getDptMsgBuffer(nmeaOutBuffer, (float)nButtom, true, 0.f, false, 0.f, false);
-				//Data::getInstance()->setNmeaMsg(nmeaOutBuffer);
 
 				//BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 
