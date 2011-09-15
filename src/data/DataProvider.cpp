@@ -62,7 +62,7 @@ void * runDataProvThread(void *ptr) {
 								dataInstance->getDepthTransMeters(), true,
 								dataInstance->getSurfaceOffsetMeters(), true,
 								0.f, false);
-						Data::getInstance()->setNmeaMsg(msgToSend);
+						Data::getInstance()->sendNmeaMsg(msgToSend, NMEA_DIRECT_OUT);
 						//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 					}
 				} else if (strcmp(tempString.Value().c_str(), "b") == 0) {
@@ -71,7 +71,7 @@ void * runDataProvThread(void *ptr) {
 								dataInstance->getDepthSurfaceMeters(), true,
 								dataInstance->getDepthSurfaceFeet(), true,
 								dataInstance->getDepthSurfaceFathoms(), true);
-						Data::getInstance()->setNmeaMsg(msgToSend);
+						Data::getInstance()->sendNmeaMsg(msgToSend, NMEA_DIRECT_OUT);
 						//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 					}
 				} else if (strcmp(tempString.Value().c_str(), "c") == 0) {
@@ -80,7 +80,7 @@ void * runDataProvThread(void *ptr) {
 								dataInstance->getDepthKeelMeters(), true,
 								dataInstance->getDepthKeelFeet(), true,
 								dataInstance->getDepthKeelFathoms(), true);
-						Data::getInstance()->setNmeaMsg(msgToSend);
+						Data::getInstance()->sendNmeaMsg(msgToSend, NMEA_DIRECT_OUT);
 												//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 					}
 				} else if (strcmp(tempString.Value().c_str(), "d") == 0) {
@@ -89,13 +89,13 @@ void * runDataProvThread(void *ptr) {
 								dataInstance->getDepthKeelMeters(), true,
 								dataInstance->getDepthKeelFathoms(), true,
 								dataInstance->getDepthKeelFathoms(), true);
-						Data::getInstance()->setNmeaMsg(msgToSend);
+						Data::getInstance()->sendNmeaMsg(msgToSend, NMEA_DIRECT_OUT);
 												//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 					}
 				} else if (strcmp(tempString.Value().c_str(), "e") == 0) {
 					if (Data::getActiveDisplayIndex() == (sourceIndex + 1) && Data::getDisplayIoChoice() == 0) {
 						NmeaMsgCreator::getXdrMsgBuffer(msgToSend, 3.3, 5.5);
-						Data::getInstance()->setNmeaMsg(msgToSend);
+						Data::getInstance()->sendNmeaMsg(msgToSend, NMEA_DIRECT_OUT);
 												//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 					}
 				}

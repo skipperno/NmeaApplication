@@ -11,6 +11,11 @@
 #include "../json/elements.h"
 using namespace json;
 
+enum nmeaDirection{
+	NMEA_DIRECT_OUT,
+	NMEA_DIRECT_IN
+};
+
 class Data {
 
 public:
@@ -19,7 +24,8 @@ public:
 
 	void setGain(int newGain);
 	void setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon);
-	void setNmeaMsg(char* nmeaMsg);
+	// TODO: wrong place for this function
+	void sendNmeaMsg(char* nmeaMsg, int nDirection);
 
 	void getJsonData(char* msg);
 	void getJsonTop(char* msg);

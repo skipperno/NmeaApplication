@@ -24,6 +24,7 @@ var jsonTOP =
 
 var jsonNmea = 
 { "type": "nmea",
+   "dir":0,
   "nmea" :""
 };
 

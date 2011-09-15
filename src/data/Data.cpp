@@ -26,6 +26,8 @@ Data *dataInstance;
 int nDisplayIoChoice = -1; // static variable
 int nActiveDisplay = -1;
 
+
+
 /*
  * var jsonDATA =
  { "type": "ALL",
@@ -101,13 +103,14 @@ void Data::initTopInfoData() {
 			timeStruct.gwNewTime.min, timeStruct.gwNewTime.sec);
 	jsonTop["type"] = String("top");
 	jsonTop["ins"]["time"] = String(newTime);
-	jsonTop["ins"]["gps"] = String("N13,04 S14,2");
+	jsonTop["ins"]["gps"] = String("? ?");
 	jsonTop["ins"]["speed"] = Number(332);
 	jsonTop["ins"]["frq"] = Number(10000);
 }
 
 void Data::initNmeaScreenData() { // TODO read data from config fil
 	jsonNmea["type"] = String("nmea");
+	jsonNmea["dir"] = Number(NMEA_DIRECT_OUT);
 	jsonNmea["nmea"] = String("");
 }
 
@@ -228,26 +231,6 @@ void Data::parseJsonMsg(char* msg) {
 		nActiveDisplay = 2;
 	} else if (strcmp(ddd.Value().c_str(), "3") == 0) {
 		jsonIO["set"][2] = newJson;
-	/*	Array tempA = jsonIO["set"][0]["oms"];
-		String tempS;
-				for (unsigned int i = 0; i<tempA.Size(); i++){
-					tempS = tempA[i];
-					printf("0: i=%d oms= %s\n", i, tempS.Value().c_str());
-				}
-
-				tempA = jsonIO["set"][1]["oms"];
-
-						for (unsigned int i = 0; i<tempA.Size(); i++){
-							tempS = tempA[i];
-							printf("1: i=%d oms= %s\n", i, tempS.Value().c_str());
-						}
-						tempA = jsonIO["set"][2]["oms"];
-
-		for (unsigned int i = 0; i<tempA.Size(); i++){
-			tempS = tempA[i];
-			printf("2: i=%d oms= %s\n", i, tempS.Value().c_str());
-		}
-*/
 
 		const Number selectedDisplayChoice =
 				jsonIO["set"][2]["disRadio"]["dis"];
@@ -276,8 +259,10 @@ void Data::changeBaud(int sourceNo, int newBaudIndex) { //TODO: not right place 
 		MsgInHandler::getInstance()->changeBaudRate_serial3(115200);
 }
 
-void Data::setNmeaMsg(char* nmeaMsg) {
+// TODO: wrong place for this function
+void Data::sendNmeaMsg(char* nmeaMsg, int nDirection) {
 	jsonNmea["nmea"] = String(nmeaMsg);
+	jsonNmea["dir"] = Number(nDirection);
 
 	char msgToSend[1000];
 	getNmeaData(msgToSend);

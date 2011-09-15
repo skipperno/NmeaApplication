@@ -32,7 +32,7 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 	this.nameDiv.unselectable = "on";
 	this.nameDiv.innerHTML = shownText;
 	this.nameDiv.style.left = "150px";
-	this.nameDiv.style.top = this.totHeight - 20 + "px";
+	this.nameDiv.style.top = iconHeight + "px";
 	
 	this.horisChoiceCenter.appendChild(this.nameDiv);
 	

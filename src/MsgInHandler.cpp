@@ -225,14 +225,14 @@ void MsgInHandler::runHandler() {
 				printf("COM 3, NMEA: %s\n", eByteArray->data());
 
 				if(Data::getActiveDisplayIndex() == 2 && Data::getDisplayIoChoice() == 1)
-					Data::getInstance()->setNmeaMsg(eByteArray->data());
+					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
 			} else if (eSignal->signalType == 3) {
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
 				printf("COM 3, NMEA: %s\n", eByteArray->data());
 
 				if(Data::getActiveDisplayIndex() == 3 && Data::getDisplayIoChoice() == 1)
-					Data::getInstance()->setNmeaMsg(eByteArray->data());
+					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
 			}
 		}
 	}

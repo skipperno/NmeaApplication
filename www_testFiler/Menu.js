@@ -52,6 +52,8 @@ function setMenuShown(show) {
 	} else {
 		showHorizontalMenu(-1);
 		$(vertMenuSliding).hide();
+		$('#sliderChoice').empty();
+		$('#sliderChoice').hide();
 	}
 	menuShown = show;
 }
@@ -231,7 +233,7 @@ function nmeaIO_PanelPopulate(){
 
 function onSliderMoved(sliderIndex, pos) {
 
-	if (sliderIndex == 0) {
+	if (sliderIndex == 0) { 
 		jsonDATA.alarm.L = pos;
 		updateAlarmIcons();
 		sendToServer(JSON.stringify(jsonDATA));
@@ -239,8 +241,7 @@ function onSliderMoved(sliderIndex, pos) {
 		jsonDATA.alarm.H = pos;
 		updateAlarmIcons();
 		sendToServer(JSON.stringify(jsonDATA));
-	} else  if (sliderIndex == 3) { // position
-		//jsonDATA.alarm.H = pos;
+	} else  if (sliderIndex == 3) { // transducer position
 		changeSignalBeamIconPos(4 - pos);
 		//sendToServer(JSON.stringify(jsonDATA));
 	}  else if (sliderIndex == 6){
@@ -289,7 +290,8 @@ function showAlarm_H(){
 function showPosition(){
 	$('#sliderChoice').empty();
 	var choiseTextArray = ["fwd", "port", "stb", "aft"];
-	var testChoice = new ChoiceBoxHoriz(3, "Position", 1, document.getElementById("sliderChoice"), 4, choiseTextArray);
+	
+	var testChoice = new ChoiceBoxHoriz2(3, "Position", 1, document.getElementById("sliderChoice"), 4, choiseTextArray, "Checkbox.png", "CheckboxFull.png", 48,48,400, 90);
 
 	$('#sliderChoice').show();
 }

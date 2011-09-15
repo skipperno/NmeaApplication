@@ -241,8 +241,11 @@
 			if (getListCount() > 20) {
 				removeOptionFirst();
 			}
+			//TODO: if 
 			
-			appendOptionLast(jsonNmea.nmea);
+			
+			if(jsonNmea.dir == jsonIO.set[selectedIO_source-1].disRadio.dis ) // if msg direction is OUT and display chois is OUT or if msg direction is IN and ...
+				appendOptionLast(jsonNmea.nmea);
 			//document.getElementById("gps").innerHTML = jsonNmea.nmea;
 		} else if (recJson.type == "ioAll") {
 			jsonIO  = recJson;	
@@ -421,6 +424,7 @@
 		changeRange(0);
 		initVertMenu(document.getElementById("eastContainer"));//eastsidebar"));
 		initMenu();
+		$('#sliderChoice').hide();
 		
 		
 		var rangeText = [ "10", "50", "100", "500", "1200", "1600" ];
