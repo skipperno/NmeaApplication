@@ -19,7 +19,7 @@ var jsonLIGHT =
 
 var jsonTOP = 
 { "type": "top",
-  "ins" :{"time":"?","gps":"?","speed":"?","frq":"?"}
+  "ins" :{"time":"?","gpsN":"?","gpsE":"?","speed":"?","frq":"?"}
 };
 
 var jsonNmea = 

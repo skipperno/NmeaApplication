@@ -19,13 +19,6 @@
 }
 
 
-#sigDiv{ /*TODO: not used */
-	 margin: 0px; 
-	 width: 2px;
-	 float:left;
-	 height:100%;
-}
-
 #eastRange_Light{
 	margin-left:18px;
 	width: 48px;
@@ -88,6 +81,7 @@
 	left:0px;
 	color:#fff;
 	font-size:36px;
+	font-weight: bold;
 	}
 	
 #sliderChoice{
@@ -250,6 +244,104 @@
 	/*border:1px solid #646464;*/
 	}
 	
+	#tableTest{
+	
+	display:block;
+	}
+	
+	.topField{
+		color:#333;
+		font-size:10px;
+	 	height:40px;
+	 	background-image:url("images/backTopFelt.png");
+	 	background-repeat:no-repeat;
+/*background-attachment:fixed;*/
+		background-position:right; 
+		position:relative;
+		float:left;
+	}
+	.topFieldTextLeft{
+		float:left;
+		padding-left:4px;
+	}
+	.topFieldTextRight{
+		float:right;
+		padding-right:4px;
+	}
+	.topFieldDown{
+	color:#000;
+	 	height:30px;
+	 	background-image:url("images/backTopDown.png");
+		background-repeat:repeat-x;
+		position:absolute;
+		top:10px;
+		left:0px; 
+		line-height:30px;
+		width:100%;
+		text-align:center;
+	}
+	
+	.topFieldDownLine1{
+	color:#000;
+	 	height:15px;
+	 	background-image:url("images/backTopDown.png");
+		background-repeat:repeat-x;
+		position:absolute;
+		top:10px;
+		left:0px; 
+		line-height:15px;
+		width:100%;
+		text-align:center;
+	}
+	.topFieldDownLine2{
+	color:#000;
+	 	height:15px;
+	 	background-image:url("images/backTopDown.png");
+		background-repeat:repeat-x;
+		position:absolute;
+		top:25px;
+		left:0px; 
+		line-height:15px;
+		width:100%;
+		text-align:center;
+	}
+
+	#time{
+	font-size:18px;
+	}
+	#gps{;
+	font-size:12px;
+	}
+	#speed{
+	font-size:12px;
+	}
+	#frq{
+	font-size:12px;
+	}
+	
+	/* STATUS */
+	#statusDiv{
+	font-size:12px;
+	position:absolute;
+	left:5px;
+	top:5px;
+	background:#fff;
+	border:2px ridge #C90;
+	}
+	.sr1 { /* status row 1 */
+		width:90px;
+	}
+	.sr2 { /* status row 2 */
+		width:90px;
+		color:#f00;
+	}
+	.sr3 { /* status row 3 */
+		width:90px;
+	}
+	.sr4 { /* status row 4 */
+		width:90px;
+		color:#f00;
+	}
 	
 	
 	

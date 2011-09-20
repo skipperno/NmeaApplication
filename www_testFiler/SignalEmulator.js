@@ -23,19 +23,7 @@ function changeSignalBeamIconPos(newPos){
 	}
 	selectedPos =newPos;
 }
-/*
-function updateSigBeam(){
-	var myElement = document.getElementById('sigDiv');
-	if (bSigOdd){
-		bSigOdd = false;
-		myElement.style.backgroundImage='url(images/sig_a_1.png)';
-		//$(myElement).css("background",getSignalColor());
-	} else {
-		bSigOdd =true;
-		myElement.style.backgroundImage='url(images/sig_b_1.png)';
-		//$(myElement).css("background","#fff");
-	}
-}*/
+
 
 function getSignalColor(){
 	if (selectedPos == 1 || selectedPos == 4)

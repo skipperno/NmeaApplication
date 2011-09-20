@@ -194,7 +194,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			changeToEchoScreen();
 		}
 		break;
-	case 14:
+	case 14: 
 		if (pushed) {
 			showParity();
 		} else {$('#sliderChoice').empty();}
@@ -243,6 +243,15 @@ function onSliderMoved(sliderIndex, pos) {
 		sendToServer(JSON.stringify(jsonDATA));
 	} else  if (sliderIndex == 3) { // transducer position
 		changeSignalBeamIconPos(4 - pos);
+		//"fwd", "port", "stb", "aft"
+		if(pos == 0) 
+			menuArray[3].changeValueText("fwd");
+		else if(pos == 1) 
+			menuArray[3].changeValueText("port");
+		else if(pos == 2) 
+			menuArray[3].changeValueText("stb");
+		else if(pos == 3) 
+			menuArray[3].changeValueText("aft");
 		//sendToServer(JSON.stringify(jsonDATA));
 	}  else if (sliderIndex == 6){
 		jsonDATA.signal.GAIN=pos;

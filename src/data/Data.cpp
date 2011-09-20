@@ -103,7 +103,8 @@ void Data::initTopInfoData() {
 			timeStruct.gwNewTime.min, timeStruct.gwNewTime.sec);
 	jsonTop["type"] = String("top");
 	jsonTop["ins"]["time"] = String(newTime);
-	jsonTop["ins"]["gps"] = String("? ?");
+	jsonTop["ins"]["gpsN"] = String("?");
+	jsonTop["ins"]["gpsE"] = String("?");
 	jsonTop["ins"]["speed"] = Number(332);
 	jsonTop["ins"]["frq"] = Number(10000);
 }
@@ -272,8 +273,10 @@ void Data::sendNmeaMsg(char* nmeaMsg, int nDirection) {
 void Data::setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon) {
 	char latLong[30];
 
-	sprintf(latLong, "%s%s %s%s", n_s, sLat, e_w, sLon);
-	jsonTop["ins"]["gps"] = String(latLong);
+	sprintf(latLong, "%s %s", n_s, sLat);
+	jsonTop["ins"]["gpsN"] = String(latLong);
+	sprintf(latLong, "%s %s", e_w, sLon);
+	jsonTop["ins"]["gpsE"] = String(latLong);
 }
 
 void Data::setGain(int newGain) {

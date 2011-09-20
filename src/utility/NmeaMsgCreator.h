@@ -13,10 +13,10 @@ public:
 	NmeaMsgCreator();
 	virtual ~NmeaMsgCreator();
 
-	static void getDptMsgBuffer(char* buffer, float fDeapth, bool deapthValid,
+	static void getDptMsgBuffer(char* buffer, float fDepth, bool deapthValid,
 				float fOffset, bool offsetValid, float fMaxRangeScale, bool scaleValid);
-	static void getDbsMsgBuffer(char* buffer, float fDeapthMeter, bool deapthValidM, float fDeapthFeet, bool deapthValidF,
-			float fDeapthFathoms, bool deapthValidFat);
+	static void getDbsMsgBuffer(char* buffer, float fDepthMeter, bool deapthValidM, float fDeapthFeet, bool deapthValidF,
+			float fDeapthFathoms, bool depthValidFat);
 	static void getDbtMsgBuffer(char* buffer, float fDeapthMeter, bool deapthValidM, float fDeapthFeet, bool deapthValidF,
 			float fDeapthFathoms, bool deapthValidFat);
 	static void getDbkMsgBuffer(char* buffer, float fDeapthMeter, bool deapthValidM, float fDeapthFeet, bool deapthValidF,
