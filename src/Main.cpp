@@ -22,7 +22,6 @@
 
 
 
-
 int nEchoSounderPort = 2004;
 int nDataPort = 2005;
 Data jsonData;
