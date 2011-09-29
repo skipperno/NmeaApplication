@@ -95,18 +95,18 @@ ChoiceBoxHoriz2.prototype.showChoice = function(show) {
 		$(this.horisChoice).show();
 	else
 		$(this.horisChoice).hide();
-}
+};
 
 ChoiceBoxHoriz2.prototype.convertPosToValue = function(newX) {
 	return parseInt(newX / this.step / 2);
-}
+};
 
 ChoiceBoxHoriz2.prototype.calcChoisePos = function() {
 	this.step = this.totWidth / this.choiceCount/2;
 	for (i = 0; i < this.choiceCount; i++) {
 		this.choicePosCenterArray[i] = parseInt(this.step*i*2 + this.step);
 	}
-}
+};
 
 
 ChoiceBoxHoriz2.prototype.selectChoice = function(selIndex) {
@@ -117,7 +117,7 @@ ChoiceBoxHoriz2.prototype.selectChoice = function(selIndex) {
 	myElem.style.backgroundImage="url(images/" + this.iconSelect + ")";
 	
 	this.selectedIndex = selIndex;
-}
+};
 
 function preventEv(e) {
 	if (e.preventDefault)

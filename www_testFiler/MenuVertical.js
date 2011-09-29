@@ -5,6 +5,16 @@
 var verMenuArray = new Array();
 var vertMenuSliding;
 
+var USER_SETUP = 0;
+var SIGNAL = 1;
+var SETUP = 2;
+var STATUS = 3;
+var COM = 4;
+var DIAGN = 5;
+var SCREEN = 6;
+var SYSTEM = 7;
+
+
 function initVertMenu(parentConteiner){
 	vertMenuSliding = this.document.createElement("DIV");
 	vertMenuSliding.id = "vertMenuSliding";
@@ -38,18 +48,17 @@ function initVertMenu(parentConteiner){
 	});
 	
 	
-	
-	verMenuArray[0]=new VerMenuItem(0, "User setup", vertMenuSlidingBlock_1);
-	verMenuArray[1]=new VerMenuItem(1, "Signal", vertMenuSlidingBlock_1);
-	verMenuArray[2]=new VerMenuItem(2, "Setup", vertMenuSlidingBlock_1);
+	verMenuArray[USER_SETUP]=new VerMenuItem(USER_SETUP, "User setup", vertMenuSlidingBlock_1);
+	verMenuArray[SIGNAL]=new VerMenuItem(SIGNAL, "Signal", vertMenuSlidingBlock_1);
+	verMenuArray[SETUP]=new VerMenuItem(SETUP, "Setup", vertMenuSlidingBlock_1);
 	vertMenuSlidingBlock_1.appendChild(westMenuDownButt);
 	
 	vertMenuSlidingBlock_2.appendChild(westMenuTopButt);
-	verMenuArray[3]=new VerMenuItem(3, "Status", vertMenuSlidingBlock_2);
-	verMenuArray[4]=new VerMenuItem(4, "Com", vertMenuSlidingBlock_2);
-	verMenuArray[5]=new VerMenuItem(5, "Diagnostic", vertMenuSlidingBlock_2);
-	verMenuArray[6]=new VerMenuItem(6, "Screen", vertMenuSlidingBlock_2);
-	verMenuArray[7]=new VerMenuItem(7, "System", vertMenuSlidingBlock_2);
+	verMenuArray[STATUS]=new VerMenuItem(STATUS, "Status", vertMenuSlidingBlock_2);
+	verMenuArray[COM]=new VerMenuItem(COM, "Com", vertMenuSlidingBlock_2);
+	verMenuArray[DIAGN]=new VerMenuItem(DIAGN, "Diagnostic", vertMenuSlidingBlock_2);
+	verMenuArray[SCREEN]=new VerMenuItem(SCREEN, "Screen", vertMenuSlidingBlock_2);
+	verMenuArray[SYSTEM]=new VerMenuItem(SYSTEM, "System", vertMenuSlidingBlock_2);
 	
 	
 	verMenuArray[8]=new VerMenuItem(8, "Skjerm 9", vertMenuSlidingBlock_2);

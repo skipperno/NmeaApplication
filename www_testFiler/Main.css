@@ -10,6 +10,12 @@ BODY
 	margin:0px;
 	padding:0px;
 	background-color:#c4c4c4;
+	
+	 user-select: none;  
+        -moz-user-select: none;  
+        -khtml-user-select: none;  
+        -webkit-user-select: none;  
+        -o-user-select: none; 
 }
 
 #wrap

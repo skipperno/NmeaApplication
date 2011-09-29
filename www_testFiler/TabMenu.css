@@ -1,0 +1,81 @@
+@CHARSET "UTF-8";
+
+#tabBar {
+	float:left;
+	height:36px;
+	margin-left:auto;
+	margin-rigth:auto;
+	margin-top:0px;
+	overflow:hidden;
+	position:relative;
+	width:100%;
+	}
+
+.tabItemSel {
+	height: 100%;
+	width: 91px;
+	background: url(images/menuHorSel.png);
+	float: left;
+	margin: 0px;
+	color: #000;
+	display:inline;
+	vertical-align:middle; /*center image*/
+	position:relative;
+}
+
+.tabItemNotSel {
+	height: 100%;
+	width: 91px;
+	background: url(images/menuHorNotSel.png);
+	float: left;
+	margin: 0px;
+	color: #000;
+	display:inline;
+	vertical-align:middle; /*center image*/
+	position:relative;
+}
+
+.tabItemOver {
+	height: 100%;
+	width: 91px;
+	background: url(images/menuHorOver.png);
+	float: left;
+	margin: 0px;
+	color: #000;
+	display:inline;
+	vertical-align:middle; /*center image*/
+	position:relative;
+}
+
+
+
+.tabItemDisab {
+	height: 100%;
+	width: 91px;
+	background: url(images/menuHorDisab.png);
+	float: left;
+	margin: 0px;
+	color: #ddd;
+	display:inline;
+	vertical-align:middle; /*center image*/
+	position:relative;
+}
+
+.tabText {
+	font-size:12px;
+	line-height:30px;
+	text-align:center;
+	/*position:absolute;
+	top:6px;
+	left:28px;*/
+}
+
+.tabItem img {
+	width: 18px;
+	height:18px;
+	position:absolute;
+	top:5px;
+	left:5px;
+	/*float:left;*/
+	/*margin-top:auto;
+	margin-bottom:auto;*/

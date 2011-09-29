@@ -6,6 +6,9 @@ var selectedIO_source = -1;
 
 var shownScope = false;
 
+
+
+
 function initMenu() {
 
 	initHorisontalSubMenu();
@@ -60,7 +63,7 @@ function setMenuShown(show) {
 
 
 /** ******************************************** */
-/** *******         Callback              ****** */
+/** *******         Vertical Menu Callback              ****** */
 /** ******************************************** */
 function onMainMenuClickCallback(menuIndex) {
 	selectVerticalMenu(menuIndex);
@@ -94,13 +97,13 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 	}
 	
 	switch(menuIndex){
-	case 0:
+	case AL_L:
 		if (pushed)
 			showAlarm_L();  
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 1:
+	case AL_H:
 		if (pushed)
 			showAlarm_H(); 
 		else
@@ -112,7 +115,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		else
 			$('#sliderChoice').empty();
 		break;*/
-	case 3: //POSITION
+	case POSITION: //POSITION
 		if (pushed)
 			showPosition();
 		else
@@ -125,37 +128,39 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			$('#sliderChoice').empty();
 		break;*/
 		
-	case 5: //MODE
+	case MODE: //MODE
 		/*if (pushed)
 			showAlarm_L();
 		else
 			$('#sliderChoice').empty();
 		break;*/
-	case 6: // GAIN
+	case GAIN: // GAIN
 		if (pushed)
 			showGain();
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 7: // TVG
+		
+	case TVG: // TVG
 		if (pushed)
 			showTVG();
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 8: // PWR
+	case PWR: // PWR
 		if (pushed)
 			showPOW();
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 9: // FREQ
+	case FREQ: // FREQ
 		if (pushed)
 			showFREQ();
 		else
 			$('#sliderChoice').empty();
 		break;
-	case 10: //COM1
+		
+	case COM1:
 		selectedIO_source = 2; // COM2
 		nmeaIO_PanelPopulate();
 		
@@ -165,7 +170,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			$("#nmeaPanel").hide();
 		}
 		break;
-	case 11: //COM2
+	case COM2: //COM2
 		selectedIO_source = 3; // COM3
 		nmeaIO_PanelPopulate();
 		
@@ -176,7 +181,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		}
 		break;
 		
-	case 12: //LAN // !!! Now is Green-Blue
+	case LAN: //LAN // !!! Now is Green-Blue
 		selectedIO_source = 4; // LAN
 		nmeaIO_PanelPopulate();
 		
@@ -184,7 +189,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			changeToGreen();
 		} else {}
 		break;
-	case 13: //CAN //!!! Now is Scope
+	case CAN: //CAN //!!! Now is Scope
 		selectedIO_source = 5; // CAN
 		if (pushed) {
 			changeHorMenuButtonValue(menuIndex, "On");
@@ -194,11 +199,22 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			changeToEchoScreen();
 		}
 		break;
-	case 14: 
+	case 14:
 		if (pushed) {
-			showParity();
+			//showParity();
 		} else {$('#sliderChoice').empty();}
 		break;
+	case TRANSCEIVER:
+		if (pushed) {
+			$("#transceiverDiv").show();
+		} else {
+			$("#transceiverDiv").hide();
+			}
+		break;
+		
+		
+		
+		
 		/*   SCOPE
 		 if (pushed) {
 			changeHorMenuButtonValue(menuIndex, "On");

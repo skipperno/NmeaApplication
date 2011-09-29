@@ -20,6 +20,8 @@
 <link rel="stylesheet" type="text/css" href="SliderHorizontal.css" />
 <link rel="stylesheet" type="text/css" href="SliderVertical.css" />
 <link rel="stylesheet" type="text/css" href="ChoiceBoxHoriz.css" />
+<link rel="stylesheet" type="text/css" href="Transceiver.css" />
+<link rel="stylesheet" type="text/css" href="TabMenu.css" />
 
 <script src="jquery.js"></script>
 <script src="jquery.populate.pack.js"></script>
@@ -40,7 +42,10 @@
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="Alarm.js"></script>
 <script type="text/javascript" src="NmeaList.js"></script>
-
+<script type="text/javascript" src="TabMenu.js"></script>
+<script type="text/javascript" src="TabMenuItem.js"></script>
+<script type="text/javascript" src="Transceiver.js"></script>
+<script type="text/javascript" src="TransceiverTabMenu.js"></script>
 
 
 
@@ -327,6 +332,7 @@
 					</table>
 				</form>
 				
+				
 				<div id="nmeaListDiv" border="1">
 					
 				<select id="nmeaList" size="17" multiple="multiple">
@@ -338,17 +344,15 @@
 		 		<div id="day_night"></div>
 				<div id="sliderChoice"></div>
 				<div id="alarmMsgDiv"></div>
-				
+				<div id="transceiverDiv"></div>
 				<div id="menuBar">
-				<div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
+					<div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
 						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;>Menu
-					
-				</div>
-				<!--  <div id="mainChoiceText">Range</div>-->
-				<div id="subMenu"></div>
+					</div>
 				
-				<!-- </div> -->
-			</div><!--  end menuBar -->
+					<!--  <div id="mainChoiceText">Range</div>-->
+					<div id="subMenu"></div>
+				</div><!--  end menuBar -->
 			
 			<div id="statusDiv">STATUS
 					<table>
@@ -438,12 +442,14 @@
 		$("#nmeaPanel").hide();
 		$("#day_night").hide();
 		$("#statusDiv").hide();
+		$("#transceiverDiv").hide();
 		
 		changeRange(0);
 		initVertMenu(document.getElementById("eastContainer"));//eastsidebar"));
 		initMenu();
 		$('#sliderChoice').hide();
 		
+		initTransceiver(document.getElementById("transceiverDiv"));
 		
 		var rangeText = [ "10", "50", "100", "500", "1200", "1600" ];
 	

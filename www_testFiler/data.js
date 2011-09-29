@@ -74,6 +74,23 @@ var jsonBaud =
   'baudR':{'ba':1}
 };
 
+var jsonTransceiverCH1 = 
+{ "type": "transceiverCH1",
+  "enabled" : 1, 
+  "position": 1, //AFT=0, PORT=1, STUR=1, FWD=3
+  "freq1" : 3000, /*!!! freq / 10 **/
+  "dualEnabled" : 1,
+  "freq2" : 4500 /*!!! freq / 10 **/
+};
+var jsonTransceiverCH2 = 
+{ "type": "transceiverCH2",
+  "enabled" : 1, 
+  "position": 3, //AFT=0, PORT=1, STUR=1, FWD=3
+  "freq1" : 2000, /*!!! freq / 10 **/
+  "dualEnabled" : 0,
+  "freq2" : 7500 /*!!! freq / 10 **/
+};
+
 function setSignalData(){
 	updateMenuValues();
 	updateAlarmIcons(); 

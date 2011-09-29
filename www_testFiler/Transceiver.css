@@ -1,0 +1,67 @@
+#transceiverDiv{
+	 width:398px; 
+	 display:block;
+	 position:absolute;
+	 left:10px;
+	 top:5px;
+}
+
+#tabContentDiv{
+	float:left;
+	width: 100%;
+	height:305px;
+	border:2px ridge #C90;
+	padding:4px;
+	background:#666;
+	color:#fff;
+	position:relative;
+}
+
+#disableTranscDiv{
+	background:#666;
+	position:absolute;
+	top:20px;
+	left:0px;
+	width:100%;
+	height:285px;
+	opacity:0.80;
+filter:alpha(opacity=80); /* For IE8 and earlier */
+}
+	
+#disableDualFreqDiv{
+	background:#666;
+	position:absolute;
+	top:240px;
+	left:0px;
+	width:100%;
+	height:70px;
+	opacity:0.80;
+filter:alpha(opacity=80); /* For IE8 and earlier */
+}
+
+#enabTranscRadioDiv{
+	width: 100%;
+	float:left;
+	background:#555;
+	padding-left:5px;
+}
+#enabTranscRadioDiv2{
+	width: 100%;
+	float:left;
+	background:#555;
+	padding-left:5px;
+}
+#positTextDiv{
+	width: 100%;
+	float:left;
+}
+#positionsChoiceBox{
+	width: 100%;
+	float:left;
+	}
+	
+.verSpace10{
+	margin-bottom:15px;
+	float:left;
+	width:100%;
+}
