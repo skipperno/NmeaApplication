@@ -23,6 +23,7 @@
 <link rel="stylesheet" type="text/css" href="Transceiver.css" />
 <link rel="stylesheet" type="text/css" href="TabMenu.css" />
 
+
 <script src="jquery.js"></script>
 <script src="jquery.populate.pack.js"></script>
 <script type="text/javascript" src="json2.js"></script>
@@ -42,17 +43,17 @@
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="Alarm.js"></script>
 <script type="text/javascript" src="NmeaList.js"></script>
-<script type="text/javascript" src="TabMenu.js"></script>
+<!--  <script type="text/javascript" src="TabMenu.js"></script> -->
 <script type="text/javascript" src="TabMenuItem.js"></script>
 <script type="text/javascript" src="Transceiver.js"></script>
 <script type="text/javascript" src="TransceiverTabMenu.js"></script>
 
 
 
-<!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
+<!-- """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 <script type="text/javascript" src="swfobject.js"></script>
 <script type="text/javascript" src="web_socket.js"></script>
-<!-- """"""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""" -->
 
 <script src="EchoPainter.js"></script>
 <script src="Scope.js"></script>
@@ -467,9 +468,20 @@
 		reconnectSocket();
 
 		function reconnectSocket() {
+			if (window.MozWebSocket) {
+				echoWebSock =  new MozWebSocket("ws://10.31.1.128:7681","dumb-increment-protocol");
+			} else if(window.WebSocket) {
+				echoWebSock =  new WebSocket("ws://10.31.1.128:7681","dumb-increment-protocol");
+			} else {
+				alert("Your browser is not supporitng WebSockets");
+				return;
+			}
+
 			//if (conn.readyState === undefined || conn.readyState > 1) {
 			//////// ECHO SOUNDER WEBSOCKET ////////
-			echoWebSock = new MozWebSocket('ws://10.31.1.128/echo');
+			//echoWebSock =  new WebSocket("ws://10.31.1.128:7681/dumb-increment-protocol");
+			//echoWebSock =  new WebSocket("ws://10.31.1.128:7681", "dumb-increment-protocol");
+			//echoWebSock = new MozWebSocket('ws://10.31.1.128:7681/dumb-increment-protocol');//echo');
 
 			echoWebSock.onopen = function() { //e
 				//	alert("Connected");
@@ -492,9 +504,14 @@
 			echoWebSock.onerror = function(e) {
 				alert("websocket error");
 			};
-
+			
 			//////// DATA WEBSOCKET ////////
-			dataWebSock = new MozWebSocket('ws://10.31.1.128/data');
+			if (window.MozWebSocket) {
+				dataWebSock =  new MozWebSocket("ws://10.31.1.128:7681","lws-mirror-protocol");
+			} else if(window.WebSocket) {
+				dataWebSock =  new WebSocket("ws://10.31.1.128:7681","lws-mirror-protocol");
+			} 
+			//dataWebSock = new MozWebSocket('ws://10.31.1.128:7681/lws-mirror-protocol');//data');
 			dataWebSock.onopen = function() { //e
 					//alert("Connected dataWebSock");
 			};

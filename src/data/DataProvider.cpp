@@ -12,7 +12,7 @@
 #include "Data.h"
 #include "../comm/Dispatcher.h"
 #include "../utility/NmeaMsgCreator.h"
-
+#include "../webserver/DataWebSocket.h"
 
 #include "../json/elements.h"
 using namespace json;
@@ -40,13 +40,17 @@ void * runDataProvThread(void *ptr) {
 
 	char msgToSend[1000];
 	Data* dataInstance = Data::getInstance();
+	sleep(5);
+	printf("DATA PROVIDER START\n");
 
 	while (dataProvider->bRun) {
 		////////////////////////////////////////////////////////
 		// Send GPS, time, ... each second
 		////////////////////////////////////////////////////////
 		Data::getInstance()->getJsonTop(msgToSend);
-		Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+
+	//	Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 
 		////////////////////////////////////////////////////////
 		// Send DPT, DBS, ... each second if them are selected

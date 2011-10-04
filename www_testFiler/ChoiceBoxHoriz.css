@@ -18,7 +18,7 @@
 	height:70px;
 	/*background:#1c1c1c;*/
 	/*height:60px;*/
-	background: url(images/horisChoiceCenter.png);
+	background: url(images/backHSlid.png); /*horisChoiceCenter.png);*/
 	background-repeat:repeat-x;
 	position:relative;
 	float:left;

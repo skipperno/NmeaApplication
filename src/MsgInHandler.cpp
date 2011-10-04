@@ -29,7 +29,7 @@
 #include "utility/EByteArray.h"
 #include "data/Data.h"
 
-
+#include "webserver/EchoDataWebSocket.h"
 
 ///////////hei Ernad /////////
 MsgInHandler* thisInstance;
@@ -189,7 +189,7 @@ void MsgInHandler::runHandler() {
 	NmeaComm stream1;
 	NmeaComm stream2;
 	char nmeaAsciBuffer[17000];
-	char nmeaOutBuffer[1000];
+	//char nmeaOutBuffer[1000];
 
 	int nmeaAsciBufferLength;
 
@@ -215,24 +215,31 @@ void MsgInHandler::runHandler() {
 						&eByteArray->data()[1], 400, nmeaAsciBuffer,
 						&nmeaAsciBufferLength);
 
+				EchoDataWebSocket::broadcastMsgToClients(nmeaAsciBuffer, nmeaAsciBufferLength);
+
 				//BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 
-				Dispatcher::sendEchoMsg(nmeaAsciBuffer, nmeaAsciBufferLength);
 
-			} else if (eSignal->signalType == 2) {
+				//Dispatcher::sendEchoMsg(nmeaAsciBuffer, nmeaAsciBufferLength);
+
+			} else if (eSignal->signalType == 2) { // Msg from COM 2
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
-				printf("COM 3, NMEA: %s\n", eByteArray->data());
+				printf("COM 2, NMEA: %s\n", eByteArray->data());
 
 				if(Data::getActiveDisplayIndex() == 2 && Data::getDisplayIoChoice() == 1)
 					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
-			} else if (eSignal->signalType == 3) {
+			} else if (eSignal->signalType == 3) { // Msg from COM 3
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
-				printf("COM 3, NMEA: %s\n", eByteArray->data());
+				printf("COM 3, Received NMEA: %s\n", eByteArray->data());
 
-				if(Data::getActiveDisplayIndex() == 3 && Data::getDisplayIoChoice() == 1)
+				if(Data::getActiveDisplayIndex() == 3 && Data::getDisplayIoChoice() == 1) {
 					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
+					printf("sent nmea\n");
+				} else {
+					printf("Not sent, active display: %d, IO choice: %d\n", Data::getActiveDisplayIndex(), Data::getDisplayIoChoice());
+				}
 			}
 		}
 	}

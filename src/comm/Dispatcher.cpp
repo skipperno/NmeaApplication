@@ -43,7 +43,7 @@ void Dispatcher::sendEchoMsg(const void *vptr, size_t nSize) {
 }
 
 void Dispatcher::sendConfigMsg(const void *vptr, size_t nSize) {
-	pthread_mutex_lock(&dispatcher_mutex);
+/*	pthread_mutex_lock(&dispatcher_mutex);
 
 	map<unsigned int, SocketClientPipe*>::iterator socketIterator;
 	SocketClientPipe* socketClientPipe;
@@ -63,7 +63,7 @@ void Dispatcher::sendConfigMsg(const void *vptr, size_t nSize) {
 
 	if (clientsCount == 0) {
 		//printf("ALARM DISPLAY\n");
-	}
+	}*/
 }
 
 void Dispatcher::addClient(SocketClientPipe* socketClientPipe, socktType type) {

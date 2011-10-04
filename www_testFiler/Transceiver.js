@@ -166,7 +166,7 @@ function disableDualFreq(){
 	document.getElementById("enabDual").checked = false;
 	selectedTranscChannel.dualEnabled=0;
 }
-
+/*
 function onSliderMoved(sliderIndex, newValue){
 	if(sliderIndex == 202) { 		// Position changed
 		selectedTranscChannel.position = newValue;
@@ -177,5 +177,5 @@ function onSliderMoved(sliderIndex, newValue){
 		selectedTranscChannel.freq2 = newValue;
 		sliderFreq2.changeUnderText("Frequency: " + newValue*10 + "kHz");
 	}
-}
+}*/
 

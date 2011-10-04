@@ -1,0 +1,252 @@
+libwebsockets_la-handshake.lo: handshake.c private-libwebsockets.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/unistd.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/features.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/predefs.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/cdefs.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/wordsize.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/gnu/stubs.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/posix_opt.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/types.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/typesizes.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stddef.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/confname.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/getopt.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdio.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/libio.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/_G_config.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/wchar.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stdarg.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stdio_lim.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sys_errlist.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stdio.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdlib.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/types.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/time.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/endian.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/endian.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/byteswap.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/select.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/select.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigset.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/time.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/sysmacros.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/pthreadtypes.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/alloca.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/string.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/xlocale.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/string.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/string2.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/strings.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/ctype.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/errno.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/errno.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/linux/errno.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/errno.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm-generic/errno.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm-generic/errno-base.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/fcntl.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/fcntl.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/signal.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/signum.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/siginfo.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigaction.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigcontext.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/sigcontext.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigstack.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigthread.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netdb.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netinet/in.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stdint.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdint.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/wchar.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/socket.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/uio.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/uio.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/socket.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sockaddr.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/socket.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/sockios.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/in.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/rpc/netdb.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/netdb.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/stat.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stat.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/prctl.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/linux/prctl.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netinet/tcp.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/arpa/inet.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/poll.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/poll.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/poll.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/mman.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/mman.h \
+ /home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/time.h \
+ libwebsockets.h
+
+private-libwebsockets.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/unistd.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/features.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/predefs.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/cdefs.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/wordsize.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/gnu/stubs.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/posix_opt.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/types.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/typesizes.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stddef.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/confname.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/getopt.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdio.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/libio.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/_G_config.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/wchar.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stdarg.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stdio_lim.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sys_errlist.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stdio.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdlib.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/types.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/time.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/endian.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/endian.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/byteswap.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/select.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/select.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigset.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/time.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/sysmacros.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/pthreadtypes.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/alloca.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/string.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/xlocale.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/string.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/string2.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/strings.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/ctype.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/errno.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/errno.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/linux/errno.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/errno.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm-generic/errno.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm-generic/errno-base.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/fcntl.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/fcntl.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/signal.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/signum.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/siginfo.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigaction.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigcontext.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/sigcontext.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigstack.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sigthread.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netdb.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netinet/in.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.1/include/stdint.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/stdint.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/wchar.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/socket.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/uio.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/uio.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/socket.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/sockaddr.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/socket.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/asm/sockios.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/in.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/rpc/netdb.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/netdb.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/stat.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/stat.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/prctl.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/linux/prctl.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/netinet/tcp.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/arpa/inet.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/poll.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/poll.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/poll.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/mman.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/bits/mman.h:
+
+/home/ernad/Buildroot/output/external-toolchain/bin/../arm-none-linux-gnueabi/libc/usr/include/sys/time.h:
+
+libwebsockets.h:

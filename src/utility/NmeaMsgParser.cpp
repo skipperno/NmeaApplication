@@ -118,10 +118,12 @@ bool NmeaMsgParser::ParseGPGGA(const char* nmeaMsgBuffer) {
 	const char * msgBuffer = nmeaMsgBuffer;
 
 	char n_s[2], e_w[2]; // North or South, East or West
-	char sLat[64], sLon[64], hemi, l_hemi, hms[64];
-	double mslHeight, geoidHeight, hdop;
-	int nSats, fix, dgpsAge, dgpsStation;
-
+	char sLat[64], sLon[64], hms[64];
+	//char hemi, l_hemi;
+	/*double mslHeight, geoidHeight, hdop;
+	int nSats, fix;
+	int dgpsAge, dgpsStation;
+*/
 
 
 	sLat[0] = 0;
@@ -153,10 +155,10 @@ bool NmeaMsgParser::ParseWIMDA(const char* nmeaMsgBuffer) {
 	char windDirMag[10], windM[2];
 	char windSpeedKnots[10], knots[2];
 	char windSpeedMet[10],  meters[2];
-
+/*
 	double mslHeight, geoidHeight, hdop;
 	int nSats, fix, dgpsAge, dgpsStation;
-
+*/
 	msgBuffer += 7; // move to start
 
 	int nPos = 0;

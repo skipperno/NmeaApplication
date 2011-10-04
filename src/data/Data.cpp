@@ -14,6 +14,8 @@
 #include "../json/writer.h"
 #include "../MsgInHandler.h"
 #include "../comm/Dispatcher.h"
+#include "../webserver/DataWebSocket.h"
+
 #include "../SysTime.h"
 #include "../MsgInHandler.h"   //TODO: feil plass for å behandle dette
 #include <sstream>
@@ -189,6 +191,7 @@ void Data::parseJsonMsg(char* msg) {
 	std::stringstream stream(msg);
 	Reader::Read(newJson, stream);
 	const String ddd = newJson["type"];
+	printf("!!!!!!!rec JSON type: %s\n", ddd.Value().c_str());
 
 	if (strcmp(ddd.Value().c_str(), "sig") == 0) {
 		jsonDATA = newJson;
@@ -243,6 +246,7 @@ void Data::parseJsonMsg(char* msg) {
 		changeBaud(3, br.Value()); //TODO: only  if not the same baud
 		//MsgInHandler::getInstance()->onReceivedNewDisplayChoice(3,
 		//		selectedDisplayChoice.Value());
+		printf("!!!!!!!rec JSON type:3, IO choice %d, baud: %d\n", nDisplayIoChoice, (int)br.Value());
 	}
 }
 
@@ -267,7 +271,8 @@ void Data::sendNmeaMsg(char* nmeaMsg, int nDirection) {
 
 	char msgToSend[1000];
 	getNmeaData(msgToSend);
-	Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+	DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+	//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 }
 
 void Data::setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon) {

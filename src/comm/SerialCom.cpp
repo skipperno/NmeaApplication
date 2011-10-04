@@ -102,8 +102,12 @@ int SerialCom::receiveSerial(char* pBuffer, int maxLength) {
 
 
 void SerialCom::closeSerial(){
-	printf("Close");//
+	if(tty_fd > 0) {
+	printf("Close serial fd: %d\n", tty_fd);//
 	int nRet = close(tty_fd);
 	printf("Close return: %d\n", nRet);
+	} else {
+		printf("Cannot close COM port, not open\n");
+	}
 }
 

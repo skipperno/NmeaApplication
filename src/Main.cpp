@@ -18,14 +18,19 @@
 #include "json/writer.h"
 #include "json/elements.h"
 
-#include <sstream>
+#include "webserver/Webserver.h"
 
+#include <sstream>
+#include <pthread.h>
+
+void * runMsgInHandlerThread(void *ptr);
 
 
 int nEchoSounderPort = 2004;
 int nDataPort = 2005;
 Data jsonData;
 DataProvider dataProvider;
+pthread_t threadMsgInHandler;
 
 int main(int argc, char **argv) {
 	//char testCh[1000];
@@ -64,14 +69,25 @@ int main(int argc, char **argv) {
 	printf("Version 1.4 (with websocket and Curtis format)\n");
 	//cout << "Hei 2 !!!" << endl; // prints !!!Hello World!!!
 
-	TcpServer tcpServerEcho;
+	/*TcpServer tcpServerEcho;
 	tcpServerEcho.serverSocket_start(nEchoSounderPort);
 
 	TcpServer tcpServerData;
-	tcpServerData.serverSocket_start(nDataPort);
+	tcpServerData.serverSocket_start(nDataPort);*/
 
 	dataProvider.startDataProvider();
 
 	MsgInHandler msgInHandler;
-	msgInHandler.runHandler(); // !!! Blocking function
+
+	pthread_create(&threadMsgInHandler,   NULL, runMsgInHandlerThread, (void*) &msgInHandler);
+
+	Webserver webServer;
+	webServer.mainLoop();
+	//msgInHandler.runHandler();
+}
+
+void * runMsgInHandlerThread(void *ptr) {
+
+	((MsgInHandler*)ptr)->runHandler(); // !!! Blocking function
+	return 0;
 }

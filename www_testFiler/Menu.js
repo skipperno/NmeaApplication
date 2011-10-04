@@ -288,6 +288,14 @@ function onSliderMoved(sliderIndex, pos) {
 		onLightPresets(pos); 
 	} else if (sliderIndex == 53) { // DAY/NIGHT
 		onDayNight(pos); 
+	} else if(sliderIndex == 202) { 		// Position changed
+		selectedTranscChannel.position = pos;
+	} else if(sliderIndex == 203) { // Freq. 1 changed
+		selectedTranscChannel.freq1 = pos;
+		sliderFreq1.changeUnderText("Frequency: " + pos*10 + "kHz");
+	} else if(sliderIndex == 204) { // Freq. 2 changed
+		selectedTranscChannel.freq2 = pos;
+		sliderFreq2.changeUnderText("Frequency: " + pos*10 + "kHz");
 	}
 
 }
