@@ -98,6 +98,7 @@ bool MsgInHandler::getLastEchoMessage(char* pStream) {
 }
 
 bool MsgInHandler::changeBaudRate_serial3(int newBaud) {
+	return true;
 	printf("************************************************\n");
 	printf("***       RESTART SERIAL PORT 3 (ttyS2)?    ****\n");
 	printf("************************************************\n");
@@ -113,6 +114,29 @@ printf("Wait\n");
 	printf("Wait end. Create new thread\n");
 	return true;
 }
+
+int MsgInHandler::sendMsgSerial1 (const char* pBuffer, int length) {
+	//return serialPort1.sendSerial(pBuffer, length);
+	return 0;
+}
+int MsgInHandler::sendMsgSerial2 (const char* pBuffer, int length) {
+	//return serialPort2.sendSerial(pBuffer, length);
+	return 0;
+}
+int MsgInHandler::sendMsgSerial3 (const char* pBuffer, int length) {
+	return serialPort3.sendSerial(pBuffer, length);
+}
+
+int MsgInHandler::selfTest(int on_off, int source){
+	if (on_off == 1) {
+		selftest.startTest(source);
+	} else {
+		selftest.stopTest();
+	}
+
+	return 0;
+}
+
 /*
 void MsgInHandler::onReceivedNewDisplayChoice(int nSource, int selectedChoice) {
 	printf("************************************************\n");
@@ -190,7 +214,7 @@ void MsgInHandler::runHandler() {
 	NmeaComm stream2;
 	char nmeaAsciBuffer[17000];
 	//char nmeaOutBuffer[1000];
-
+	char tempBuf[500];
 	int nmeaAsciBufferLength;
 
 
@@ -205,14 +229,16 @@ void MsgInHandler::runHandler() {
 	for (;;) {
 		eSignal = signalGenerator->waitOnSignal();
 		if (eSignal != NULL) {
-			if (eSignal->signalType == 1) {
+			if (eSignal->signalType == 1) { // Curtis data received
 				eByteArray = (EByteArray*) eSignal->msg;
-				// DataProcessing::kalmanFilter(pBuffer, 400, outArray);
-				// ButterworthLowPassFilter::test(outArray, 400, outArray);
+				 DataProcessing::kalmanFilter(&eByteArray->data()[1], 400, tempBuf);
+				//ButterworthLowPassFilter::test(&eByteArray->data()[1], 400, &eByteArray->data()[1]);
+				/*int nButtom = DataProcessing::bottomDetection(
+						&eByteArray->data()[1], 400);*/
 				int nButtom = DataProcessing::bottomDetection(
-						&eByteArray->data()[1], 400);
-				NewEchoParser::convertDataToAsciNmea(nButtom, nRange, nGain,
-						&eByteArray->data()[1], 400, nmeaAsciBuffer,
+						tempBuf, 400);
+				NewEchoParser::convertDataToAsciNmea(nButtom, Data::getInstance()->getRange(), nGain,
+						tempBuf, 400, nmeaAsciBuffer,//&eByteArray->data()[1], 400, nmeaAsciBuffer,
 						&nmeaAsciBufferLength);
 
 				EchoDataWebSocket::broadcastMsgToClients(nmeaAsciBuffer, nmeaAsciBufferLength);

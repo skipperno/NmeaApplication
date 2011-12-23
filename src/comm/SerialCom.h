@@ -14,6 +14,7 @@ public:
 	virtual ~SerialCom();
 	int  openSerial(const char* portName, int bautRate);
 	int receiveSerial(char* pBuffer, int length);
+	int sendSerial(const char* pBuffer, int length);
 	void closeSerial();
 private:
 	int tty_fd;

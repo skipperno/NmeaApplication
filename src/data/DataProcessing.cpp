@@ -12,7 +12,7 @@
 
 #define SAMPLE_FILTER_COUNT 20
 // !!! Must be same as in file "DataProcessing.cpp"
-int rangeMaxValues[]={1600,1000,500,100,50,10}; //the same values as max values in "Range.js"
+int rangeMaxValues[]={10, 50, 100, 500, 1000, 1600}; //the same values as max values in "Range.js"
 
 DataProcessing::DataProcessing() {
 	// TODO Auto-generated constructor stub
@@ -29,7 +29,7 @@ void DataProcessing::kalmanFilter(char* inArray, int dataLength, char*outArray) 
 	float P_last = 0;
 	//the noise in the system
 	float Qk = 0.042;//0.022;   // !!! Kan ikke brukes 0 (hvis Rk er også 0 => error)
-	float Rk = 4.1;//0.917; //0.617; // bruk "0" for å disable
+	float Rk = 9.1;//0.917; //0.617; // bruk "0" for å disable
 
 	float K;
 	float P_temp;
@@ -56,14 +56,34 @@ int DataProcessing::bottomDetection(char* inArray, int dataLength) {
 	int nMaxSegInd = getTopSegment(nSegmArray, nSegmsCount);
 
 
-	int bottom = getBottomStartIndex((unsigned char*) inArray, dataLength,
-			nMaxSegInd, nSegmentLength);
+	int bottom;/* = getBottomStartIndex((unsigned char*) inArray, dataLength,
+			nMaxSegInd, nSegmentLength);*/
 	//printf("MAX %d, depth: %d\n", nMaxSegInd, bottom);
-
-	bottom = rangeMaxValues[Data::getInstance()->getRange()] * bottom / 400;
+	int nButtIndex = getMaxDiff((unsigned char*) inArray, dataLength);
+bottom = rangeMaxValues[Data::getInstance()->getRange()] * nButtIndex / 40; // *10/400
+	/*bottom = rangeMaxValues[Data::getInstance()->getRange()] * bottom / 40;*/
 
 	//printf("BOTTOM: %d\n", bottom);
 	return bottom; // nMaxSegInd*nSegmentLength;
+}
+
+int DataProcessing::getMaxDiff(unsigned char* inArray, int arrayLenght) {
+	int nMax = 0;
+	int nTemp;
+	int nInd = 0;
+
+	for (int i = 0; i < arrayLenght - 10; i++) {
+		int j;
+		for (j=i; j<i+10;j++) {
+			nTemp = inArray[j] - inArray[i];
+			if (nMax < nTemp) {
+				//printf("YES, %d\n",nMax);
+				nMax = nTemp;
+				nInd = i;
+			}
+		}
+	}
+	return nInd;
 }
 
 /*
@@ -162,6 +182,6 @@ int DataProcessing::getIncreasingStart(unsigned char* inArray, int arrayLenght, 
 			return topIndex - i;
 	}
 
-	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WRONG BOTTOM DETECTION?????\n");
+	//printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WRONG BOTTOM DETECTION?????\n");
 	return topIndex - maxSearchLength;
 }

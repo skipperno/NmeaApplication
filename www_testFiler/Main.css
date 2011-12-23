@@ -3,8 +3,9 @@
 
 BODY
 {
-	font-family: "Times New Roman", serif ;
-   /* FONT-FAMILY: Verdana,"BitStream vera Sans",Tahoma,Helvetica,Sans-serif;*/
+	/*font-family: "Times New Roman", serif ;*/
+	font-family: Helvetica;
+    /*FONT-FAMILY: Verdana,"BitStream vera Sans",Tahoma,Helvetica,Sans-serif;*/
     COLOR: #555;
     FONT-SIZE: 11px;
 	margin:0px;
@@ -32,7 +33,7 @@ BODY
    	WIDTH: 640px;
 	height:480px;
 	BACKGROUND: #404040;/*#282828;*/
-	border:2px ridge #C90;
+	/*border:2px ridge #C90;*/
 	position:relative;
 }
 
@@ -58,7 +59,7 @@ BODY
 }
 
 #eastContainer{
-	margin: 0px;
+	margin-top: 150px;/*test, skal vare 0px;*/
 	width: 78px;
 	float:left;
 	height:280px;/*100%;*/

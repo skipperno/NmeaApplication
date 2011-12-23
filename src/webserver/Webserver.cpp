@@ -10,7 +10,7 @@
 
 #include "Webserver.h"
 
-#include "ServerPublic.h"
+#include "ServerConstants.h"
 
 //#define DEBUG_WEBSERVER
 
@@ -101,7 +101,7 @@ int Webserver::callback_http(struct libwebsocket_context * context,
 	char wantedFile[256];
 	char extension[64];
 #ifdef DEBUG_WEBSERVER
-	fprintf(stderr, "callback HTTP, fd: %d, reason: %d\n", libwebsocket_get_socket_fd(wsi), reason);
+	fprintf(stderr, "callback HTTP, fd: %d, reason: %s\n", libwebsocket_get_socket_fd(wsi), ServerConstants::getCallbackReasonText(reason));
 #endif
 
 	switch (reason) {
@@ -124,7 +124,9 @@ int Webserver::callback_http(struct libwebsocket_context * context,
 			if (libwebsockets_serve_http_file(wsi,wantedFile, extension)) { //"image/x-icon"))
 				fprintf(stderr, "Failed to send file: %s\n", wantedFile);
 			} else {
+#ifdef DEBUG_WEBSERVER
 				fprintf(stderr, "=====Sent file: %s\n", wantedFile);
+#endif
 			}
 			break;
 		} else {
@@ -147,15 +149,18 @@ int Webserver::callback_http(struct libwebsocket_context * context,
 
 		libwebsockets_get_peer_addresses((int)(long)user, client_name,
 			     sizeof(client_name), client_ip, sizeof(client_ip));
-
+#ifdef DEBUG_WEBSERVER
 		fprintf(stderr, "Received network connect from %s (%s)\n",
 							client_name, client_ip);
+#endif
 
 		/* if we returned non-zero from here, we kill the connection */
 		break;
 
 	default:
+#ifdef DEBUG_WEBSERVER
 		fprintf(stderr, "callback_http(), default case? Reason %d**********\n", (int)reason);
+#endif
 		break;
 	}
 

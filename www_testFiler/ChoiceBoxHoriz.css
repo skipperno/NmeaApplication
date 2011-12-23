@@ -19,7 +19,7 @@
 	/*background:#1c1c1c;*/
 	/*height:60px;*/
 	background: url(images/backHSlid.png); /*horisChoiceCenter.png);*/
-	background-repeat:repeat-x;
+	/*background-repeat:repeat-x;*/
 	position:relative;
 	float:left;
 } 
@@ -48,6 +48,15 @@
 	top:20px;
 }
 
+
+#horChoiceMainText{
+	position:absolute;
+	left:0px;
+	/*top:0px; autocalculated using icon height */
+	width:100%;
+	text-align:center;
+}
+
 .horChoiceText{
 	position:absolute;
 	left:0px;
@@ -55,7 +64,6 @@
 	width:100px;
 	text-align:center;
 }
-
 
 /********** TEST ****************/
 .choiceIc{

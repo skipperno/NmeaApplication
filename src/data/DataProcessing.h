@@ -17,6 +17,7 @@ public:
 	static int bottomDetection(char* inArray, int dataLength);
 
 private:
+	static int getMaxDiff(unsigned char* inArray, int arrayLenght);
 	static void getSegmentsArray(char* inArray, int dataLength, int segmentsCount, int segmLeng, int* segmArray);
 	static int getTopSegment(int* inArray, int dataLength);
 

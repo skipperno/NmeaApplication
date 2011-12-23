@@ -5,16 +5,17 @@ SliderVertical.isSupported = typeof document.createElement != "undefined" &&
 	typeof document.documentElement != "undefined" &&
 	typeof document.documentElement.offsetWidth == "number";*/
 	
-function onVerticalSliderMoved(sliderIndex, pos) {
+//function onVerticalSliderMoved(sliderIndex, pos) {
 	/*if (sliderIndex == 3) {
 		changeTimeRange(pos);
 	} else if (sliderIndex == 4) {
 		changeRange(pos);
 	}*/
-}
+//}
 
 
 function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContainer,textArray) {
+	this.currentValue = 0;
 	this.currentStep=0;
 	this.mouseDownX;
 	this.mouseDownY;
@@ -108,13 +109,14 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 	$(this.verticalSliderCenter).mousedown(function(e){
 		var offset = $(this).offset();
 		//var offset = $(this).offset();
-  		var x = parseInt(e.pageX - offset.left);
+  		//var x = parseInt(e.pageX - offset.left);
  		var y = parseInt(e.pageY - offset.top);
 
 	 	/*this.myObject.mouseDownX = x;//mouseX; mousePos.
  		this.myObject.mouseDownY = y; // mouseY; mousePos.
 		*/
 		this.myObject.setNewPos(y, true);
+		onSliderMoved(this.myObject.sliderIndex, this.myObject.currentStep);
 	});
 
 	$(this.verticalSliderHandleButton).mousedown(function(e){
@@ -133,8 +135,9 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
 			//this.myObject.verticalSliderHandleButton.setAttribute("style", "left:" + (xx - this.myObject.mouseDownY) + "px");
 			this.myObject.setNewPos(yy - this.myObject.mouseDownY, false);
 			
-			onVerticalSliderMoved(this.myObject.sliderIndex, (yy - this.myObject.mouseDownY));
-			return preventEv(e);
+			//onSliderMoved(this.myObject.sliderIndex, (yy - this.myObject.mouseDownY));
+			//onVerticalSliderMoved(this.myObject.sliderIndex, (yy - this.myObject.mouseDownY));
+			return preventEv2(e);
 		 });
 		
 		$(this.myObject.verticalSliderBody).mouseup(function(e){
@@ -144,10 +147,12 @@ function SliderVertical(slidIndex, slidName, slMin, slMax, slStart, parentContai
   			var yy = parseInt(e.pageY - offset2.top);
 			
 			this.myObject.setNewPos(yy - this.myObject.mouseDownY, true);
-			return preventEv(e);
+			
+			onSliderMoved(this.myObject.sliderIndex, this.myObject.currentStep);
+			return preventEv2(e);
 		 });
 
-		return preventEv(e);
+		return preventEv2(e);
     }); 
 }
 
@@ -168,9 +173,15 @@ SliderVertical.prototype.setNewPos = function(newX, anim) {
 	} else{
 		this.verticalSliderHandleButton.setAttribute("style", "top:" + calcX + "px");
 	}
+	
+	this.currentValue = this.slMin + this.currentStep * (this.slMax - this.slMin);
 }
 
-function preventEv(e){
+SliderVertical.prototype.setNewIndex = function(newIndex, anim) {
+	this.setNewPos(newIndex*segmentHeight, anim);
+}
+
+function preventEv2(e){
 		if (e.preventDefault)
         		e.preventDefault();
     	else

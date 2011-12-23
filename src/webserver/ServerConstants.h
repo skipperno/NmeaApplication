@@ -1,15 +1,12 @@
 /*
- * ServerPublic.h
+ * ServerConstants.h
  *
- *  Created on: Sep 30, 2011
+ *  Created on: Oct 4, 2011
  *      Author: ernad
  */
 
-#ifndef SERVERPUBLIC_H_
-#define SERVERPUBLIC_H_
-
-#include "Webserver.h"
-#include "DataWebSocket.h"
+#ifndef SERVERCONSTANTS_H_
+#define SERVERCONSTANTS_H_
 
 /////////////////////////////////////////////////////////////////
 // session can be used to save some info about this user
@@ -36,6 +33,13 @@ enum demo_protocols {
 	DEMO_PROTOCOL_COUNT
 };
 
+class ServerConstants {
 
+public:
+	ServerConstants();
+	virtual ~ServerConstants();
 
-#endif /* SERVERPUBLIC_H_ */
+	static const char* getCallbackReasonText(int nReason);
+};
+
+#endif /* SERVERCONSTANTS_H_ */

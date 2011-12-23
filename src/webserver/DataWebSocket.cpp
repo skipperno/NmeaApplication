@@ -6,16 +6,19 @@
  */
 
 #include "DataWebSocket.h"
+#include "ServerConstants.h"
+#include "Webserver.h"
 
 #include "../data/Data.h"
 
-#include "ServerPublic.h"
+
 
 
 unsigned char dataMsg[1000];
 int dataLength = 0;
 unsigned char broadcastMsg[1300];
 int broadcastLength = 0;
+
 
 
 DataWebSocket::DataWebSocket() {
@@ -31,7 +34,9 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 		struct libwebsocket *wsi,
 		enum libwebsocket_callback_reasons reason,
 				       void *user, void *in, size_t len){
-//	fprintf(stderr, "*****callback Mirror, fd: %d, reason: %d\n", libwebsocket_get_socket_fd(wsi), reason);
+#ifdef DEBUG_WEBSERVER
+	fprintf(stderr, "*****callback Mirror, fd: %d, reason: %s\n", libwebsocket_get_socket_fd(wsi), ServerConstants::getCallbackReasonText(reason));
+#endif
 
 			int n;
 			// DON'T REMOVE THIS, can be used as session
@@ -41,8 +46,8 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 			switch (reason) {
 
 			case LWS_CALLBACK_ESTABLISHED:
-		#ifdef DEBUG_WEBSERVER
-				fprintf(stdout, "Mirror established\n");
+#ifdef DEBUG_WEBSERVER
+				fprintf(stdout, "**********Mirror established\n");
 		#endif
 				/*pss->ringbuffer_tail = ringbuffer_head;
 				pss->wsi = wsi;*/
@@ -63,15 +68,17 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 		#endif
 			//	fprintf(stdout, "!!!!!!!!!!!!!!!!!!!!Mirror LWS_CALLBACK_BROADCAST\n");
 				n = libwebsocket_write(wsi, &broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], broadcastLength, LWS_WRITE_TEXT);
+		#ifdef DEBUG_WEBSERVER
 				fprintf(stdout, "LWS_CALLBACK_BROADCAST END, length: %d\n", broadcastLength);
-
+		#endif
 				break;
 
 			case LWS_CALLBACK_RECEIVE:
 		#ifdef DEBUG_WEBSERVER
 				fprintf(stdout, "Mirror LWS_CALLBACK_RECEIVEE, %d\n", (int)wsi);
-		#endif
+
 				fprintf(stderr, "Received command widht length: %d\n", len);
+		#endif
 				memcpy((char*)&broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], in, len);
 				memcpy((char*)dataMsg, (char*)&broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], len);
 				broadcastLength = len;
@@ -114,6 +121,7 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 				break;
 
 			default:
+				fprintf(stderr, "!!! callbackDataWebSocket(), default case? Reason %d**********\n", (int)reason);
 				break;
 			}
 
@@ -129,5 +137,7 @@ void DataWebSocket::broadcastMsgToClients(char* msg, int nLen) {
 	memcpy((char*)&broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], msg, nLen);
 	broadcastLength = nLen;
 	libwebsockets_broadcast(&protoc[PROTOCOL_LWS_MIRROR], &buf[LWS_SEND_BUFFER_PRE_PADDING], 1); //PROTOCOL_LWS_MIRROR = 2
+#ifdef DEBUG_WEBSERVER
 	printf("Broadcast %d bytes\n", nLen);
+#endif
 }

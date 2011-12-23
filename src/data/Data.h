@@ -24,11 +24,13 @@ public:
 
 	void setGain(int newGain);
 	void setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon);
+	void setPowerMeasurment(int nAdcIndex, int value);
 	// TODO: wrong place for this function
 	void sendNmeaMsg(char* nmeaMsg, int nDirection);
 
 	void getJsonData(char* msg);
 	void getJsonTop(char* msg);
+	//void getPowerData(char* msg);
 	void parseJsonMsg(char* msg);
 	int getGain();
 	int getTvg();
@@ -72,6 +74,8 @@ private:
 	Object jsonDisplay;
 	Object jsonBaud;
 	Object jsonIO;
+	Object jsonPower;
+	Object jsonTest;
 
 	void initSignalData();
 	void initTopInfoData();
@@ -79,6 +83,8 @@ private:
 	void initJsonDisplayData();
 	void initJsonBaudData();
 	void initIoData();
+	void initJsonTestData();
+	//void initJsonPowerData();
 
 	void changeBaud(int sourceNo, int newBaudIndex);
 

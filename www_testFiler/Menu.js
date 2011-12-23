@@ -1,6 +1,6 @@
 var menuShown = false;
 var selectedHorizMenuIndex = -1;
-var selectedVerticalMenuIndex = 0;
+var selectedVerticalMenuIndex = -1;
 
 var selectedIO_source = -1;
 
@@ -10,7 +10,6 @@ var shownScope = false;
 
 
 function initMenu() {
-
 	initHorisontalSubMenu();
 	setMenuShown(false);
 }
@@ -24,68 +23,150 @@ function onSetupButtonClick() {
 	if (menuShown) {
 		setMenuShown(false);
 		//myElement.src = "images/MenuShow.png";
-		myElement.style.backgroundImage='url(images/MenuShow.png)';
+		myElement.style.backgroundImage='url(images/MenuShow3.png)';
 	} else {
 		setMenuShown(true);
-		onMainMenuClickCallback(selectedVerticalMenuIndex);
+		//onMainMenuClickCallback(-1); //select item 0
 		
-		myElement.style.backgroundImage='url(images/MenuBack.png)';
+		myElement.style.backgroundImage='url(images/MenuBack3.png)';
 	}
 }
 
 function onSetupButtonOver() {
-	if (!menuShown) {
+	/*if (!menuShown) {
 		var myElement = document.getElementById('menuOnOffBut');
 		myElement.style.backgroundImage='url(images/MenuShow_2.png)';
-		//myElement.src = "images/MenuShow_2.png";
-	}
+	}*/
 }
 function onSetupButtonOut() {
 	if (!menuShown) {
 		var myElement = document.getElementById('menuOnOffBut');
-		myElement.style.backgroundImage='url(images/MenuShow.png)';
+		myElement.style.backgroundImage='url(images/MenuShow3.png)';
 		//myElement.src = "images/MenuShow.png";
 	}
 }
 
 function setMenuShown(show) {
 	if (show) {
-		showHorizontalMenu(0);
+		//showHorizontalMenu(-1);
+		resetVertMenu();
 		$(vertMenuSliding).show();
 	} else {
-		showHorizontalMenu(-1);
+		$("#subMenu").animate({top:'60px'},400);
+		//showHorizontalMenu(-1);
+		resetVertMenu();
 		$(vertMenuSliding).hide();
-		$('#sliderChoice').empty();
-		$('#sliderChoice').hide();
+		removeSlider();
 	}
 	menuShown = show;
 }
 
+function removeSlider(){
+	removeRangeSlider();
+	$('#sliderChoice').empty();
+	$('#sliderChoice').hide();
+	
+	$('#nmeaPanel').hide();
+	
+	$("#statusDiv").hide();
+	
+	$("#alarmSlidDiv_1").empty();
+	$("#alarmSlidDiv_2").empty();
+	$("#alarmSlidDiv").hide();
+	removeBigBoat();
+	statusShown = false;
+	//$("#statusDiv").empty();
+}
 
+var statusShown = false;
+var showHorisontalMenu;
 /** ******************************************** */
 /** *******         Vertical Menu Callback              ****** */
 /** ******************************************** */
 function onMainMenuClickCallback(menuIndex) {
-	selectVerticalMenu(menuIndex);
-	showHorizontalMenu(menuIndex);
+	showHorisontalMenu = true;
+	deselectOtherHorizontalMenuItems(-1); //deselect all horisontal items
+	removeSlider();
+	if (menuIndex == selectedVerticalMenuIndex) { // the same item, remove menu
+		if (menuIndex == PICT_SPEED) { //TRANSDUCER) {
+			onBoatIconPush(); // remove boat icon
+		}
+		setMenuShown(false);
+		return;
+	}
+	
+	if (menuIndex != -1) {
+		$("#subMenu").animate({top:'60px'},200);
+	} else
+		menuIndex = 0;
+	
+	if(menuIndex == STATUS){
+		if(statusShown){
+			$("#statusDiv").hide();
+			statusShown = false;
+		} else {
+			$("#statusDiv").show();
+			statusShown = true;
+		}
+		showHorisontalMenu = false;
+		//return;
+	} else if (menuIndex == TRANSDUCER) { 
+		showHorisontalMenu = false;
+		onBoatIconPush();
+	} else if (menuIndex == PICT_SPEED) { 
+		showHorisontalMenu = false;
+		showTimeScaleCheckBox();
+	} else if (menuIndex == MARK) {
+		showHorisontalMenu = false;
+		echoCanvas1.paintMark();
+	} else if (menuIndex == ALARMS) {
+		showHorisontalMenu = false;
+		showAlarmSliders();
+	}
+		
+	
+	selectVerticalMenu(menuIndex);	
 	selectedVerticalMenuIndex = menuIndex;
+	
+	/*$("#menuBar").css('top','240px');
+	$("#menuBar").css('left','470px');
+	$("#menuBar").animate({left:'0px'},300);
+	$("#menuBar").animate({top:'360px'},400);*/
+	
+	/*$("#menuBar").css('left','470px');
+	$("#menuBar").animate({left:'0px'},300);*/
+	if(showHorisontalMenu) {
+		showHorizontalMenu(menuIndex);
+		
+		$("#subMenu").css('top','60px');
+		$("#subMenu").animate({top:'0px'},400);
+	}
+}
+
+function onPictureSpeedButtonPush() {
+	if(boatShown){
+		removeTimeSlider();
+	} else {
+		showTimeSlider();
+	}
+}
+
+function onBoatIconPush(){
+	if(boatShown){
+		//verMenuArray[TRANSDUCER].selected = false;
+		removeBigBoat();
+		/*$('#sliderChoice').hide();
+		$('#sliderChoice').empty();*/
+	} else {
+		//verMenuArray[TRANSDUCER].selected = true;
+		showBigBoat();
+		//showPosition();
+		//onMainMenuClickCallback(TRANSDUCER);
+	}
+		
 }
 
 function onHorisontalMenuCallback(menuIndex, pushed) {
-	/*if (!pushed) { // the same button released
-		$('#sliderChoice').empty();
-		
-		if (selectedHorizMenuIndex == menuIndex) {// the same button
-			selectHorizontalMenu(-1);
-			selectedHorizMenuIndex = -1;
-			$('#sliderChoice').hide();
-			return;
-		}
-		
-	}*/
-	
-	// TODO: save?
-	
 	if (pushed) {
 		if (selectedHorizMenuIndex > -1) { // other button was pushed 
 			
@@ -97,7 +178,7 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 	}
 	
 	switch(menuIndex){
-	case AL_L:
+	/*	case AL_L:
 		if (pushed)
 			showAlarm_L();  
 		else
@@ -109,30 +190,27 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 		else
 			$('#sliderChoice').empty();
 		break;
-	/*case 2: //MARK
-		if (pushed)
-			showPosition();
-		else
-			$('#sliderChoice').empty();
-		break;*/
-	case POSITION: //POSITION
+	case 2: //MARK
 		if (pushed)
 			showPosition();
 		else
 			$('#sliderChoice').empty();
 		break;
+	case POSITION: //POSITION
+		if (pushed)
+			showPosition();
+		else
+			$('#sliderChoice').empty();
+		break;*/
 	/*case 4: //DRAUGHT
 		if (pushed)
 			// 
 		else
 			$('#sliderChoice').empty();
-		break;*/
+		break;
 		
 	case MODE: //MODE
-		/*if (pushed)
-			showAlarm_L();
-		else
-			$('#sliderChoice').empty();
+
 		break;*/
 	case GAIN: // GAIN
 		if (pushed)
@@ -150,12 +228,6 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 	case PWR: // PWR
 		if (pushed)
 			showPOW();
-		else
-			$('#sliderChoice').empty();
-		break;
-	case FREQ: // FREQ
-		if (pushed)
-			showFREQ();
 		else
 			$('#sliderChoice').empty();
 		break;
@@ -199,10 +271,8 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			changeToEchoScreen();
 		}
 		break;
-	case 14:
-		if (pushed) {
-			//showParity();
-		} else {$('#sliderChoice').empty();}
+	case COLOR:
+		showColor();
 		break;
 	case TRANSCEIVER:
 		if (pushed) {
@@ -212,28 +282,8 @@ function onHorisontalMenuCallback(menuIndex, pushed) {
 			}
 		break;
 		
-		
-		
-		
-		/*   SCOPE
-		 if (pushed) {
-			changeHorMenuButtonValue(menuIndex, "On");
-			changeToScopeScreen();
-		} else {
-			changeHorMenuButtonValue(menuIndex, "Off");
-			changeToEchoScreen();
-		}
-		break;
-		 */
-		
-		/*  GREEN/BLUE
-		  if (pushed) {
-			changeToGreen();
-		} else {}
-		break;
-		 */
-		
 	default:
+		deselectOtherHorizontalMenuItems(-1); //deselect all horizontal items
 		alert("NOT IMPELMENTED");
 		break;
 	}
@@ -258,15 +308,23 @@ function onSliderMoved(sliderIndex, pos) {
 		updateAlarmIcons();
 		sendToServer(JSON.stringify(jsonDATA));
 	} else  if (sliderIndex == 3) { // transducer position
-		changeSignalBeamIconPos(4 - pos);
+		onBigBoatClick( pos + 1);
+		
+		if(jsonTransceiver.jsonTransceiverCH1.position == pos)
+			jsonTransceiver.activeCh = 0;
+		else if(jsonTransceiver.jsonTransceiverCH2.position == pos)
+			jsonTransceiver.activeCh = 1;
+		
+		updateTransceiverInfo();
+		
 		//"fwd", "port", "stb", "aft"
-		if(pos == 0) 
+		if(pos == 3) {
 			menuArray[3].changeValueText("fwd");
-		else if(pos == 1) 
+		} else if(pos == 2) 
 			menuArray[3].changeValueText("port");
-		else if(pos == 2) 
+		else if(pos == 1) 
 			menuArray[3].changeValueText("stb");
-		else if(pos == 3) 
+		else if(pos == 0) 
 			menuArray[3].changeValueText("aft");
 		//sendToServer(JSON.stringify(jsonDATA));
 	}  else if (sliderIndex == 6){
@@ -278,10 +336,12 @@ function onSliderMoved(sliderIndex, pos) {
 	} else if (sliderIndex == 8){
 		jsonDATA.signal.POW=pos;
 		sendToServer(JSON.stringify(jsonDATA));
-	} else if (sliderIndex == 100){ 
-		changeTimeRange(pos); 
-	} else if (sliderIndex == 101) {
+	} else if (sliderIndex == 100){  // RANGE
 		changeRange(pos); 
+		jsonDATA.range = pos;
+		sendToServer(JSON.stringify(jsonDATA));
+	} else if (sliderIndex == 101) { // TIME   
+		changeTimeRange(pos); 
 	} else if (sliderIndex == 51) { // BRIGHTNES
 		onBrightnes(pos);  // defined in Light.js
 	} else if (sliderIndex == 52) { // LIGHT PRESETS
@@ -293,38 +353,68 @@ function onSliderMoved(sliderIndex, pos) {
 	} else if(sliderIndex == 203) { // Freq. 1 changed
 		selectedTranscChannel.freq1 = pos;
 		sliderFreq1.changeUnderText("Frequency: " + pos*10 + "kHz");
+		updateTransceiverInfo();
 	} else if(sliderIndex == 204) { // Freq. 2 changed
 		selectedTranscChannel.freq2 = pos;
 		sliderFreq2.changeUnderText("Frequency: " + pos*10 + "kHz");
+	} else  if (sliderIndex == 701) { // Color
+		changeColor(pos);
 	}
 
 }
 
+function showAlarmSliders() {
+	showAlarm_L();
+	showAlarm_H();
+	$('#alarmSlidDiv').show();
+}
+
 function showAlarm_L(){
-	$('#sliderChoice').empty();
+	//$("#alarmSlidDiv_1").empty();
+	//$('#sliderChoice').empty();
 
 	var alarmText = [ "0m", "320m", "640m", "960m", "1280m", "1600m" ];
 	var mySlider = new SliderHorizontal(0, "Alarm Shallow",0, 1600, jsonDATA.alarm.L, document
-			.getElementById("sliderChoice"), alarmText, false);
-
+			.getElementById("alarmSlidDiv_1"), alarmText, false);
 	$('#sliderChoice').show();
+	//$('#sliderChoice').show();
 }
 
 function showAlarm_H(){
-	$('#sliderChoice').empty();
+	//$('#alarmSlidDiv_2').empty();
 
 	var alarmText = [ "0m", "320m", "640m", "960m", "1280m", "1600m" ];
 	var mySlider = new SliderHorizontal(1, "Alarm Deep",0, 1600, jsonDATA.alarm.H, document
-			.getElementById("sliderChoice"), alarmText, false);
+			.getElementById("alarmSlidDiv_2"), alarmText, false);
 
-	$('#sliderChoice').show();
+	//$('#sliderChoice').show();
 }
 
 function showPosition(){
 	$('#sliderChoice').empty();
-	var choiseTextArray = ["fwd", "port", "stb", "aft"];
+	var choiseTextArray = ["aft", "stb","port", "fwd"];
+	var activeChannel;
 	
-	var testChoice = new ChoiceBoxHoriz2(3, "Position", 1, document.getElementById("sliderChoice"), 4, choiseTextArray, "Checkbox.png", "CheckboxFull.png", 48,48,400, 90);
+	if(jsonTransceiver.activeCh == 0)
+		activeChannel = jsonTransceiver.jsonTransceiverCH1;
+	else if(jsonTransceiver.activeCh == 1)
+		activeChannel = jsonTransceiver.jsonTransceiverCH2;
+	
+	
+	var testChoice = new ChoiceBoxHoriz2(3, "Position", activeChannel.position, document.getElementById("sliderChoice"), 4, choiseTextArray, "Checkbox.png", "CheckboxFull.png", 48,48,400, 90);
+
+	$('#sliderChoice').show();
+}
+
+
+
+
+function showColor(){
+	$('#sliderChoice').empty();
+	var choiseTextArray = ["Normal", "Green","Blue", "Wrong"];
+	var activeChannel;
+	
+	var testChoice = new ChoiceBoxHoriz2(701, "Color", 0, document.getElementById("sliderChoice"), 4, choiseTextArray, "Checkbox.png", "CheckboxFull.png", 48,48,400, 90);
 
 	$('#sliderChoice').show();
 }

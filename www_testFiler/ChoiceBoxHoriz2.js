@@ -28,11 +28,10 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 	this.horisChoiceCenter.style.height = this.totHeight + "px";
 
 	this.nameDiv = this.document.createElement("DIV");
-	this.nameDiv.className = "horChoiceText";
-	this.nameDiv.unselectable = "on";
+	this.nameDiv.id = "horChoiceMainText";
 	this.nameDiv.innerHTML = shownText;
-	this.nameDiv.style.left = "150px";
-	this.nameDiv.style.top = iconHeight + "px";
+	//this.nameDiv.style.left = "150px";
+	this.nameDiv.style.top = (iconHeight + 5)+ "px";
 	
 	this.horisChoiceCenter.appendChild(this.nameDiv);
 	
@@ -47,10 +46,9 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 	for (i = 0; i < choiceCount; i++) {
 		this.txtDiv = this.document.createElement("DIV");
 		this.txtDiv.className = "horChoiceText";
-		this.txtDiv.unselectable = "on";
 		this.txtDiv.innerHTML = this.choiceNamesArray[i];
 		this.txtDiv.style.left = this.choicePosCenterArray[i] - 50 + "px";
-		this.txtDiv.style.top = this.iconHeight/2 - 12 + "px";
+		this.txtDiv.style.top = this.iconHeight/2 - 20 + "px";
 		
 		
 		
@@ -58,7 +56,6 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 		this.horChoiceIcon.className = "choiceIc";
 		this.horChoiceIcon.id = "choiceIc_id_" + this.myId + "_" + i;		
 		this.horChoiceIcon.style.backgroundImage="url(images/" + this.iconNorm + ")";
-		this.horChoiceIcon.unselectable = "on";
 		this.horChoiceIcon.style.width = this.iconWidth + "px";
 		this.horChoiceIcon.style.height = this.iconHeight+ "px";
 		this.horChoiceIcon.style.left = this.choicePosCenterArray[i] - this.iconWidth/2 + "px";

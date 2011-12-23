@@ -26,17 +26,16 @@ NewEchoParser::~NewEchoParser() {
 
 void NewEchoParser::convertDataToAsciNmea(int nButtom, int nRange, int nGain,
 		char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength) {
-	/*char averageBuffer[VERTICAL_RESOLUTION + 2]; // 2 for header (1- type, 2-range)
-
-	// My average filter
-		char outArray[401];
+/*
+		char outArray[VERTICAL_RESOLUTION + 1];
 	 DataProcessing::kalmanFilter(inBuffer, 400, outArray);
-	 NewEchoParser::convertAverageToAsciNmea(nRange, nGain, outArray, asciNmeaMsg, nAsciMsgLength);
-	 */
+//	 NewEchoParser::convertAverageToAsciNmea(nRange, nGain, outArray, asciNmeaMsg, nAsciMsgLength);
+	 memcpy(inBuffer, outArray, VERTICAL_RESOLUTION);
+*/
 	// Low pass filter
-	/*char outArray[401];
+/*	char outArray[VERTICAL_RESOLUTION + 1];
 	 ButterworthLowPassFilter::test(inBuffer, 400, outArray);
-	 NewEchoParser::convertAverageToAsciNmea(nRange, nGain, outArray, asciNmeaMsg, nAsciMsgLength);*/
+	 memcpy(inBuffer, outArray, VERTICAL_RESOLUTION);*/
 
 	// Normal
 	NewEchoParser::convertAverageToAsciNmea(nButtom, nRange, nGain, inBuffer,
@@ -90,7 +89,13 @@ void NewEchoParser::convertAverageToAsciNmea(int nButtom, int nRange,
 	nTvg = Data::getInstance()->getTvg();
 	nRange = 50; //TODO
 
-	if (nButtom > 999) {
+	if (nButtom > 9999) {
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom / 10000;
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 10000) / 1000;
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 1000) / 100;
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 100) / 10;
+			asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom % 10;
+	} else if (nButtom > 999) {
 		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + nButtom / 1000;
 		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 1000) / 100;
 		asciNmeaMsg[(*nAsciMsgLength)++] = 0x30 + (nButtom % 100) / 10;

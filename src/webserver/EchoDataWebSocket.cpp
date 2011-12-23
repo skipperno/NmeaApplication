@@ -6,6 +6,12 @@
  */
 
 #include "EchoDataWebSocket.h"
+#include "ServerConstants.h"
+
+#include "Webserver.h"
+
+#include "../data/Data.h"
+
 
 unsigned char echoBuffer[LWS_SEND_BUFFER_PRE_PADDING + 1024 +
 								  LWS_SEND_BUFFER_POST_PADDING];
@@ -39,9 +45,9 @@ int EchoDataWebSocket::callback_dumb_increment(struct libwebsocket_context * con
 			enum libwebsocket_callback_reasons reason,
 					       void *user, void *in, size_t len)
 {
-//#ifdef DEBUG_WEBSERVER
-	fprintf(stderr, "callback Increment, fd: %d, reason: %d\n", libwebsocket_get_socket_fd(wsi), reason);
-//#endif
+#ifdef DEBUG_WEBSERVER
+	fprintf(stderr, "callback Data websocket, fd: %d, reason: %s\n", libwebsocket_get_socket_fd(wsi), ServerConstants::getCallbackReasonText(reason));
+#endif
 	int n;
 	//unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + 512 +
 		//				  LWS_SEND_BUFFER_POST_PADDING];
@@ -52,7 +58,9 @@ int EchoDataWebSocket::callback_dumb_increment(struct libwebsocket_context * con
 	switch (reason) {
 
 	case LWS_CALLBACK_ESTABLISHED:
-		pss->number = 0;
+#ifdef DEBUG_WEBSERVER
+		fprintf(stdout, "********Data websocket established\n");
+#endif
 		break;
 
 	/*
@@ -62,41 +70,20 @@ int EchoDataWebSocket::callback_dumb_increment(struct libwebsocket_context * con
 	 */
 
 	case LWS_CALLBACK_BROADCAST:
-		fprintf(stdout, "increment LWS_CALLBACK_BROADCAST\n");
+#ifdef DEBUG_WEBSERVER
+		fprintf(stdout, "********Data websocket LWS_CALLBACK_BROADCAST\n");
+#endif
 
 		n = libwebsocket_write(wsi, &broadcastEchoMsg[LWS_SEND_BUFFER_PRE_PADDING], broadcastEchoLength, LWS_WRITE_TEXT);
-		fprintf(stdout, "LWS_CALLBACK_BROADCAST END, length: %d\n", broadcastEchoLength);
+#ifdef DEBUG_WEBSERVER
+		fprintf(stdout, "** END **Data websocket LWS_CALLBACK_BROADCAST, length: %d\n", broadcastEchoLength);
+#endif
 
-		/*n = sprintf((char *)p, "%d", pss->number++);
-		n = libwebsocket_write(wsi, p, n, LWS_WRITE_TEXT);
-		if (n < 0) {
-			fprintf(stderr, "ERROR writing to socket");
-			return 1;
-		}
-		if (close_testing && pss->number == 50) {
-			fprintf(stderr, "close tesing limit, closing\n");
-			libwebsocket_close_and_free_session(context, wsi,
-						       LWS_CLOSE_STATUS_NORMAL);
-		}*/
 		break;
-	/*case LWS_CALLBACK_SERVER_WRITEABLE:
-		fprintf(stdout, "increment LWS_CALLBACK_SERVER_WRITEABLE\n");
-				n = sprintf((char *)p, "%d", pss->number++);
-				n = libwebsocket_write(wsi, p, n, LWS_WRITE_TEXT);
-				if (n < 0) {
-					fprintf(stderr, "ERROR writing to socket");
-					return 1;
-				}
-				if (close_testing && pss->number == 50) {
-					fprintf(stderr, "close tesing limit, closing\n");
-					libwebsocket_close_and_free_session(context, wsi,
-								       LWS_CLOSE_STATUS_NORMAL);
-				}
-		break;*/
 
 	case LWS_CALLBACK_RECEIVE:
 #ifdef DEBUG_WEBSERVER
-		fprintf(stdout, "increment LWS_CALLBACK_RECEIVE\n");
+		fprintf(stdout, "Data websocket LWS_CALLBACK_RECEIVE\n");
 #endif
 		fprintf(stderr, "rx %d\n", (int)len);
 		if (len < 6)
@@ -116,6 +103,9 @@ int EchoDataWebSocket::callback_dumb_increment(struct libwebsocket_context * con
 		break;
 
 	default:
+#ifdef DEBUG_WEBSERVER
+		fprintf(stderr, "!!! callback Data websocket, default case? Reason %d**********\n", (int)reason);
+#endif
 		break;
 	}
 
@@ -128,5 +118,7 @@ void EchoDataWebSocket::broadcastMsgToClients(char* msg, int nLen) {
 	memcpy((char*)&broadcastEchoMsg[LWS_SEND_BUFFER_PRE_PADDING], msg, nLen);
 	broadcastEchoLength = nLen;
 	libwebsockets_broadcast(&protoc[PROTOCOL_DUMB_INCREMENT], &echoBuffer[LWS_SEND_BUFFER_PRE_PADDING], 1); //PROTOCOL_LWS_MIRROR = 2
+#ifdef DEBUG_WEBSERVER
 	printf("Broadcast ECHO %d bytes\n", nLen);
+#endif
 }

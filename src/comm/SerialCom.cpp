@@ -75,7 +75,7 @@ int SerialCom::openSerial(const char* portName, int baudRate)
                 if (read(tty_fd,&c,1)>0)        write(STDOUT_FILENO,&c,1);              // if new data is available on the serial port, print it out
                 else
                 	printf("!!!!!!!!!!read 0 bytes\n");
-             //   if (read(STDIN_FILENO,&c,1)>0)  write(tty_fd,&c,1);                     // if new data is available on the console, send it to the serial port
+        pBuffer[1]     //   if (read(STDIN_FILENO,&c,1)>0)  write(tty_fd,&c,1);                     // if new data is available on the console, send it to the serial port
                 usleep(30000);
         }
 
@@ -98,6 +98,10 @@ int SerialCom::receiveSerial(char* pBuffer, int maxLength) {
 			pBuffer[*length] =0;
 		} else
 			return;*/
+}
+
+int SerialCom::sendSerial(const char* pBuffer, int length) {
+	write(tty_fd, pBuffer, length);
 }
 
 

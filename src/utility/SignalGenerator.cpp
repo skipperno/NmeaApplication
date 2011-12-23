@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include <fcntl.h>
+#include <errno.h>
 
 
 SignalGenerator* signalGeneratorInstance [MAX_SIGNAL_GROUPS];
@@ -34,6 +35,8 @@ SignalGenerator::SignalGenerator(const char* semName) {
 	pJob_queue_count = sem_open(semaphoreName, O_CREAT, 0644, 0);
 	if (pJob_queue_count == SEM_FAILED) {
 		printf("Critical, cannot open semaphore\n");//TODO
+		fprintf(stderr,"sem_open(line %d) failed: %d: %s\n", __LINE__, errno, strerror(errno));
+
 	}
 }
 

@@ -4,6 +4,7 @@
  *  Created on: Aug 30, 2011
  *      Author: ernad
  */
+#include "../Selftest.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -16,6 +17,8 @@
 
 #include "../json/elements.h"
 using namespace json;
+
+
 
 void * runDataProvThread(void *ptr);
 

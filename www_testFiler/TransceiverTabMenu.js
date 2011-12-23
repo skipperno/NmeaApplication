@@ -9,6 +9,11 @@ var NUMB_OF_SUBMENU_TRANSC = 1; // use only if sliding
 var selectedTransceiverMenuIndex = -1;
 //$(slidingMenu).animate({left:'-425px'},400);
 
+function onHorisontalMenuCallbackTest(tabIndex) {
+	showChannel(tabIndex + 1);
+	//selectTransceiverTabMenu(tabIndex, true);
+}
+
 function initTransceiverMenu(parentDiv){
 	
 	fastTranscSubMenu = document.createElement("DIV");

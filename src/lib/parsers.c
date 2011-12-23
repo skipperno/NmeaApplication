@@ -21,16 +21,28 @@
 
 #include "private-libwebsockets.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// Ernad: changed for QtWebKit: added "WebSocket-Protocol", 19   // 19 is length of string "WebSocket-Protocol"
+// It is parameter in handshaking request sent from the browser (QtWebKit):
+//
+// GET /HTTP/1.1
+// Upgrade: WebSocket
+// Connection: Upgrade
+// Host: 10.31.1.128:7681
+// Origin: http://10.31.1.128:7681
+// WebSocket-Protocol: myProtocol
+
 const struct lws_tokens lws_tokens[WSI_TOKEN_COUNT] = {
 
 	/* win32 can't do C99 */
 
-/*	[WSI_TOKEN_GET_URI]	=	*/{ "GET ",			 4 },
+/*	[WSI_TOKEN_GET_URI]	=	*/{ "GET ",			 4 }, //!!! Ernad, must be first
 /*	[WSI_TOKEN_HOST]	=	*/{ "Host:",			 5 },
 /*	[WSI_TOKEN_CONNECTION]	=	*/{ "Connection:",		11 },
 /*	[WSI_TOKEN_KEY1]	=	*/{ "Sec-WebSocket-Key1:",	19 },
 /*	[WSI_TOKEN_KEY2]	=	*/{ "Sec-WebSocket-Key2:",	19 },
 /*	[WSI_TOKEN_PROTOCOL]	=	*/{ "Sec-WebSocket-Protocol:",	23 },
+/*	[WSI_TOKEN_QTPROTOCOL]	=	*/{ "WebSocket-Protocol:",	19 }, // Ernad: for QT WebKit
 /*	[WSI_TOKEN_UPGRADE]	=	*/{ "Upgrade:",			 8 },
 /*	[WSI_TOKEN_ORIGIN]	=	*/{ "Origin:",			 7 },
 /*	[WSI_TOKEN_DRAFT]	=	*/{ "Sec-WebSocket-Draft:",	20 },
@@ -52,13 +64,17 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 {
 	int n;
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Ernad: changed for QtWebKit:
+	// Here is not used "WSI_TOKEN_QTPROTOCOL". When "WebSocket-Protocol" is received, parser_state is
+	// changed to "WSI_TOKEN_PROTOCOL" and not to "QTPROTOCOL" (TODO?)
 	switch (wsi->parser_state) {
 	case WSI_TOKEN_GET_URI:
 	case WSI_TOKEN_HOST:
 	case WSI_TOKEN_CONNECTION:
 	case WSI_TOKEN_KEY1:
 	case WSI_TOKEN_KEY2:
-	case WSI_TOKEN_PROTOCOL:
+	case WSI_TOKEN_PROTOCOL:   //if we are in this state, string: "Sec-WebSocket-Protocol:" is recevied and we are receiving e.g. "myProtocolName".
 	case WSI_TOKEN_UPGRADE:
 	case WSI_TOKEN_ORIGIN:
 	case WSI_TOKEN_SWORIGIN:
@@ -70,7 +86,6 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 	case WSI_TOKEN_NONCE:
 	case WSI_TOKEN_EXTENSIONS:
 	case WSI_TOKEN_HTTP:
-		// ernad debug("WSI_TOKEN_(%d) '%c'\n", wsi->parser_state, c);
 
 		/* collect into malloc'd buffers */
 		/* optional space swallow */
@@ -100,6 +115,16 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 			wsi->utf8_token[wsi->parser_state].token =
 			       realloc(wsi->utf8_token[wsi->parser_state].token,
 							wsi->current_alloc_len);
+		}
+		if (wsi->parser_state == WSI_TOKEN_PROTOCOL && c == '\x0d' && wsi->utf8_token[WSI_TOKEN_VERSION].token_len) {
+			// Ernad: both "WebSocket-Protocol" and "Sec-WebSocket-Protocol" is using the same state (WSI_TOKEN_PROTOCOL). If
+			// TOKEN_VERSION is "-1", it's QtWebKit ("WebSocket-Protocol) and we don't need more data
+			if (wsi->utf8_token[WSI_TOKEN_VERSION].token[0] == '-') {// Ernad, protocol = -1 => old protocol used by QT
+				wsi->utf8_token[wsi->parser_state].token[wsi->utf8_token[wsi->parser_state].token_len] = '\0';
+				// printf("*end of QT protocol name? \n");
+				wsi->parser_state = WSI_PARSING_COMPLETE;
+				break;
+			}
 		}
 
 		/* bail at EOL */
@@ -168,8 +193,25 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 				continue;
 			if (strcmp(lws_tokens[n].token, wsi->name_buffer))
 				continue;
-			debug("known hdr '%s'\n", wsi->name_buffer);
-			wsi->parser_state = WSI_TOKEN_GET_URI + n;
+			if(n == WSI_TOKEN_QTPROTOCOL) {
+				//////////////////////////////////////////////////////////////////////////
+				// Ernad: We have received: "WebSocket-Protocol:" and next string is protocol
+				// name (e.g. myProtocolName). It is handshaking from
+				// QtWebKit. Change state to "WSI_TOKEN_PROTOCOL" (TODO: change to "WSI_TOKEN_QTPROTOCOL")
+				// and set Token Version to "-1". !!! Qt is not sending any protocol version.
+				// We can not use positive (because of "if" test many places in code e.g. "if (protocol < 4 ...)" )
+				//////////////////////////////////////////////////////////////////////////
+				debug("!!!! QT known hdr '%s'\n", wsi->name_buffer);
+				wsi->utf8_token[WSI_TOKEN_VERSION].token = malloc(3);
+				wsi->parser_state = WSI_TOKEN_PROTOCOL; // change to standard protocol parameter
+				wsi->utf8_token[WSI_TOKEN_VERSION].token[0] = '-'; // QT WebKit has not version as parameter. Set it to "-1"
+				wsi->utf8_token[WSI_TOKEN_VERSION].token[1] = '1'; //
+				wsi->utf8_token[WSI_TOKEN_VERSION].token[2] = 0; // and null terminate
+				wsi->utf8_token[WSI_TOKEN_VERSION].token_len = 2;
+			} else {
+				debug("known hdr '%s'\n", wsi->name_buffer);
+				wsi->parser_state = WSI_TOKEN_GET_URI + n;             //ERNAD: set state to receiving of the new parameter
+			}
 			wsi->current_alloc_len = LWS_INITIAL_HDR_ALLOC;
 
 			wsi->utf8_token[wsi->parser_state].token =
@@ -279,6 +321,7 @@ static int libwebsocket_rx_sm(struct libwebsocket *wsi, unsigned char c)
 
 		switch (wsi->ietf_spec_revision) {
 		/* Firefox 4.0b6 likes this as of 30 Oct */
+		case -1: //Ernad: Used for QtWebKit
 		case 0:
 			if (c == 0xff)
 				wsi->lws_rx_parse_state = LWS_RXPS_SEEN_76_FF;
@@ -299,6 +342,7 @@ static int libwebsocket_rx_sm(struct libwebsocket *wsi, unsigned char c)
 			break;
 		case 7:
 		case 8: //ernad
+		case 13: //ernad
 			/*
 			 * no prepended frame key any more
 			 */
@@ -772,7 +816,7 @@ int libwebsocket_client_rx_sm(struct libwebsocket *wsi, unsigned char c)
 
 	switch (wsi->lws_rx_parse_state) {
 	case LWS_RXPS_NEW:
-
+printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		switch (wsi->ietf_spec_revision) {
 		/* Firefox 4.0b6 likes this as of 30 Oct */
 		case 0:
@@ -1307,6 +1351,7 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 	switch (wsi->ietf_spec_revision) {
 	/* chrome likes this as of 30 Oct */
 	/* Firefox 4.0b6 likes this as of 30 Oct */
+	case -1: //Ernad for QT
 	case 0:
 		if ((protocol & 0xf) == LWS_WRITE_BINARY) {
 			/* in binary mode we send 7-bit used length blocks */
@@ -1329,7 +1374,6 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 			}
 			break;
 		}
-
 		/* frame type = text, length-free spam mode */
 
 		pre = 1;
@@ -1567,6 +1611,7 @@ send_raw:
 		return 0;
 	}
 
+
 	/*
 	 * give any active extensions a chance to munge the buffer
 	 * before send.  We pass in a pointer to an lws_tokens struct
@@ -1618,10 +1663,18 @@ send_raw:
 
 		/* assuming they left us something to send, send it */
 
-		if (eff_buf.token_len)
+		if (eff_buf.token_len) {
 			if (lws_issue_raw(wsi, (unsigned char *)eff_buf.token,
-							     eff_buf.token_len))
+							     eff_buf.token_len)) {
 				return -1;
+			} else {
+#ifdef DEBUG_WEBSERVER
+				printf("----------> sent: %d\n", eff_buf.token_len);
+#endif
+			}
+		} else {
+			printf("----------> 888 !!! TOKEN NULL\n");
+		}
 
 		/* we used up what we had */
 
@@ -1647,8 +1700,6 @@ send_raw:
 		wsi->extension_data_pending = 1;
 		ret = 0;
 	}
-
-	debug("written %d bytes to client\n", eff_buf.token_len);
 
 	return 0;
 }

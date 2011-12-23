@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include "comm/TcpServer.h"
+#include "comm/AD7997.h"
 #include "MsgInHandler.h"
 
 #include "data/Data.h"
@@ -23,6 +24,7 @@
 #include <sstream>
 #include <pthread.h>
 
+
 void * runMsgInHandlerThread(void *ptr);
 
 
@@ -33,6 +35,8 @@ DataProvider dataProvider;
 pthread_t threadMsgInHandler;
 
 int main(int argc, char **argv) {
+	AD7997 ad7997;
+	ad7997.startMeasuringAD7997();
 	//char testCh[1000];
 	//jsonData.setGain(99);
 	/*jsonData.getJsonData(testCh);
@@ -83,7 +87,6 @@ int main(int argc, char **argv) {
 
 	Webserver webServer;
 	webServer.mainLoop();
-	//msgInHandler.runHandler();
 }
 
 void * runMsgInHandlerThread(void *ptr) {

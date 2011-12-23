@@ -9,9 +9,28 @@ var sliderFreq2;
 var enablTransceiverDiv;
 var positionsChoiceBox;
 var selectedTranscChannel;
+var cTA1 = ["AFT","STUR","PORT","FWD"];
+
+
+
+function updateTransceiverInfo(){
+	var activeCh;
+	if(jsonTransceiver.activeCh == 0)
+		activeCh = jsonTransceiver.jsonTransceiverCH1;
+	else if(jsonTransceiver.activeCh == 1)
+		activeCh = jsonTransceiver.jsonTransceiverCH2;
+	
+	/*if(activeCh.dualEnabled)
+		document.getElementById("boatFreq").innerHTML = "" + activeCh.freq1 + "/" + activeCh.freq2 +  "kHz";
+	else
+		document.getElementById("boatFreq").innerHTML = "" + activeCh.freq1 + "kHz";
+	
+	document.getElementById("boatTransPos").innerHTML = cTA1[activeCh.position];*/
+}
 
 function initTransceiver(parentDiv){
 	//initMainMenu(parentDiv);
+	updateTransceiverInfo();
 	
 	initTransceiverMenu(parentDiv);
 	selectTransceiverTabMenu(0, true);
@@ -38,7 +57,7 @@ function initTransceiver(parentDiv){
 	
 	var positBarDiv = document.createElement("DIV");
 	positBarDiv.id = "positBarDiv";
-	var cTA1 = ["AFT","PORT","STUR","FWD"];
+	
 	tabContentDiv.appendChild(positBarDiv);
 	
 	positionsChoiceBox = new ChoiceBoxHoriz2(202, "Position", 0, document.getElementById("positBarDiv"), 4, cTA1, "Checkbox.png", "CheckboxFull.png", 48,48,400, 80);
@@ -99,10 +118,10 @@ function showChannel(channel){
 	
 		
 	if (channel == 1) {
-		selectedTranscChannel = jsonTransceiverCH1;
+		selectedTranscChannel = jsonTransceiver.jsonTransceiverCH1;
 		enablTransceiverDiv.innerHTML="Enable Channel 1<input type=\"checkbox\" id=\"enabTransciver\" onclick=\"onEnableTransciverChanged()\" value=0></input>";	
 	} else if(channel == 2) {
-		selectedTranscChannel = jsonTransceiverCH2;
+		selectedTranscChannel = jsonTransceiver.jsonTransceiverCH2;
 		enablTransceiverDiv.innerHTML="Enable Channel 2<input type=\"checkbox\" id=\"enabTransciver\" onclick=\"onEnableTransciverChanged()\" value=0></input>";
 	}
 	

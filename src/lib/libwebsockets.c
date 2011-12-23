@@ -389,7 +389,7 @@ libwebsockets_get_peer_addresses(int fd, char *name, int name_len,
 	host = gethostbyaddr((char *) &sin.sin_addr, sizeof sin.sin_addr,
 								       AF_INET);
 	if (host == NULL) {
-		perror("gethostbyaddr");
+		//perror("eno: gethostbyaddr");
 		return;
 	}
 
@@ -709,9 +709,9 @@ libwebsocket_service_fd(struct libwebsocket_context *context,
 		fprintf(stderr, "ernad: wsi == NULL !!!!!!!!!\n");
 		return 1;
 	}
-
-	fprintf(stderr, "---------------------------: wsi->mode = %d, protocol: %d, socket: %d\n", wsi->mode, wsi->protocol_index_for_broadcast_proxy, wsi->sock);
-
+#ifdef DEBUG_WEBSERVER
+	fprintf(stderr, "----libwebsocket_service_fd()--: wsi->mode = %d, protocol: %d, socket: %d\n", wsi->mode, wsi->protocol_index_for_broadcast_proxy, wsi->sock);
+#endif
 	switch (wsi->mode) {
 	case LWS_CONNMODE_SERVER_LISTENER:
 
@@ -729,8 +729,9 @@ libwebsocket_service_fd(struct libwebsocket_context *context,
 			fprintf(stderr, "ERROR on accept");
 			break;
 		}
+#ifdef DEBUG_WEBSERVER
 		fprintf(stdout, "___________ACCEPT_1 fd: %d\n", accept_fd);
-
+#endif
 
 		/* Disable Nagle */
 		opt = 1;
@@ -1371,7 +1372,7 @@ issue_hdr:
 			goto bail3;
 		}
 
-		fprintf(stderr, "Ernad: %s\n", p);
+		fprintf(stderr, "############################### Ernad NEVER HERE? p= %s\n", p);
 
 		p = pkt;
 		for (n = 0; n < len; n++)

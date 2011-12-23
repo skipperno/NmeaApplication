@@ -20,6 +20,8 @@
 #include "../MsgInHandler.h"   //TODO: feil plass for å behandle dette
 #include <sstream>
 
+//#define DEBUG_ADC
+
 #define METER_FEET_CONST 	3.2808399
 #define METER_FATHOM_CONST 	0.546806649
 
@@ -75,6 +77,8 @@ Data::Data() {
 	initJsonDisplayData();
 	initJsonBaudData();
 	initIoData();
+	initJsonTestData();
+	//initJsonPowerData();
 }
 
 Data::~Data() {
@@ -87,13 +91,13 @@ Data* Data::getInstance() {
 
 void Data::initSignalData() { // TODO read data from config fil
 	jsonDATA["type"] = String("sig");
-	jsonDATA["signal"]["GAIN"] = Number(50);
-	jsonDATA["signal"]["TVG"] = Number(0);
+	jsonDATA["signal"]["GAIN"] = Number(10);
+	jsonDATA["signal"]["TVG"] = Number(19);
 	jsonDATA["signal"]["FREQ"] = Number(50);
 	jsonDATA["signal"]["POW"] = Number(8);
-	jsonDATA["alarm"]["L"] = Number(9);
-	jsonDATA["alarm"]["H"] = Number(10);
-	jsonDATA["range"] = Number(0);
+	jsonDATA["alarm"]["L"] = Number(10);
+	jsonDATA["alarm"]["H"] = Number(500);
+	jsonDATA["range"] = Number(4);
 }
 
 void Data::initTopInfoData() {
@@ -109,6 +113,15 @@ void Data::initTopInfoData() {
 	jsonTop["ins"]["gpsE"] = String("?");
 	jsonTop["ins"]["speed"] = Number(332);
 	jsonTop["ins"]["frq"] = Number(10000);
+
+	jsonTop["pow"]["24V_U"] = 		String("0"); 		//voltage
+	jsonTop["pow"]["24V_I"] = 		String("0"); 	//current
+	jsonTop["pow"]["24_48V_I"] = 	String("0");		//voltage
+	jsonTop["pow"]["5V_U"] = 	String("0"); 		//voltage
+	jsonTop["pow"]["5V_I"] = 	String("0");		//current
+	jsonTop["pow"]["NMEA1_I"] = 		String("0"); 		//current
+	jsonTop["pow"]["NMEA2_I"] = 		String("0"); 		//current
+	jsonTop["pow"]["NMEA3_I"] = 		String("0");		//current
 }
 
 void Data::initNmeaScreenData() { // TODO read data from config fil
@@ -129,6 +142,12 @@ void Data::initJsonBaudData() { // TODO read data from config fil
 	jsonBaud["s"] = Number(0); //source
 }
 
+void Data::initJsonTestData() { // TODO read data from config fil
+	jsonTest["type"] = String("test");
+	jsonTest["on"] = Number(0);
+	jsonTest["source"] = Number(0); //source
+}
+
 void Data::initIoData() { // TODO read data from config fil
 	char
 			jsonIoString[] =
@@ -144,6 +163,20 @@ void Data::initIoData() { // TODO read data from config fil
 	std::stringstream stream(jsonIoString);
 	Reader::Read(jsonIO, stream);
 }
+/*
+void Data::initJsonPowerData() {
+	jsonPower["24V_U"] = 		Number(0); 		//voltage
+	jsonPower["24V_I"] = 		Number(0);  	//current
+	jsonPower["24/48V_U"] = 	Number(0); 		//voltage
+	jsonPower["5V_U"] = 		Number(0); 		//voltage
+	jsonPower["5V_I"] = 		Number(0); 		//current
+	jsonPower["NMEA1_I"] = 		Number(0); 		//current
+	jsonPower["NMEA2_I"] = 		Number(0); 		//current
+	jsonPower["NMEA3_I"] = 		Number(0); 		//current
+}*/
+
+
+
 
 Array Data::getOutputSettingsObject(int inputIndex) {
 	return jsonIO["set"][inputIndex]["oms"];
@@ -181,7 +214,12 @@ void Data::getJsonTop(char* msg) {
 	Writer::Write(jsonTop, stream);
 	strcpy(msg, stream.str().c_str());
 }
-
+/*
+void Data::getPowerData(char* msg) {
+	std::stringstream stream;
+	Writer::Write(jsonPower, stream);
+	strcpy(msg, stream.str().c_str());
+}*/
 ////////////////////////////////////////////////////
 // Receive signal data from one client (browser) and
 // broadcast to other clients.
@@ -193,15 +231,27 @@ void Data::parseJsonMsg(char* msg) {
 	const String ddd = newJson["type"];
 	printf("!!!!!!!rec JSON type: %s\n", ddd.Value().c_str());
 
-	if (strcmp(ddd.Value().c_str(), "sig") == 0) {
+	if (strcmp(ddd.Value().c_str(), "getConf") == 0) {
+		printf ("yes\n");
+		char msgToSend[1000];
+		getJsonData(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+		//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+	} else if (strcmp(ddd.Value().c_str(), "sig") == 0) {
+		int oldRange = getRange();
 		jsonDATA = newJson;
+		int newRange = getRange();
+		if (newRange != oldRange) {
+			printf ("New RANGE = %d\n", newRange);
+		}
 		/*	 	 const Number gain = newJson["signal"]["GAIN"];
 		 printf ("New GAIN = %d\n", (int)gain.Value());
 		 MsgInHandler::setGain((int)gain.Value());
 		 */
 		char msgToSend[1000];
 		getJsonData(msgToSend);
-		Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+		//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 	} else if (strcmp(ddd.Value().c_str(), "baud") == 0) {
 		jsonBaud = newJson;
 		const Number br = jsonBaud["baudR"]["ba"];
@@ -247,6 +297,11 @@ void Data::parseJsonMsg(char* msg) {
 		//MsgInHandler::getInstance()->onReceivedNewDisplayChoice(3,
 		//		selectedDisplayChoice.Value());
 		printf("!!!!!!!rec JSON type:3, IO choice %d, baud: %d\n", nDisplayIoChoice, (int)br.Value());
+	} else if (strcmp(ddd.Value().c_str(), "test") == 0) {
+		jsonTest = newJson;
+		const Number on_off = jsonTest["on"];
+		const Number source = jsonTest["source"];
+		MsgInHandler::getInstance()->selfTest(on_off.Value(), source.Value());
 	}
 }
 
@@ -283,6 +338,79 @@ void Data::setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon) {
 	sprintf(latLong, "%s %s", e_w, sLon);
 	jsonTop["ins"]["gpsE"] = String(latLong);
 }
+
+void Data::setPowerMeasurment(int nAdcIndex, int value) {
+	char bufferTemp[20];
+	float Vin;// = value*3.3/1023;
+	float Vmeas= value*3.3/1023;
+	const String vcc_string = jsonTop["pow"]["5V_U"];
+	float Vcc_5 = atof(vcc_string.Value().c_str());
+#ifdef DEBUG_ADC
+	printf("Meas row: %d, Measur. U: %f\n", value, Vmeas);
+#endif
+	switch(nAdcIndex) {
+	case 1:
+		sprintf(bufferTemp, "%.2f", (41.7795 - (value*3.3/1023)*7.0518));
+		jsonTop["pow"]["24V_U"] = 	String(bufferTemp);
+		break;
+	case 2:
+		// !!! Offset = Vcc_5 * 0.4878   (if Vcc_5 = 5.00V => offset = 2.439V)
+		// K = 11
+
+		// Vin = value*3.3/1023
+		//Vin = (Vmeas + Vcc_5*470/86.6)*42.25/470;
+		//Vin = (Vmeas + Vcc_5*5.4272)*0.08989;
+		Vin = (Vmeas*0.08989 + 2.38);
+		// ACS714 05B has sensitivity 185mV/A
+		//sprintf(bufferTemp, "%.3f", (Vin - Vcc_5/2)/0.185);
+		sprintf(bufferTemp, "%.2f", (Vin - 2.5)/0.185);
+		jsonTop["pow"]["24V_I"] = 	String(bufferTemp);
+#ifdef DEBUG_ADC
+		printf("=> Vmeas: %f, Vin_24: %f, 24V_I=%s\n", Vmeas, Vin, bufferTemp);
+#endif
+			break;
+	case 3:
+		Vin = (Vmeas + Vcc_5*5.4272)*0.08989;
+		//Vin = (Vmeas + Vcc_5*470/86.6)*42.25/470;
+		//sprintf(bufferTemp, "%.3f", (Vin - Vcc_5/2 - 0.06)/0.185);
+		sprintf(bufferTemp, "%.2f", (Vin - 2.5)/0.185);
+		jsonTop["pow"]["24_48V_I"] = 	String(bufferTemp);
+			break;
+	case 4:
+		// ******************************************************************************
+		// 5V_VOLT:
+		// V*3.3/1023 / 22000 *(22000 + 15000) =>
+		// V*0.005425
+		// ******************************************************************************
+		sprintf(bufferTemp, "%.2f", (value*0.005425));
+		jsonTop["pow"]["5V_U"] = String(bufferTemp);//		Number(((int)(value*0.005425*100)));// /100);
+			break;
+	case 5:
+		// ******************************************************************************
+		//5V_CURR:
+		// 				  v*1000/(0.5*22100) * 3.3/1023
+		// It should be = v /1.105            *3.3/1023   but 0.05 Ohm + PCB track =>
+		//              = v /1.172            *3.3/1023 (With PCB-resistance correction)
+		//				= v *0.00275239
+		// ******************************************************************************
+		sprintf(bufferTemp, "%.2f", (value*0.00275));
+		jsonTop["pow"]["5V_I"] = 	String(bufferTemp);//	Number(((int)(value*0.00275*1000)));// /1000);
+			break;
+	case 6:
+		sprintf(bufferTemp, "%.2f", (value*3.3/1023/5.7));
+		jsonTop["pow"]["NMEA3_I"] = String(bufferTemp);
+			break;
+	case 7:
+		sprintf(bufferTemp, "%.2f", (value*3.3/1023/5.7));
+		jsonTop["pow"]["NMEA2_I"] = String(bufferTemp);
+			break;
+	case 8:
+		sprintf(bufferTemp, "%.2f", (value*3.3/1023/5.7));
+		jsonTop["pow"]["NMEA1_I"] = String(bufferTemp);
+			break;
+	}
+}
+
 
 void Data::setGain(int newGain) {
 	jsonDATA["signal"]["GAIN"] = Number(newGain);

@@ -10,7 +10,10 @@
 	position:relative;
 	width:100%;
 	}
-
+.subMenuDivTransc{
+	height:100%;
+	}
+	
 .tabItemSel {
 	height: 100%;
 	width: 91px;

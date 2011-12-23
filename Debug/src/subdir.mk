@@ -7,18 +7,21 @@ CPP_SRCS += \
 ../src/Main.cpp \
 ../src/MsgInHandler.cpp \
 ../src/NmeaComm.cpp \
+../src/Selftest.cpp \
 ../src/SysTime.cpp 
 
 OBJS += \
 ./src/Main.o \
 ./src/MsgInHandler.o \
 ./src/NmeaComm.o \
+./src/Selftest.o \
 ./src/SysTime.o 
 
 CPP_DEPS += \
 ./src/Main.d \
 ./src/MsgInHandler.d \
 ./src/NmeaComm.d \
+./src/Selftest.d \
 ./src/SysTime.d 
 
 

@@ -9,8 +9,21 @@
 #define ECHODATAWEBSOCKET_H_
 
 
-#include "../data/Data.h"
-#include "ServerPublic.h"
+//#include "../data/Data.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <getopt.h>
+#include <string.h>
+#include <sys/time.h>
+#include "MimeTypes.h"
+
+
+extern "C" {
+//#include <libwebsockets.h>
+#include "../lib/libwebsockets.h"
+}
+
 
 class EchoDataWebSocket {
 public:

@@ -52,7 +52,7 @@ TabMenuItem.prototype.enableItem = function(select){
 	
 	$(this.tabItem).click(function(e){
 		this.parentObject.tabItem.className = "tabItemSel";
-		onHorisontalMenuCallback(this.parentObject.itemIndex);
+		onHorisontalMenuCallbackTest(this.parentObject.itemIndex);
 	});
 };
 

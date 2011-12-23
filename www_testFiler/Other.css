@@ -1,22 +1,124 @@
 @CHARSET "UTF-8";
 
 #boatDiv{
-	width:62px;
-	height:40px;
-	background: url(images/boat_40.png);
+	width:140px;
+	height:51px;
+	background: url(images/Boat_2.png);
 	position:absolute;
-	right:45px; /*7+18 or 27+18 or 35+18 or 55+18*/
-	top:40px;
+	right:0px; /*7+18 or 27+18 or 35+18 or 55+18*/
+	top:29px;
+	
 }
-
+#logoDiv{
+	width:130px;
+	background: url(images/logo2.png);
+	position:absolute;
+	top:0px;
+	right:0px;
+	height:29px;
+	}
+#boatFreq{
+	margin-right:5px;
+	text-align:right;
+	position:absolute;
+	right:0px;
+	top:0px;
+	width:105px;
+	height:10px;
+	}
+	
+#boatTransPos{
+	margin-right:5px;
+	text-align:right;
+	position:absolute;
+	right:0px;
+	top:12px;
+	width:105px;
+	height:10px;
+	}
+	
+	#boatBigDiv{
+	background: url(images/boatBig.png);
+	width:200px;
+	height:350px;
+	position:absolute;
+	right:125px;
+	top:12px;
+	}
+	#sens_F{
+	background: url(images/sens_F.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:85px;
+	top:37px;
+	}
+	#sens_FL{
+	background: url(images/sens_P.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:70px;
+	top:37px;
+	}
+	#sens_FR{
+	background: url(images/sens_S.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:100px;
+	top:37px;
+	}
+	#sens_P{
+	background: url(images/sens_P.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:30px;
+	top:175px;
+	}
+	#sens_S{
+	background: url(images/sens_NOT.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	right:30px;
+	top:175px;
+	}
+	#sens_A{
+	background: url(images/sens_F.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:85px;
+	top:280px;
+	}
+	#sens_AL{
+	background: url(images/sens_P.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:70px;
+	top:280px;
+	}
+	#sens_AR{
+	background: url(images/sens_S.png);
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:100px;
+	top:280px;
+	}
+	
+/*
 #boatSensDiv{
 	width:3px;
 	height:6px;
 	background-color: #f00;
 	position:absolute;
-	right:80px; /*7+18 or 27+18 or 35+18 or 55+18*/
+	right:80px; 
 	top:74px;
-}
+}*/
 
 
 #eastRange_Light{
@@ -25,7 +127,7 @@
 	float:left;
 	height:120px;
 	position:absolute;
-	bottom: 0px;
+	bottom: 260px;/*test, riktig: 0px_*/
 	display: block;
 }
 #eastRangeButton {
@@ -48,18 +150,38 @@
 
 #timeScale
 {
-	height: 15px;
+	font-size:16px;
+	height: 18px;
     FLOAT: right;
     OVERFLOW: hidden;
 	margin:0px;
 	display:block;
-	BACKGROUND: #383838;
+	/*BACKGROUND: #383838;*/
 	text-align:right;
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	width:100%;
+}
+#distanceScale
+{
+	font-size:16px;
+	height: 18px;
+    FLOAT: right;
+    OVERFLOW: hidden;
+	margin:0px;
+	display:block;
+	/*BACKGROUND: #383838;*/
+	text-align:right;
+	position:absolute;
+	top:18px;
+	left:0px;
+	width:100%;
 }
 
 #rangeScale   
 {
-	width:40px;
+	width:15px;
 	height: 400px;
 	display:block;
 	color:#fff;
@@ -67,6 +189,25 @@
 	position:absolute;
 	top:0px;
 	right:0px;
+	background: url(images/rangeBackg1.png);
+}
+
+#rangeScaleTextDiv  
+{
+	width:35px;
+	height: 400px;
+	color:#fff;
+	font-size:16px;
+	position:absolute;
+	top:0px;
+	right:18px;
+}
+
+.rangeText  
+{
+	width:35px;
+	position:absolute;
+	text-align:right;
 }
 
 #rangeSliderDiv{
@@ -77,11 +218,23 @@
 
 #depth{
 	position:absolute;
-	top:0px;
-	left:0px;
+	top:5px;
+	left:5px;
 	color:#fff;
-	font-size:36px;
+	font-size:70px;
 	font-weight: bold;
+	text-align:right;
+	width:110px;
+	}
+	#depthType{
+	position:absolute;
+	top:5px;
+	left:5px;
+	color:#fff;
+	font-size:70px;
+	font-weight: bold;
+	text-align:left;
+	width:110px;
 	}
 	
 #sliderChoice{
@@ -91,9 +244,27 @@
 	color:#fff;
 	font-size:16px;
 	width:400px;
-	height:70px;
+	height:120px;
 	background: url(images/backHSlid.png);
 	background-repeat:repeat-x;
+	}
+	
+	#alarmSlidDiv{
+	position:absolute;
+	top:220px;
+	left:90px;
+	color:#fff;
+	font-size:16px;
+	width:400px;
+	height:130px;
+	background: url(images/backMsgWindow_H_130px.png);
+	background-repeat:repeat-x;
+	}
+	#alarmSlidDiv_1{
+	height:50%;
+	}
+	#alarmSlidDiv_2{
+	height:50%;
 	}
 	
 #alarmMsgDiv{
@@ -251,18 +422,27 @@
 	
 	.topField{
 		color:#333;
-		font-size:10px;
-	 	height:40px;
+		font-size:14px;
+		height:21px;
+	 	/*height:40px;*/
 	 	background-image:url("images/backTopFelt.png");
-	 	background-repeat:no-repeat;
+	 	background-repeat:repeat-x;/*no-repeat;*/
 /*background-attachment:fixed;*/
-		background-position:right; 
+	/*	background-position:right; */
 		position:relative;
 		float:left;
 	}
 	.topFieldTextLeft{
 		float:left;
 		padding-left:4px;
+		margin-right:5px;
+		color:#666;
+	}
+	.topFieldTextLeft2{
+		float:left;
+		padding-left:4px;
+		margin-right:5px;
+		color:#000;
 	}
 	.topFieldTextRight{
 		float:right;
@@ -307,16 +487,16 @@
 	}
 
 	#time{
-	font-size:18px;
+	/*font-size:18px;*/
 	}
 	#gps{;
-	font-size:12px;
+	/*font-size:12px;*/
 	}
 	#speed{
-	font-size:12px;
+	/*font-size:12px;*/
 	}
 	#frq{
-	font-size:12px;
+	/*font-size:12px;*/
 	}
 	
 	/* STATUS */

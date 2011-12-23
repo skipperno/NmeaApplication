@@ -13,8 +13,9 @@
 
 
 <link rel="stylesheet" type="text/css" href="Main.css" />
-<link rel="stylesheet" type="text/css" href="Position.css" />
 <link rel="stylesheet" type="text/css" href="Menu.css" />
+<link rel="stylesheet" type="text/css" href="Position.css" />
+
 <link rel="stylesheet" type="text/css" href="Other.css" />
 
 <link rel="stylesheet" type="text/css" href="SliderHorizontal.css" />
@@ -27,7 +28,7 @@
 <script src="jquery.js"></script>
 <script src="jquery.populate.pack.js"></script>
 <script type="text/javascript" src="json2.js"></script>
-<script type="text/javascript" src="SignalEmulator.js"></script>
+<script type="text/javascript" src="TransceiverBoat.js"></script>
 <script type="text/javascript" src="SliderHorizontal.js"></script>
 <script type="text/javascript" src="SliderVertical.js"></script>
 <script type="text/javascript" src="ChoiceBoxHoriz.js"></script>
@@ -47,8 +48,8 @@
 <script type="text/javascript" src="TabMenuItem.js"></script>
 <script type="text/javascript" src="Transceiver.js"></script>
 <script type="text/javascript" src="TransceiverTabMenu.js"></script>
-
-
+<script type="text/javascript" src="DataStorage.js"></script>
+<script type="text/javascript" src="DepthInfo.js"></script>
 
 <!-- """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 <script type="text/javascript" src="swfobject.js"></script>
@@ -68,8 +69,10 @@
 	var echoWebSock; //echo sounder data
 	var dataWebSock; // set-get data (e.q. GAIN, TVG...)
 
+	var rangeSlider3;
+	
 	var oldRange = 0;
-	var currRange = 0;
+	var currRange = -1;
 
 	var currTimeScale = 0;
 
@@ -129,8 +132,7 @@
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", startSleepTime + sleepCoef
-				* 100); //300);
+		t = setTimeout("onPaintingCanvasTimer()", paintSleepTime[sleepTimeIndex]); //200); 
 	}
 
 	function onPaintingCanvasTimer() {
@@ -200,14 +202,18 @@
 	// Parse echo data received from server
 	////////////////////////////////////////////////
 	function parseEchoData(data) {
+		 if (!echoCanvas1)
+			 return;
 		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
 			var range = data.charAt(1);
-
-			if (currRange != range) {
+if (range < 0 || range > 5)
+	return;
+			if (currRange != range) {		
 				oldRange = currRange;
 				currRange = range;
 				echoCanvas1.paintChangedRange(oldRange);
 				changeRange(currRange);
+				rangeSlider3.setNewIndex(currRange, true);
 			}
 
 
@@ -216,17 +222,17 @@
 			if (chanelsArray.length > 1) // NOT USED, ALWAYS = 1
 				newColorArrayCh2 = chanelsArray[1].split(",");
 			
-			var buttom = newColorArrayCh1[0];
-			document.getElementById("depth").innerHTML = "" + buttom + "m";
+			var buttom = newColorArrayCh1[0]/10;
+			updateDepthText(buttom.toFixed(1));
 			
 			dataReceived = 1;
 			alarmTest(buttom);
 			
 			if (scopeVisible)
 				scopeCanvas.setNewData(newColorArrayCh1);
-			echoCanvas1.setNewData(newColorArrayCh1);
+			echoCanvas1.setNewData(buttom, newColorArrayCh1);
 			if (echoCanvas2 != null)
-				echoCanvas2.setNewData(newColorArrayCh2);
+				echoCanvas2.setNewData(buttom, newColorArrayCh2);
 			//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
 		}
 		//updateSigBeam();
@@ -241,7 +247,9 @@
 			setSignalData();
 		} else if (recJson.type == "top") {
 			jsonTOP  = recJson;
-			$('#tableTest').populate(jsonTOP.ins); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});		
+			$('#tableTest').populate(jsonTOP.ins); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
+			$('#statusDiv').populate(jsonTOP.pow); 
+			//$('#tableTest').populate(jsonTOP.pow);
 		}	else if (recJson.type == "nmea") {
 			jsonNmea = recJson;
 			if (getListCount() > 20) {
@@ -271,16 +279,17 @@
 		<div id="container">
 
 			<div class="northsidebar">
-			<div name="tableTest" id="tableTest" style="width:500px">
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">TIME</div><div class="topFieldDown" id="time"></div></div>
-				<div class="topField" style="width:100px"><div class="topFieldTextLeft">GPS</div><div class="topFieldDownLine1" id="gpsN">N 32 4334</div><div class="topFieldDownLine2" id="gpsE">E 33 44 5433</div></div>
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">SPEED</div><div class="topFieldTextRight">[m/s]</div><div class="topFieldDown" id="speed"></div></div>
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">TIME</div><div class="topFieldDown" id="time1"></div></div>
-				<div class="topField" style="width:100px"><div class="topFieldTextLeft">GPS</div><div class="topFieldDown" id="gps"></div></div>
+			<div name="tableTest" id="tableTest" style="width:495px;height:75px; border:2px ridge #C90;">
+				<div class="topField"><div class="topFieldTextLeft">TIME:</div><div class="topFieldTextLeft2" id="time"></div></div>
+				<div class="topField"><div class="topFieldTextLeft">Screen Speed:</div><div class="topFieldTextLeft2" id="scrSpeed">20/s</div></div>
+				<div class="topField"><div class="topFieldTextLeft">Freq:</div><div class="topFieldTextLeft"2 id="frq">1000kHz</div></div>
+				<div class="topField"><div class="topFieldTextLeft">Position:</div><div class="topFieldTextLeft2" id="pos">Port</div></div>
+			<!--  	<div class="topField" style="width:100px"><div class="topFieldTextLeft">5V_I</div><div class="topFieldDown" id="5V_I"></div></div>
 				<div class="topField" style="width:70px"><div class="topFieldTextLeft">SPEED</div><div class="topFieldTextRight">[m/s]</div><div class="topFieldDown" id="speed1"></div></div>
 				<div class="topField" style="width:70px"><div class="topFieldTextLeft">TIME</div><div class="topFieldDown" id="time2"></div></div>
 				<div class="topField" style="width:100px"><div class="topFieldTextLeft">GPS</div><div class="topFieldDown" id="gps2"></div></div>
 				<div class="topField" style="width:70px"><div class="topFieldTextLeft">SPEED</div><div class="topFieldTextRight">[m/s]</div><div class="topFieldDown" id="speed2"></div></div>
+				-->
 			</div>
 			<!-- 
 			<table name="tableTest" id="tableTest">
@@ -289,16 +298,20 @@
 			</table>
 			
 			 -->
-				<div id="boatDiv"></div>
-				<div id="boatSensDiv"></div>
+				<div id="boatDiv" onclick="onBoatIconPush()"></div>
+				<div id="logoDiv"></div>
+			<!--  	<div id="boatFreq">124.32kHz</div>
+				<div id="boatTransPos">AFT</div>-->
 			</div>
 			<div id="maincenter">
 				<div id="depth">??</div>
+				<div id="depthType">??</div>
 				<script>
 					initAlarm(document.getElementById("maincenter"));
 				</script>
 				<canvas id="echoCanvas" width="556" height="400"></canvas>
 				<div id="rangeScale"></div>
+				<div id="rangeScaleTextDiv"></div>
 				<div id="timeScale"></div>
 				<div id="nmeaPanel">
 				<form id="nmeaOutputs">
@@ -345,10 +358,16 @@
 		 		<div id="day_night"></div>
 				<div id="sliderChoice"></div>
 				<div id="alarmMsgDiv"></div>
+				<div id="alarmSlidDiv"><div id="alarmSlidDiv_1"></div><div id="alarmSlidDiv_2"></div></div>
 				<div id="transceiverDiv"></div>
+				
+				<div id="boatBigDiv"><div id="sens_F" onclick="onBigBoatClick(1)"></div><div id="sens_FL" onclick="onBigBoatClick(2)"></div><div id="sens_FR" onclick="onBigBoatClick(3)"></div>
+					<div id="sens_P"></div><div id="sens_S"></div>
+					<div id="sens_A"></div><div id="sens_AL"></div><div id="sens_AR"></div>
+				</div>
 				<div id="menuBar">
 					<div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
-						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;>Menu
+						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;> Menu 
 					</div>
 				
 					<!--  <div id="mainChoiceText">Range</div>-->
@@ -356,12 +375,23 @@
 				</div><!--  end menuBar -->
 			
 			<div id="statusDiv">STATUS
+				<table>
+					<tr><th></th><th>U[V]</th><th>I[A]</th></tr>
+					<tr><td class="sr1">+5V</td><td class="sr2" id="5V_U">?V</td><td class="sr2" id="5V_I">?A</td></tr>
+					<tr><td class="sr1">+24V</td><td class="sr2" id="24V_U">?V</td><td class="sr2"  id="24V_I">?A</td></tr>
+					<tr><td class="sr1">+24/48V</td><td class="sr2">-</td><td class="sr2" id="24_48V_I">?A</td></tr>
+					<tr><td class="sr1">NMEA1</td><td class="sr2">-</td><td class="sr2" id="NMEA1_I">?A</td></tr>
+					<tr><td class="sr1">NMEA2</td><td class="sr2">-</td><td class="sr2" id="NMEA2_I">?A</td></tr>
+					<tr><td class="sr1">NMEA3</td><td class="sr2">-</td><td class="sr2" id="NMEA3_I">?A</td></tr>
+				</table>
+					<!--
 					<table>
 					<tr><td class="sr1">+5V</td><td class="sr2">4.8V</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
 					<tr><td class="sr1">+12V</td><td class="sr2">11.5V</td><td class="sr3">Depth range:</td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
 					<tr><td class="sr1">Inv12V</td><td class="sr2">11.5V</td><td class="sr3"></td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
 					<tr><td class="sr1">XCVR</td><td class="sr2">25.4V</td><td class="sr3"></td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
 					</table>
+					  -->
 				</div>
 			</div><!--  end main -->
 
@@ -388,6 +418,16 @@
 	<!-- wrap end -->
 
 	<script>
+	
+	initDepthText();
+	initDepthTypeText();
+	updateDepthTypeText();
+	////////////////////////////////////////////////////////////
+	// If client is using Qt WebKit (touchscreen), remove cursor
+	////////////////////////////////////////////////////////////
+	if (navigator.userAgent.indexOf("Qt/") > 0) {
+		document.body.style.cursor = "none";
+	}
 	
 	// TODO
 	function onOutputsCheckboxEvent(){
@@ -434,7 +474,6 @@
 		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
 	}
 	
-	
 
 
 	
@@ -443,19 +482,23 @@
 		$("#nmeaPanel").hide();
 		$("#day_night").hide();
 		$("#statusDiv").hide();
+		$("#alarmSlidDiv").hide();
+		
 		$("#transceiverDiv").hide();
+		removeBigBoat();
 		
 		changeRange(0);
+		//changeTimeRange(3);
 		initVertMenu(document.getElementById("eastContainer"));//eastsidebar"));
 		initMenu();
 		$('#sliderChoice').hide();
 		
 		initTransceiver(document.getElementById("transceiverDiv"));
 		
-		var rangeText = [ "10", "50", "100", "500", "1200", "1600" ];
+		var rangeSlidText = [ "10", "50", "100", "500", "1200", "1600" ];
 	
-		var rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
-				document.getElementById("rangeSliderDiv"), rangeText);//testCont"),rangeText);
+		rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
+				document.getElementById("rangeSliderDiv"), rangeSlidText);//testCont"),rangeText);
 		$("#rangeSliderDiv").hide();		
 		//setSignalData();
 				
@@ -468,10 +511,11 @@
 		reconnectSocket();
 
 		function reconnectSocket() {
+		
 			if (window.MozWebSocket) {
-				echoWebSock =  new MozWebSocket("ws://10.31.1.128:7681","dumb-increment-protocol");
+				echoWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"dumb-increment-protocol");
 			} else if(window.WebSocket) {
-				echoWebSock =  new WebSocket("ws://10.31.1.128:7681","dumb-increment-protocol");
+				echoWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"dumb-increment-protocol");
 			} else {
 				alert("Your browser is not supporitng WebSockets");
 				return;
@@ -484,7 +528,7 @@
 			//echoWebSock = new MozWebSocket('ws://10.31.1.128:7681/dumb-increment-protocol');//echo');
 
 			echoWebSock.onopen = function() { //e
-				//	alert("Connected");
+				//	alert("Connected echo");
 			};
 			echoWebSock.onmessage = function(msg) {
 				parseEchoData(msg.data);
@@ -506,14 +550,15 @@
 			};
 			
 			//////// DATA WEBSOCKET ////////
-			if (window.MozWebSocket) {
-				dataWebSock =  new MozWebSocket("ws://10.31.1.128:7681","lws-mirror-protocol");
+			if (window.MozWebSocket){
+				dataWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"lws-mirror-protocol");
 			} else if(window.WebSocket) {
-				dataWebSock =  new WebSocket("ws://10.31.1.128:7681","lws-mirror-protocol");
+				dataWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"lws-mirror-protocol");
 			} 
 			//dataWebSock = new MozWebSocket('ws://10.31.1.128:7681/lws-mirror-protocol');//data');
 			dataWebSock.onopen = function() { //e
-					//alert("Connected dataWebSock");
+				//	alert("Connected data");
+				sendToServer(JSON.stringify(jsonGet));
 			};
 			dataWebSock.onmessage = function(msg) {
 				parseRecData(msg.data);

@@ -5,7 +5,7 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 	this.text2 = line2;
 	this.selected = false;
 	this.parentContainer = parentContainer;
-	
+	this.selected = false;
 	this.document = parentContainer.ownerDocument || parentContainer.document;
 	
 	
@@ -35,24 +35,29 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 	
 	$(this.menuItem).mouseout(function(e){
 		if (!this.parentObject.selected)
-			this.style.backgroundImage='url(images/menuItemBackround.png)';
+			this.style.backgroundImage='url(images/menuItemBackround2.png)';
 	});
 	
 	$(this.menuItem).click(function(e){	
-		this.selected = ~this.selected;
-		this.parentObject.select(this.selected);
-		onHorisontalMenuCallback(this.parentObject.itemIndex, this.selected);
+		if(this.parentObject.selected)
+			this.parentObject.deselect();
+		else
+			this.parentObject.select();
+		
+		deselectOtherHorizontalMenuItems(this.parentObject.itemIndex);
+		//this.parentObject.select(this.selected);
+		onHorisontalMenuCallback(this.parentObject.itemIndex, this.parentObject.selected);
 	});
 }
 
-HorizMenuItem.prototype.select = function(select){
-	if(select){
-		this.selected = true;
-		this.menuItem.style.backgroundImage='url(images/menuItemBackroundSelect.png)';
-	} else{
-		this.selected = false;
-		this.menuItem.style.backgroundImage='url(images/menuItemBackround.png)';
-	}
+HorizMenuItem.prototype.select = function(){
+	this.selected = true;
+	this.menuItem.style.backgroundImage='url(images/menuItemBackroundSelect2.png)';
+}
+
+HorizMenuItem.prototype.deselect = function(){
+	this.selected = false;
+	this.menuItem.style.backgroundImage='url(images/menuItemBackround2.png)';
 }
 
 HorizMenuItem.prototype.changeValueText = function(newValue){
@@ -102,7 +107,7 @@ function VerMenuItem(itemIndex, itemText, parentContainer) {
 VerMenuItem.prototype.select = function(select){
 	if(select){
 		this.selected = true;
-		this.verMenuItem.style.backgroundImage='url(images/VerMenuItemBackroundSelect.png)';
+		this.verMenuItem.style.backgroundImage='url(images/VerMenuItemBackroundSelect2.png)';
 	} else{
 		this.selected = false;
 		this.verMenuItem.style.backgroundImage='url(images/VerMenuItemBackround.png)';

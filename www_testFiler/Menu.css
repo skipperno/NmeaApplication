@@ -17,11 +17,12 @@
 
 #subMenu {
 	height: 40px;
-	width: 450px;
+	width: 430px;
 	float: left;
 	OVERFLOW: hidden;
-	position:relative;
-	
+	position:absolute;
+	background:#333;
+	left:60px;
 }
 
 #fastSubMenu {
@@ -53,11 +54,13 @@
 #menuOnOffBut {
 	float: left;
 	margin-right: 5px;
-	background: url(images/MenuShow.png);
-	width: 60px;
-	height: 40px;
+	background: url(images/MenuShow3.png);
+	width: 58px;
+	height: 39px;
 	text-align: center;
-	line-height: 40px;
+	line-height: 39px;
+	color:#bbb;
+	font-size:14px;
 }
 
 #slidingMenu {
@@ -88,7 +91,7 @@
 .menuItem {
 	height: 40px;
 	width: 80px;
-	background: url(images/menuItemBackround.png);
+	background: url(images/menuItemBackround2.png);
 	float: left;
 	margin-left: 5px;
 	color: #fff;
@@ -145,7 +148,7 @@
 	height: 40px;
 	width: 70px;
 	background: url(images/VerMenuItemBackround.png);
-	margin-top: 5px;
+	margin-top: 1px;
 	color: #fff;
 }
 

@@ -5,14 +5,20 @@
 var verMenuArray = new Array();
 var vertMenuSliding;
 
-var USER_SETUP = 0;
-var SIGNAL = 1;
-var SETUP = 2;
-var STATUS = 3;
-var COM = 4;
-var DIAGN = 5;
-var SCREEN = 6;
-var SYSTEM = 7;
+var ALARMS = 0;
+var PICT_SPEED = 1;
+var MARK = 2;
+var TRANSDUCER = 3;
+var ADJUST = 4;
+
+var SETUP = 5;
+var STATUS = 6;
+var COM = 7;
+var DIAGN = 8;
+var SCREEN = 9;
+var SYSTEM = 10;
+
+var NUMB_OF_VERT_MENU = 11;
 
 
 function initVertMenu(parentConteiner){
@@ -47,35 +53,45 @@ function initVertMenu(parentConteiner){
 		$("#vertMenuSliding").animate({top:'-400px'},300);
 	});
 	
+	verMenuArray[ALARMS]=new VerMenuItem(ALARMS, "Alarm", vertMenuSlidingBlock_1);
+	verMenuArray[PICT_SPEED]=new VerMenuItem(PICT_SPEED, "Picture speed", vertMenuSlidingBlock_1);
+	verMenuArray[MARK]=new VerMenuItem(MARK, "Mark", vertMenuSlidingBlock_1);
+	verMenuArray[TRANSDUCER]=new VerMenuItem(TRANSDUCER, "Transducer", vertMenuSlidingBlock_1);
+	verMenuArray[ADJUST]=new VerMenuItem(ADJUST, "Adjust", vertMenuSlidingBlock_1);
+
 	
-	verMenuArray[USER_SETUP]=new VerMenuItem(USER_SETUP, "User setup", vertMenuSlidingBlock_1);
-	verMenuArray[SIGNAL]=new VerMenuItem(SIGNAL, "Signal", vertMenuSlidingBlock_1);
-	verMenuArray[SETUP]=new VerMenuItem(SETUP, "Setup", vertMenuSlidingBlock_1);
 	vertMenuSlidingBlock_1.appendChild(westMenuDownButt);
 	
 	vertMenuSlidingBlock_2.appendChild(westMenuTopButt);
+	
+	verMenuArray[SETUP]=new VerMenuItem(SETUP, "Setup", vertMenuSlidingBlock_2);
 	verMenuArray[STATUS]=new VerMenuItem(STATUS, "Status", vertMenuSlidingBlock_2);
 	verMenuArray[COM]=new VerMenuItem(COM, "Com", vertMenuSlidingBlock_2);
 	verMenuArray[DIAGN]=new VerMenuItem(DIAGN, "Diagnostic", vertMenuSlidingBlock_2);
 	verMenuArray[SCREEN]=new VerMenuItem(SCREEN, "Screen", vertMenuSlidingBlock_2);
 	verMenuArray[SYSTEM]=new VerMenuItem(SYSTEM, "System", vertMenuSlidingBlock_2);
 	
-	
+/*	
 	verMenuArray[8]=new VerMenuItem(8, "Skjerm 9", vertMenuSlidingBlock_2);
 	verMenuArray[9]=new VerMenuItem(9, "Skjerm 10", vertMenuSlidingBlock_2);
 	verMenuArray[10]=new VerMenuItem(10, "Skjerm 11", vertMenuSlidingBlock_3);
 	verMenuArray[11]=new VerMenuItem(11, "Skjerm 12", vertMenuSlidingBlock_3);
 	verMenuArray[12]=new VerMenuItem(12, "Skjerm 13", vertMenuSlidingBlock_3);
 	verMenuArray[13]=new VerMenuItem(13, "Skjerm 14", vertMenuSlidingBlock_3);
-	
+	*/
 	parentConteiner.appendChild(vertMenuSliding);
 	
 	verMenuArray[0].select(true);
 }
 
+function resetVertMenu(){
+	$("#vertMenuSliding").css("top","0px");
+	selectVerticalMenu(-1);
+	selectedVerticalMenuIndex = -1;
+}
 
 function selectVerticalMenu(submenuIndex){
-	for(i=0;i<14;i++){
+	for(var i=0;i<NUMB_OF_VERT_MENU;i++){
 		if(i != submenuIndex)
 			verMenuArray[i].select(false);
 		else {
@@ -83,3 +99,4 @@ function selectVerticalMenu(submenuIndex){
 		}
 	}
 }
+
