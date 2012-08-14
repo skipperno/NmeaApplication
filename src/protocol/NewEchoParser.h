@@ -12,9 +12,9 @@ class NewEchoParser {
 public:
 	NewEchoParser();
 	virtual ~NewEchoParser();
-	static void convertDataToAsciNmea(int nButtom, int nRange, int nGain, char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength);
+	static void convertDataToAsciNmea(int nButtom, int nAlarm, int nRange, int nGain, char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength);
 private:
-	static void convertAverageToAsciNmea(int nButtom, int nRange, int nGain, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength);
+	static void convertAverageToAsciNmea(int nButtom, int nAlarm, int nRange, int nGain, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength);
 	static char calcTvg(char signal, int Tvg, float nDistance);
 	static float myLog10(float nDistance);
 };

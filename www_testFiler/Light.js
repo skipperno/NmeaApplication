@@ -27,7 +27,7 @@ function onLightButtonClick(){
 
 
 
-function createLightDiv(parentDiv){
+function initLightDiv(parentDiv){
 	var lightSliderDiv;
 	var lightStepDiv;
 	var lightDay_NightDiv;
@@ -46,7 +46,7 @@ function createLightDiv(parentDiv){
 	parentDiv.appendChild(lightDay_NightDiv);
 	
 	var slidText = [ "0%", "20%", "40%", "60%", "80%", "100%" ];
-	sliderBrightnes = new SliderHorizontal(51, "Brightness",0, 100, jsonLIGHT.brighDay[0], document
+	sliderBrightnes = new SliderHorizontal(51, "Brightness", "%", 0, 100, jsonLIGHT.brighDay[0], document
 			.getElementById("lightSliderDiv"), slidText, false); //jsonDATA.signal.TVG
 	
 	
@@ -59,29 +59,50 @@ function createLightDiv(parentDiv){
 	var cTA2 = [ "Day", "Night"];
 	//var testChoice = new ChoiceBoxHoriz(53, "", 0, document.getElementById("lightDay_NightDiv"), 2, cTA2);
 	dayNight = new ChoiceBoxHoriz2(53, "", 0, document.getElementById("lightDay_NightDiv"), 2, cTA2, "but2.png", "but_push2.png", 150,70,400,90);
+	
+/*	isDay = 
+	presetsSelectLev = 
+		if (isDay) {
+	sendLightMsg();
+		} else {
+			
+		}*/
 }
 
 ///////// CALLBACK ////////////////
 function onBrightnes(pos){
-	if (isDay)
+	if (isDay) {
 		jsonLIGHT.brighDay[presetsSelectLev] = pos;
-	else
+		sendLightMsg(jsonLIGHT.brighDay[presetsSelectLev]);
+	} else {
 		jsonLIGHT.brighNight[presetsSelectLev] = pos;
+		sendLightMsg(jsonLIGHT.brighNight[presetsSelectLev]);
+	}
 }
 function onLightPresets(pos){
-	if (isDay)
-		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighDay[pos], true);
-	else
-		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighNight[pos], true);
-	
 	presetsSelectLev = pos;
+	
+	if (isDay) {
+		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighDay[pos], true);
+		sendLightMsg(jsonLIGHT.brighDay[presetsSelectLev]);
+	} else {
+		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighNight[pos], true);
+		sendLightMsg(jsonLIGHT.brighNight[presetsSelectLev]);
+	}
 }
 function onDayNight(pos){
 	if (pos == 0) {
 		isDay = true;
 		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighDay[presetsSelectLev], true);
+		sendLightMsg(jsonLIGHT.brighDay[presetsSelectLev]);
 	} else {
 		isDay = false;
 		sliderBrightnes.setHandlButtValue(jsonLIGHT.brighNight[presetsSelectLev], true);
+		sendLightMsg(jsonLIGHT.brighNight[presetsSelectLev]);
 	}
+}
+
+function sendLightMsg(newPwm){
+	jsonLightMsg.pwm = newPwm;
+	sendToServer(JSON.stringify(jsonLightMsg));
 }

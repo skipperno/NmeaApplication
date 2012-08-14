@@ -14,12 +14,11 @@ function TabMenuItem(itemIndex, line1, image, parentContainer, enableItem) {
 	this.tabItem.id = "tabItem_" + itemIndex;
 	this.tabItem.parentObject = this;
 	
+if(image != "") {
 	this.imgDiv = this.document.createElement("img");
 	this.imgDiv.src = image;
-	//this.imgDiv.className = "pp";
-	//this.imgDiv.style.backgroundImage='url(images/home.png)';
 	this.tabItem.appendChild(this.imgDiv);
-	
+}	
 	this.tabTextdiv = this.document.createElement("DIV");
 	this.tabTextdiv.className = "tabText";
 	this.tabTextdiv.innerHTML=this.tabText;
@@ -27,6 +26,7 @@ function TabMenuItem(itemIndex, line1, image, parentContainer, enableItem) {
 	
 	this.parentContainer.appendChild(this.tabItem);
 	
+
 	
 	if(enableItem) {
 		this.enableItem();
@@ -35,7 +35,7 @@ function TabMenuItem(itemIndex, line1, image, parentContainer, enableItem) {
 	}
 }
 
-TabMenuItem.prototype.enableItem = function(select){
+TabMenuItem.prototype.enableItem = function(){
 	this.tabItem.className = "tabItemNotSel";
 	
 	$(this.tabItem).mouseover(function(e){
@@ -52,7 +52,8 @@ TabMenuItem.prototype.enableItem = function(select){
 	
 	$(this.tabItem).click(function(e){
 		this.parentObject.tabItem.className = "tabItemSel";
-		onHorisontalMenuCallbackTest(this.parentObject.itemIndex);
+		onTabItemCallback(this.parentObject.itemIndex);
+		return preventEv(e);
 	});
 };
 

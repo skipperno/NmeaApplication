@@ -24,7 +24,7 @@ NewEchoParser::~NewEchoParser() {
 	// TODO Auto-generated destructor stub
 }
 
-void NewEchoParser::convertDataToAsciNmea(int nButtom, int nRange, int nGain,
+void NewEchoParser::convertDataToAsciNmea(int nButtom, int nAlarm, int nRange, int nGain,
 		char* inBuffer, int inLength, char* asciNmeaMsg, int * nAsciMsgLength) {
 /*
 		char outArray[VERTICAL_RESOLUTION + 1];
@@ -38,7 +38,7 @@ void NewEchoParser::convertDataToAsciNmea(int nButtom, int nRange, int nGain,
 	 memcpy(inBuffer, outArray, VERTICAL_RESOLUTION);*/
 
 	// Normal
-	NewEchoParser::convertAverageToAsciNmea(nButtom, nRange, nGain, inBuffer,
+	NewEchoParser::convertAverageToAsciNmea(nButtom, nAlarm, nRange, nGain, inBuffer,
 			asciNmeaMsg, nAsciMsgLength);
 }
 
@@ -76,14 +76,15 @@ float NewEchoParser::myLog10(float nDistance) {
 	return 3.f; //3;
 }
 
-void NewEchoParser::convertAverageToAsciNmea(int nButtom, int nRange,
+void NewEchoParser::convertAverageToAsciNmea(int nButtom, int nAlarm, int nRange,
 		int nGain, char* averageBuffer, char* asciNmeaMsg, int * nAsciMsgLength) {
 	int nTemp;
 	int nTvg;
 	asciNmeaMsg[0] = '1'; // TODO: msg type
 	asciNmeaMsg[1] = 0x30 + nRange;
+	asciNmeaMsg[2] = 0x30 + nAlarm;
 
-	*nAsciMsgLength = 2;
+	*nAsciMsgLength = 3;
 
 	nGain = Data::getInstance()->getGain();
 	nTvg = Data::getInstance()->getTvg();

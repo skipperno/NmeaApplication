@@ -2,7 +2,7 @@
  * MsgInHandler.cpp
  *
  *  Created on: 6. mai 2011
- *      Author: nn
+ *      Author: Ernad Secic
  */
 
 #include "MsgInHandler.h"
@@ -28,22 +28,27 @@
 #include "utility/ESignal.h"
 #include "utility/EByteArray.h"
 #include "data/Data.h"
+#include "data/Alarm.h"
 
 #include "webserver/EchoDataWebSocket.h"
+#include "utility/SysTime.h"
+#include "data/Simulator.h"
 
-///////////hei Ernad /////////
 MsgInHandler* thisInstance;
 pthread_mutex_t lastMsgMutex;
 
 int nRange;
 int nGain = 1;
 
+
 bool serialPort3Running = false;
-int com3baudRate = 4800; //TODO: get from config
+
 
 void * runCom3listener(void *ptr);
+void * runCurtisReceivingThread(void *ptr);
 
 MsgInHandler::MsgInHandler() {
+	simulatingData = false;
 	memset(lastMsgStream_1, 0, 17000);
 	memset(lastMsgStream_2, 0, 17000);
 	nNoOfMessages = 0;
@@ -74,14 +79,14 @@ void MsgInHandler::getLastWeatherMessage(char* pStream) {
 	strcpy(pStream, lastMsgStream_2);
 }
 /*
-void MsgInHandler::setRange(int newRange) {
-	nRange = newRange;
-}
+ void MsgInHandler::setRange(int newRange) {
+ nRange = newRange;
+ }
 
-void MsgInHandler::setGain(int newGain) {
-	nGain = newGain;
-}
-*/
+ void MsgInHandler::setGain(int newGain) {
+ nGain = newGain;
+ }
+ */
 bool MsgInHandler::getLastEchoMessage(char* pStream) {
 	pthread_mutex_lock(&lastMsgMutex);
 	if (lastMsgStream_1[0] != 0) {
@@ -97,37 +102,50 @@ bool MsgInHandler::getLastEchoMessage(char* pStream) {
 	}
 }
 
-bool MsgInHandler::changeBaudRate_serial3(int newBaud) {
+void MsgInHandler::simulate(bool bSimulate) {
+	simulatingData = bSimulate;
+
+	if (bSimulate) {
+		printf("************************************************\n");
+		printf("***      Start simulation and stop ttyS1    ****\n");
+		printf("************************************************\n");
+		serialPortEcholodd.closeSerial();
+	}
+}
+
+bool MsgInHandler::restart_serial3() {
 	return true;
 	printf("************************************************\n");
 	printf("***       RESTART SERIAL PORT 3 (ttyS2)?    ****\n");
 	printf("************************************************\n");
 	serialPort3.closeSerial();
-	com3baudRate = newBaud;
-printf("Wait\n");
-	while(serialPort3Running){ //TODO: if never false?
+
+
+	printf("Wait\n");
+	while (serialPort3Running) { //TODO: if never false?
 		usleep(10000); // sleep 10 ms
 	}
+
 	printf("Wait end. Create new thread\n");
 	usleep(100000);
-	pthread_create(&threadCom3,   NULL, runCom3listener, (void*) this);
+	pthread_create(&threadCom3, NULL, runCom3listener, (void*) this);
 	printf("Wait end. Create new thread\n");
 	return true;
 }
 
-int MsgInHandler::sendMsgSerial1 (const char* pBuffer, int length) {
+int MsgInHandler::sendMsgSerial1(const char* pBuffer, int length) {
 	//return serialPort1.sendSerial(pBuffer, length);
 	return 0;
 }
-int MsgInHandler::sendMsgSerial2 (const char* pBuffer, int length) {
+int MsgInHandler::sendMsgSerial2(const char* pBuffer, int length) {
 	//return serialPort2.sendSerial(pBuffer, length);
 	return 0;
 }
-int MsgInHandler::sendMsgSerial3 (const char* pBuffer, int length) {
+int MsgInHandler::sendMsgSerial3(const char* pBuffer, int length) {
 	return serialPort3.sendSerial(pBuffer, length);
 }
 
-int MsgInHandler::selfTest(int on_off, int source){
+int MsgInHandler::selfTest(int on_off, int source) {
 	if (on_off == 1) {
 		selftest.startTest(source);
 	} else {
@@ -138,27 +156,26 @@ int MsgInHandler::selfTest(int on_off, int source){
 }
 
 /*
-void MsgInHandler::onReceivedNewDisplayChoice(int nSource, int selectedChoice) {
-	printf("************************************************\n");
-	printf("***       SOURCE: %d, choice: %d     ****\n", nSource, selectedChoice);
-	printf("************************************************\n");
+ void MsgInHandler::onReceivedNewDisplayChoice(int nSource, int selectedChoice) {
+ printf("************************************************\n");
+ printf("***       SOURCE: %d, choice: %d     ****\n", nSource, selectedChoice);
+ printf("************************************************\n");
 
-	if (selectedChoice == 1) { // Selected "IN"
-		Data::setForwardSourceIndex(nSource);
-		//nForwardNmeaMsgsSource = nSource;
-	} else {					 // Selected "OUT" (0) or "OFF" (2)
-		Data::setForwardSourceIndex(-1);
-		//nForwardNmeaMsgsSource = -1;
-	}
-}*/
-
+ if (selectedChoice == 1) { // Selected "IN"
+ Data::setForwardSourceIndex(nSource);
+ //nForwardNmeaMsgsSource = nSource;
+ } else {					 // Selected "OUT" (0) or "OFF" (2)
+ Data::setForwardSourceIndex(-1);
+ //nForwardNmeaMsgsSource = -1;
+ }
+ }*/
 
 void * runCom3listener(void *ptr) {
 	char buffer[10024]; // Storage of NMEA data stream
-	SerialCom* pserialPort3 = &((MsgInHandler*)ptr)->serialPort3;
+	SerialCom* pserialPort3 = &((MsgInHandler*) ptr)->serialPort3;
 	int nRec;
 
-	pserialPort3->openSerial("/dev/ttyS2", com3baudRate);
+	pserialPort3->openSerial("/dev/ttyS2", Data::getInstance()->getBaudCom3());
 
 	NmeaParser nmeaParser;
 	nmeaParser.init(3); // COM 3
@@ -172,8 +189,8 @@ void * runCom3listener(void *ptr) {
 			nmeaParser.addChars(buffer, nRec); // SIGNAL AUTOGENERATED FROM NmeaParser if message is completed.
 			//circularBuffer.addChars(buffer, nRec); // todo: if > 0
 			//int nMsgSize = circularBuffer.getMessage('$', '*', nmeaMsgBuff);
-		} else if (nRec == 0){
-			printf("***************nREC = 0\n");
+		} else if (nRec == 0) {
+			//printf("***************nREC = 0\n");
 		} else {
 			printf("************************************************\n");
 			printf("***  REC < 0, CLOSED SERIAL PORT 3 (ttyS2)? ****\n");
@@ -186,28 +203,41 @@ void * runCom3listener(void *ptr) {
 	return 0;
 }
 
-void * runCurtisReceivingThread(void *ptr);
+
 
 void * runCurtisReceivingThread(void *ptr) {
 	char buffer[8000];
-	SerialCom serialPortEcholodd;
+	SerialCom* pSerialPortEcholodd = &((MsgInHandler*) ptr)->serialPortEcholodd;
+
 	int nRec;
 
 	CurtisFormatParser curtisFormatParser;
 	curtisFormatParser.init(1);
 
+	pSerialPortEcholodd->openSerial("/dev/ttyS1",
+			Data::getInstance()->getBaudCom2());
 
-	serialPortEcholodd.openSerial("/dev/ttyS1", 115200);
 
 	for (;;) {
-		nRec = serialPortEcholodd.receiveSerial(buffer, 8000);
+		if (((MsgInHandler*) ptr)->simulatingData) {
+			nRec = Simulator::getNextMessage(buffer, 514);
+			usleep(300000);
+		} else {
+			nRec = pSerialPortEcholodd->receiveSerial(buffer, 8000);
+		}
 
 		if (nRec > 0) {
 			curtisFormatParser.addChars(buffer, nRec);
 		}
 	}
+	/*printf("************************************************\n");
+	printf("***  REC < 0, CLOSED SERIAL PORT 2 (ttyS1 - Curtis)? ****\n");
+	printf("************************************************\n");
+	serialPort2_Curtis_Running = false;*/
 	return 0;
 }
+
+//#define USE_KALMAN_FILTER
 
 void MsgInHandler::runHandler() {
 	NmeaComm stream1;
@@ -217,58 +247,91 @@ void MsgInHandler::runHandler() {
 	char tempBuf[500];
 	int nmeaAsciBufferLength;
 
-
 	SignalGenerator* signalGenerator = SignalGenerator::getInstance(0);
 	ESignal* eSignal;
 	EByteArray* eByteArray;
 
 	int ret;
-	ret = pthread_create(&threadCurtis, NULL, runCurtisReceivingThread, (void*) this);
-	ret = pthread_create(&threadCom3,   NULL, runCom3listener,          (void*) this);
+	ret = pthread_create(&threadCurtis, NULL, runCurtisReceivingThread,
+			(void*) this);
+	ret = pthread_create(&threadCom3, NULL, runCom3listener, (void*) this);
 
 	for (;;) {
 		eSignal = signalGenerator->waitOnSignal();
 		if (eSignal != NULL) {
 			if (eSignal->signalType == 1) { // Curtis data received
 				eByteArray = (EByteArray*) eSignal->msg;
-				 DataProcessing::kalmanFilter(&eByteArray->data()[1], 400, tempBuf);
+
+				DataProcessing::kalmanFilter(&eByteArray->data()[1], 400,
+										tempBuf);
+
 				//ButterworthLowPassFilter::test(&eByteArray->data()[1], 400, &eByteArray->data()[1]);
 				/*int nButtom = DataProcessing::bottomDetection(
-						&eByteArray->data()[1], 400);*/
-				int nButtom = DataProcessing::bottomDetection(
-						tempBuf, 400);
-				NewEchoParser::convertDataToAsciNmea(nButtom, Data::getInstance()->getRange(), nGain,
-						tempBuf, 400, nmeaAsciBuffer,//&eByteArray->data()[1], 400, nmeaAsciBuffer,
+				 &eByteArray->data()[1], 400);*/
+				int nBottom = DataProcessing::bottomDetection(tempBuf, 400);
+				int nAlarm = Alarm::updateAlarmState(nBottom);
+				Data::getInstance()->setDepthMeters((float) nBottom / 10.f);
+
+#ifdef USE_KALMAN_FILTER
+				NewEchoParser::convertDataToAsciNmea(nBottom, nAlarm,
+										Data::getInstance()->getRange(), nGain, tempBuf, 400,
+										nmeaAsciBuffer,
+										&nmeaAsciBufferLength);
+#else
+				NewEchoParser::convertDataToAsciNmea(nBottom, nAlarm,
+						Data::getInstance()->getRange(), nGain, &eByteArray->data()[1], 400,
+						nmeaAsciBuffer,
 						&nmeaAsciBufferLength);
+#endif
 
-				EchoDataWebSocket::broadcastMsgToClients(nmeaAsciBuffer, nmeaAsciBufferLength);
+				EchoDataWebSocket::broadcastMsgToClients(nmeaAsciBuffer,
+						nmeaAsciBufferLength);
 
+				/*char timeString[10];
+				 int nNewHour = SysTime::minutSecondToString(timeString);
+				 if (nOldHour != nNewHour || currentHourString[0] == 0) {
+				 nOldHour = nNewHour;
+				 sprintf(currentHourString, "%.2d", nNewHour);
+				 //fileAccess.createFile("/media/mySD", currentHourString);
+				 }
+
+				 char saveMsg[40];
+				 sprintf(saveMsg, "%s %d\n", timeString, nBottom);
+				 fileAccess.addMsg("/media/mySD", currentHourString, saveMsg, strlen(saveMsg));*/
+				fileAccess.addBottomMsg(nBottom);
 				//BinaryEchoParser::convertCompressedDataToAsciNmea(nRange, pBuffer, length, lastMsgStream_1, &nStram_1_length);
 
-
 				//Dispatcher::sendEchoMsg(nmeaAsciBuffer, nmeaAsciBufferLength);
-
 			} else if (eSignal->signalType == 2) { // Msg from COM 2
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
 				printf("COM 2, NMEA: %s\n", eByteArray->data());
 
-				if(Data::getActiveDisplayIndex() == 2 && Data::getDisplayIoChoice() == 1)
-					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
+				if (Data::getInstance()->getActiveDisplayIndex() == 2
+						&& Data::getInstance()->getDisplayIoChoice() == 1)
+					Data::getInstance()->sendNmeaMsg(eByteArray->data(),
+							NMEA_DIRECT_IN);
 			} else if (eSignal->signalType == 3) { // Msg from COM 3
 				eByteArray = (EByteArray*) eSignal->msg;
 				eByteArray->data()[eByteArray->length() - 1] = 0;
 				printf("COM 3, Received NMEA: %s\n", eByteArray->data());
 
-				if(Data::getActiveDisplayIndex() == 3 && Data::getDisplayIoChoice() == 1) {
-					Data::getInstance()->sendNmeaMsg(eByteArray->data(), NMEA_DIRECT_IN);
+				if (Data::getInstance()->getActiveDisplayIndex() == 3
+						&& Data::getInstance()->getDisplayIoChoice() == 1) {
+					Data::getInstance()->sendNmeaMsg(eByteArray->data(),
+							NMEA_DIRECT_IN);
 					printf("sent nmea\n");
 				} else {
-					printf("Not sent, active display: %d, IO choice: %d\n", Data::getActiveDisplayIndex(), Data::getDisplayIoChoice());
+					printf("Not sent, active display: %d, IO choice: %d\n",
+							Data::getInstance()->getActiveDisplayIndex(),
+							Data::getInstance()->getDisplayIoChoice());
 				}
 			}
+
+			delete eByteArray;
 		}
 	}
 	//	serialPortEcholodd.closeInputPort();
 	//serialPortEcholodd.closeOutputPort();
 }
+

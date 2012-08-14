@@ -14,6 +14,8 @@
 #include "comm/SerialCom.h"
 #include "Selftest.h"
 
+#include "data/FileAccess.h"
+
 #define MAX_NMEA_BUFF 17000
 
 class MsgInHandler {
@@ -25,7 +27,7 @@ public:
 	void getLastXXMessage(char* pStream);
 	void getLastWeatherMessage(char* pStream);
 	bool getLastEchoMessage(char* pStream);
-	bool changeBaudRate_serial3(int newBaud);
+	bool restart_serial3();
 	int sendMsgSerial1 (const char* pBuffer, int length);
 	int sendMsgSerial2 (const char* pBuffer, int length);
 	int sendMsgSerial3 (const char* pBuffer, int length);
@@ -37,9 +39,11 @@ public:
 	//static void setGain(int newGain);
 
 	static MsgInHandler* getInstance();
+	void simulate(bool bSimulate);
 
-	//SerialCom serialPortEcholodd;
+	SerialCom serialPortEcholodd;
 	SerialCom serialPort3;
+	bool simulatingData;
 private:
 	/*void parseRecBuffer();
 	void removeFromBuffer(int nRemoveLength);
@@ -47,6 +51,8 @@ private:
 	int fineMsgStart();
 	int fineMsgEnd(int nStartPos);
 */
+	FileAccess fileAccess;
+
 
 	char totalNmeaBuffer[MAX_NMEA_BUFF];
 	int totalReceived;

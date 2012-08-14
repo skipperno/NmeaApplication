@@ -8,6 +8,10 @@
 #ifndef DATA_H_
 #define DATA_H_
 
+#include "DataSignal.h"
+#include "DataGlobalt.h"
+#include "DataTransceiver.h"
+
 #include "../json/elements.h"
 using namespace json;
 
@@ -22,7 +26,9 @@ public:
 	Data();
 	virtual ~Data();
 
-	void setGain(int newGain);
+	static Data* getInstance();
+
+	static void setGain(int newGain);
 	void setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon);
 	void setPowerMeasurment(int nAdcIndex, int value);
 	// TODO: wrong place for this function
@@ -30,6 +36,8 @@ public:
 
 	void getJsonData(char* msg);
 	void getJsonTop(char* msg);
+	void getJsonTransceiver(char* msg);
+	void getJsonActiveTransceiver(char* msg);
 	//void getPowerData(char* msg);
 	void parseJsonMsg(char* msg);
 	int getGain();
@@ -38,7 +46,7 @@ public:
 	void getNmeaData(char* msg);
 
 	Array getOutputSettingsObject(int inputIndex);
-
+	bool isAlarmMsgEnabled(int inputIndex);
 	///////////////////////////////////////////////
 	// DEPTH
 	///////////////////////////////////////////////
@@ -60,22 +68,30 @@ public:
 	float getDepthKeelFeet();
 	float getDepthKeelFathoms();
 
-	static Data* getInstance();
 
-	static int getActiveDisplayIndex();
-	static int getDisplayIoChoice();
+	int getActiveDisplayIndex();
+	int getDisplayIoChoice();
+	int getAlarmL();
+	int getAlarmH();
+
+	char* getLat();
+	char* getLon();
+	int getVelocity();
+
+	int getBaudCom1();
+	int getBaudCom2();
+	int getBaudCom3();
 	//static int getForwardSourceIndex();
 	//static void setForwardSourceIndex(int newIndex);
 
+	DataSignal dataSignal;
+	DataGlobalt dataGlobalt;
+	DataTransceiver dataTransceiver;
+	char configVersion[10];
+
+
 private:
-	Object jsonDATA;
-	Object jsonTop;
-	Object jsonNmea;
-	Object jsonDisplay;
-	Object jsonBaud;
-	Object jsonIO;
-	Object jsonPower;
-	Object jsonTest;
+
 
 	void initSignalData();
 	void initTopInfoData();
@@ -84,6 +100,12 @@ private:
 	void initJsonBaudData();
 	void initIoData();
 	void initJsonTestData();
+	void initJsonTransceiverData();
+	void initJsonActiveTransceiverData();
+	void initJsonAlarmConfirmData();
+	void initJsonTimeDate();
+	void initLightData();
+	void initSimulatorData();
 	//void initJsonPowerData();
 
 	void changeBaud(int sourceNo, int newBaudIndex);

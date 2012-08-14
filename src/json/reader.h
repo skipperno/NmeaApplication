@@ -56,15 +56,15 @@ public:
 
 
    // if you know what the document looks like, call one of these...
-   static void Read(Object& object, std::istream& istr);
-   static void Read(Array& array, std::istream& istr);
-   static void Read(String& string, std::istream& istr);
-   static void Read(Number& number, std::istream& istr);
-   static void Read(Boolean& boolean, std::istream& istr);
-   static void Read(Null& null, std::istream& istr);
+   static bool Read(Object& object, std::istream& istr);
+   static bool Read(Array& array, std::istream& istr);
+   static bool Read(String& string, std::istream& istr);
+   static bool Read(Number& number, std::istream& istr);
+   static bool Read(Boolean& boolean, std::istream& istr);
+   static bool Read(Null& null, std::istream& istr);
 
    // ...otherwise, if you don't know, call this & visit it
-   static void Read(UnknownElement& elementRoot, std::istream& istr);
+   static bool Read(UnknownElement& elementRoot, std::istream& istr);
 
 private:
    struct Token
@@ -96,10 +96,10 @@ private:
    typedef std::vector<Token> Tokens;
 
    template <typename ElementTypeT>   
-   static void Read_i(ElementTypeT& element, std::istream& istr);
+   static bool Read_i(ElementTypeT& element, std::istream& istr);
 
    // scanning istream into token sequence
-   void Scan(Tokens& tokens, InputStream& inputStream);
+   bool Scan(Tokens& tokens, InputStream& inputStream);
 
    void EatWhiteSpace(InputStream& inputStream);
    void MatchString(std::string& sValue, InputStream& inputStream);

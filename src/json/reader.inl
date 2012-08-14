@@ -124,23 +124,24 @@ inline bool Reader::TokenStream::EOS() const {
 // Reader (finally)
 
 
-inline void Reader::Read(Object& object, std::istream& istr)                { Read_i(object, istr); }
-inline void Reader::Read(Array& array, std::istream& istr)                  { Read_i(array, istr); }
-inline void Reader::Read(String& string, std::istream& istr)                { Read_i(string, istr); }
-inline void Reader::Read(Number& number, std::istream& istr)                { Read_i(number, istr); }
-inline void Reader::Read(Boolean& boolean, std::istream& istr)              { Read_i(boolean, istr); }
-inline void Reader::Read(Null& null, std::istream& istr)                    { Read_i(null, istr); }
-inline void Reader::Read(UnknownElement& unknown, std::istream& istr)       { Read_i(unknown, istr); }
+inline bool Reader::Read(Object& object, std::istream& istr)                {return Read_i(object, istr); }
+inline bool Reader::Read(Array& array, std::istream& istr)                  {return Read_i(array, istr); }
+inline bool Reader::Read(String& string, std::istream& istr)                {return Read_i(string, istr); }
+inline bool Reader::Read(Number& number, std::istream& istr)                {return Read_i(number, istr); }
+inline bool Reader::Read(Boolean& boolean, std::istream& istr)              {return Read_i(boolean, istr); }
+inline bool Reader::Read(Null& null, std::istream& istr)                    {return Read_i(null, istr); }
+inline bool Reader::Read(UnknownElement& unknown, std::istream& istr)       {return Read_i(unknown, istr); }
 
 
 template <typename ElementTypeT>   
-void Reader::Read_i(ElementTypeT& element, std::istream& istr)
+bool Reader::Read_i(ElementTypeT& element, std::istream& istr)
 {
    Reader reader;
 
    Tokens tokens;
    InputStream inputStream(istr);
-   reader.Scan(tokens, inputStream);
+   if(!reader.Scan(tokens, inputStream))
+   	return false;
 
    TokenStream tokenStream(tokens);
    reader.Parse(element, tokenStream);
@@ -149,12 +150,14 @@ void Reader::Read_i(ElementTypeT& element, std::istream& istr)
    {
       const Token& token = tokenStream.Peek();
       std::string sMessage = "Expected End of token stream; found " + token.sValue;
-      throw ParseException(sMessage, token.locBegin, token.locEnd);
+      //throw ParseException(sMessage, token.locBegin, token.locEnd);
+      return false;
    }
+   return true;
 }
 
 
-inline void Reader::Scan(Tokens& tokens, InputStream& inputStream)
+inline bool Reader::Scan(Tokens& tokens, InputStream& inputStream)
 {
    while (EatWhiteSpace(inputStream),              // ignore any leading white space...
           inputStream.EOS() == false) // ...before checking for EOS
@@ -245,13 +248,15 @@ inline void Reader::Scan(Tokens& tokens, InputStream& inputStream)
 
          default: {
             std::string sErrorMessage = "Unexpected character in stream: " + sChar;
-            throw ScanException(sErrorMessage, inputStream.GetLocation());
+            //throw ScanException(sErrorMessage, inputStream.GetLocation());
+            return false;
          }
       }
 
       token.locEnd = inputStream.GetLocation();
       tokens.push_back(token);
    }
+   return true;
 }
 
 

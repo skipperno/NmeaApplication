@@ -6,7 +6,7 @@
  */
 
 #include "Data.h"
-
+#include "../definitions.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -15,44 +15,45 @@
 #include "../MsgInHandler.h"
 #include "../comm/Dispatcher.h"
 #include "../webserver/DataWebSocket.h"
+#include "Alarm.h"
+#include "FileAccess.h"
+#include "ConfigParser.h"
+#include "../comm/Backlight.h"
 
-#include "../SysTime.h"
+#include "../utility/SysTime.h"
+#include "../utility/Log.h"
 #include "../MsgInHandler.h"   //TODO: feil plass for å behandle dette
 #include <sstream>
+
+
 
 //#define DEBUG_ADC
 
 #define METER_FEET_CONST 	3.2808399
 #define METER_FATHOM_CONST 	0.546806649
 
-Data *dataInstance;
+Data *dataInstance = NULL;
 
 int nDisplayIoChoice = -1; // static variable
 int nActiveDisplay = -1;
 
 
 
-/*
- * var jsonDATA =
- { "type": "ALL",
- "signal" :
- { "GAIN" : 0,
- "TVG"  : 0,
- "FREQ" : "50",
- "POW" : "50"},
- "alarm" :
- { "L" : 44,
- "H" : 400},
- "range" : 0
- };
+// Object jsonDATA;
+Object jsonTop;
+Object jsonNmea;
+//Object jsonDisplay;
+//Object jsonBaud;
+Object jsonIO;
+Object jsonPower;
+Object jsonTransceiver;
+Object jsonActTransceiver;
+Object jsonTest;
+Object jsonAlarmConfirm;
+Object jsonTimeDate;
+Object jsonLightMsg;
+Object jsonSimulate;
 
-
- var jsonGAIN =
- { "type": "G",
- "signal" :
- { "GAIN" : 0}
- };
- */
 
 int Data::getActiveDisplayIndex() {
 	return nActiveDisplay;
@@ -60,24 +61,40 @@ int Data::getActiveDisplayIndex() {
 int Data::getDisplayIoChoice() {
 	return nDisplayIoChoice;
 }
-/*
-void Data::setActiveDisplayIndex(int newIndex) {
-	nActiveDisplay = newIndex;
-}
-*/
+
 Data::Data() {
+	char temp[30];
 	fDepthTransMeters 		= 0;  //TODO: config file
 	fSurfaceOffsetMeters 	= 10;
 	fKeelOffsetMeters 		= 2;
 
+	FileAccess::createDirectoryIfNotExist(MAIN_CONFIG_DIR);
+	FileAccess::createDirectoryIfNotExist(TRANSCEIVER_CONFIG_DIR);
+	for (int i = 1; i < 5; i++) {
+		sprintf(temp, "%s/%s%d", TRANSCEIVER_CONFIG_DIR, "CH", i);
+		FileAccess::createDirectoryIfNotExist(temp);
+	}
+
+
 	dataInstance = this;
-	initSignalData();
+	dataSignal.init();
+	dataGlobalt.init();
+	dataTransceiver.init();
+
 	initTopInfoData();
 	initNmeaScreenData();
-	initJsonDisplayData();
-	initJsonBaudData();
+	//initJsonDisplayData();
+	//initJsonBaudData();
 	initIoData();
 	initJsonTestData();
+	initJsonTransceiverData();
+	initJsonActiveTransceiverData();
+	initJsonAlarmConfirmData();
+	initJsonTimeDate();
+	initLightData();
+	initSimulatorData();
+	strcpy(configVersion, DEFAULT_CONFIG_VERSION);
+
 	//initJsonPowerData();
 }
 
@@ -86,19 +103,28 @@ Data::~Data() {
 }
 
 Data* Data::getInstance() {
+	if (dataInstance == NULL)
+		dataInstance = new Data();
 	return dataInstance;
 }
 
-void Data::initSignalData() { // TODO read data from config fil
-	jsonDATA["type"] = String("sig");
-	jsonDATA["signal"]["GAIN"] = Number(10);
-	jsonDATA["signal"]["TVG"] = Number(19);
-	jsonDATA["signal"]["FREQ"] = Number(50);
-	jsonDATA["signal"]["POW"] = Number(8);
-	jsonDATA["alarm"]["L"] = Number(10);
-	jsonDATA["alarm"]["H"] = Number(500);
-	jsonDATA["range"] = Number(4);
+void Data::initJsonTimeDate() {
+	jsonTimeDate["type"] = String("tiDay");
+	jsonTimeDate["h"] = Number(0);
+	jsonTimeDate["min"] = Number(0);
+	jsonTimeDate["s"] = Number(0);
+	jsonTimeDate["y"] = Number(0);
+	jsonTimeDate["m"] = Number(0);
+	jsonTimeDate["d"] = Number(0);
 }
+
+void Data::initLightData() { // TODO read data from config fil
+	jsonLightMsg["type"] = String("light");
+	jsonLightMsg["pwm"] = Number(0);
+
+	Backlight::setBacklight(0); // TODO: not right place to do it
+}
+
 
 void Data::initTopInfoData() {
 	GW_TIME timeStruct;
@@ -112,7 +138,7 @@ void Data::initTopInfoData() {
 	jsonTop["ins"]["gpsN"] = String("?");
 	jsonTop["ins"]["gpsE"] = String("?");
 	jsonTop["ins"]["speed"] = Number(332);
-	jsonTop["ins"]["frq"] = Number(10000);
+	jsonTop["ins"]["frq"] = Number(100);
 
 	jsonTop["pow"]["24V_U"] = 		String("0"); 		//voltage
 	jsonTop["pow"]["24V_I"] = 		String("0"); 	//current
@@ -129,7 +155,7 @@ void Data::initNmeaScreenData() { // TODO read data from config fil
 	jsonNmea["dir"] = Number(NMEA_DIRECT_OUT);
 	jsonNmea["nmea"] = String("");
 }
-
+/*
 void Data::initJsonDisplayData() { // TODO read data from config fil
 	jsonDisplay["type"] = String("disp");
 	jsonDisplay["disRadio"]["dis"] = Number(2); //TODO: get from config
@@ -142,10 +168,26 @@ void Data::initJsonBaudData() { // TODO read data from config fil
 	jsonBaud["s"] = Number(0); //source
 }
 
-void Data::initJsonTestData() { // TODO read data from config fil
-	jsonTest["type"] = String("test");
-	jsonTest["on"] = Number(0);
-	jsonTest["source"] = Number(0); //source
+*/
+void Data::initJsonAlarmConfirmData() { // TODO read data from config fil
+	jsonAlarmConfirm["type"] = String("alarmConf");
+}
+
+void Data::initJsonTransceiverData() { // TODO: !!! TRENGER IKKE INIT ???????
+	char jsonTransceiverString[1000];
+	dataTransceiver.objectToJsonMsg(jsonTransceiverString);
+
+
+	std::stringstream stream(jsonTransceiverString);
+	Reader::Read(jsonTransceiver, stream);
+}
+
+void Data::initJsonActiveTransceiverData() {
+	char jsonActiveTransceiverString[200];
+	dataTransceiver.objectActiveToJsonMsg(jsonActiveTransceiverString);
+
+	std::stringstream stream(jsonActiveTransceiverString);
+	Reader::Read(jsonActTransceiver, stream);
 }
 
 void Data::initIoData() { // TODO read data from config fil
@@ -153,15 +195,25 @@ void Data::initIoData() { // TODO read data from config fil
 			jsonIoString[] =
 					{
 							"{\"type\": \"ioAll\",\"set\":["
-								"{\"type\":\"1\",\"oms\":[\"a\",\"e\"],\"disRadio\":{\"dis\":2},\"baudR\":{\"ba\":1}}," // COM1
-								"{\"type\":\"2\",\"oms\":[\"a\",\"e\"],\"disRadio\":{\"dis\":2},\"baudR\":{\"ba\":1}}," // COM2
-								"{\"type\":\"3\",\"oms\":[\"a\",\"b\",\"e\"],\"disRadio\":{\"dis\":2},\"baudR\":{\"ba\":1}}," // COM3
-								"{\"type\":\"4\",\"oms\":[\"a\",\"e\"],\"disRadio\":{\"dis\":2}}," // COM4
-								"{\"type\":\"5\",\"oms\":[\"a\",\"e\"],\"disRadio\":{\"dis\":2},\"baudR\":{\"ba\":1}}]}" // COM5
+								"{\"type\":\"0\",\"alOn\":0,\"oms\":[0,0,0,0,0],\"outInOff\":2,\"baudR\":{\"ba\":1}}," // COM1
+								"{\"type\":\"1\",\"alOn\":0,\"oms\":[0,0,0,0,0],\"outInOff\":2,\"baudR\":{\"ba\":1}}," // COM2
+								"{\"type\":\"2\",\"alOn\":0,\"oms\":[0,0,0,0,0],\"outInOff\":2,\"baudR\":{\"ba\":1}}," // COM3
+								"{\"type\":\"3\",\"alOn\":0,\"oms\":[0,0,0,0,0],\"outInOff\":2}]}" // COM4
 					};
 
 	std::stringstream stream(jsonIoString);
 	Reader::Read(jsonIO, stream);
+}
+
+void Data::initJsonTestData() { // TODO read data from config fil
+	jsonTest["type"] = String("test");
+	jsonTest["on"] = Number(0);
+	jsonTest["source"] = Number(0); //source
+}
+
+void Data::initSimulatorData() {
+	jsonSimulate["type"] = String("simul");
+	jsonSimulate["sim"] = Number(0);
 }
 /*
 void Data::initJsonPowerData() {
@@ -178,118 +230,73 @@ void Data::initJsonPowerData() {
 
 
 
-Array Data::getOutputSettingsObject(int inputIndex) {
-	return jsonIO["set"][inputIndex]["oms"];
-}
 
-/*
- var jsonLIGHT =
- { "type": "LIGHT",
- "brighDay" :[10,20,30,40,50],
- "brighNight" :[0,10,20,30,40],
- };*/
-
-void Data::getJsonData(char* msg) {
-	std::stringstream stream;
-	Writer::Write(jsonDATA, stream);
-	strcpy(msg, stream.str().c_str());
-}
-
-void Data::getNmeaData(char* msg) {
-	std::stringstream stream;
-	Writer::Write(jsonNmea, stream);
-	strcpy(msg, stream.str().c_str());
-}
-
-void Data::getJsonTop(char* msg) {
-	GW_TIME timeStruct;
-	char newTime[30];
-	SysTime::sysTime_get(&timeStruct);
-
-	sprintf(newTime, "%.2d:%.2d:%.2d", timeStruct.gwNewTime.hour,
-			timeStruct.gwNewTime.min, timeStruct.gwNewTime.sec);
-	jsonTop["ins"]["time"] = String(newTime);
-
-	std::stringstream stream;
-	Writer::Write(jsonTop, stream);
-	strcpy(msg, stream.str().c_str());
-}
-/*
-void Data::getPowerData(char* msg) {
-	std::stringstream stream;
-	Writer::Write(jsonPower, stream);
-	strcpy(msg, stream.str().c_str());
-}*/
 ////////////////////////////////////////////////////
-// Receive signal data from one client (browser) and
+// Receive command/data from one client (browser) and
 // broadcast to other clients.
 ////////////////////////////////////////////////////
 void Data::parseJsonMsg(char* msg) {
 	Object newJson;
+	Log::logDbgMsg("!!!!!!!JSON: %s\r\n", msg);
+
 	std::stringstream stream(msg);
-	Reader::Read(newJson, stream);
+	if(!Reader::Read(newJson, stream)){
+		printf("No!!!\n");
+		return;
+	}
+
 	const String ddd = newJson["type"];
-	printf("!!!!!!!rec JSON type: %s\n", ddd.Value().c_str());
+	Log::logDbgMsg("JSON type: %s\r\n", ddd.Value().c_str());
 
 	if (strcmp(ddd.Value().c_str(), "getConf") == 0) {
-		printf ("yes\n");
 		char msgToSend[1000];
-		getJsonData(msgToSend);
+		dataSignal.objectToJsonMsg(msgToSend);
+		//getJsonData(msgToSend);
 		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
-		//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+
+		getJsonTransceiver(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+
+		getJsonActiveTransceiver(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
 	} else if (strcmp(ddd.Value().c_str(), "sig") == 0) {
-		int oldRange = getRange();
-		jsonDATA = newJson;
-		int newRange = getRange();
-		if (newRange != oldRange) {
-			printf ("New RANGE = %d\n", newRange);
-		}
-		/*	 	 const Number gain = newJson["signal"]["GAIN"];
-		 printf ("New GAIN = %d\n", (int)gain.Value());
-		 MsgInHandler::setGain((int)gain.Value());
-		 */
+		dataSignal.updateObjectWithJson(newJson);
 		char msgToSend[1000];
-		getJsonData(msgToSend);
+		dataSignal.objectToJsonMsg(msgToSend);
 		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
-		//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
-	} else if (strcmp(ddd.Value().c_str(), "baud") == 0) {
+		FileAccess::notifySettingsChanged();
+	} /*else if (strcmp(ddd.Value().c_str(), "baud") == 0) {
 		jsonBaud = newJson;
 		const Number br = jsonBaud["baudR"]["ba"];
 
 		changeBaud(3, br.Value());
-	} /*else if (strcmp(ddd.Value().c_str(), "disp") == 0) {
+	} else if (strcmp(ddd.Value().c_str(), "disp") == 0) {
 		jsonDisplay = newJson;
 		const Number selectedDisplayChoice = jsonDisplay["disRadio"]["dis"];
 		const Number selectedSource = jsonDisplay["s"];
 
 		MsgInHandler::getInstance()->onReceivedNewDisplayChoice(
 				selectedSource.Value(), selectedDisplayChoice.Value());
-	}*/ else if (strcmp(ddd.Value().c_str(), "1") == 0) {
+	}*/ else if (strcmp(ddd.Value().c_str(), "0") == 0) {
 		jsonIO["set"][0] = newJson;
-
-		Array tempA = jsonIO["set"][0]["oms"];
-		String tempS;
-		for (unsigned int i = 0; i<tempA.Size(); i++){
-			tempS = tempA[i];
-			printf("0: i=%d oms= %s\n", i, tempS.Value().c_str());
-		}
-		nActiveDisplay = 1;
-	} else if (strcmp(ddd.Value().c_str(), "2") == 0) {
+		const Number selectedDisplayChoice = newJson["outInOff"];
+		nActiveDisplay = 0;
+		nDisplayIoChoice = selectedDisplayChoice.Value();
+		const Number br = jsonIO["set"][2]["baudR"]["ba"];
+		// changeBaud(3, br.Value()); //TODO: only  if not the same baud
+	} else if (strcmp(ddd.Value().c_str(), "1") == 0) {
 		jsonIO["set"][1] = newJson;
-		Array tempA = jsonIO["set"][1]["oms"];
-		String tempS;
-		for (unsigned int i = 0; i<tempA.Size(); i++){
-			tempS = tempA[i];
-			printf("1: i=%d oms= %s\n", i, tempS.Value().c_str());
-		}
-		nActiveDisplay = 2;
-	} else if (strcmp(ddd.Value().c_str(), "3") == 0) {
+		const Number selectedDisplayChoice = newJson["outInOff"];
+		nActiveDisplay = 1;
+		nDisplayIoChoice = selectedDisplayChoice.Value();
+		const Number br = jsonIO["set"][2]["baudR"]["ba"];
+		// changeBaud(3, br.Value()); //TODO: only  if not the same baud
+	} else if (strcmp(ddd.Value().c_str(), "2") == 0) {
 		jsonIO["set"][2] = newJson;
 
-		const Number selectedDisplayChoice =
-				jsonIO["set"][2]["disRadio"]["dis"];
+		const Number selectedDisplayChoice = newJson["outInOff"];
 
-		nActiveDisplay = 3;
+		nActiveDisplay = 2;
 		nDisplayIoChoice = selectedDisplayChoice.Value();
 
 		const Number br = jsonIO["set"][2]["baudR"]["ba"];
@@ -297,37 +304,95 @@ void Data::parseJsonMsg(char* msg) {
 		//MsgInHandler::getInstance()->onReceivedNewDisplayChoice(3,
 		//		selectedDisplayChoice.Value());
 		printf("!!!!!!!rec JSON type:3, IO choice %d, baud: %d\n", nDisplayIoChoice, (int)br.Value());
+	} else if (strcmp(ddd.Value().c_str(), "actTrans") == 0){
+		char msgToSend[1000];
+		dataTransceiver.updateActiveChObjectWithJson(newJson);
+		jsonActTransceiver = newJson;
+		/*const Number actCh = jsonActTransceiver["activeCh"];
+		const Number isDual = jsonActTransceiver["isActiveDual"];*/
+		if (dataTransceiver.isActiveDual == 1) //  isDual.Value() == 1)
+			jsonTop["ins"]["frq"] = Number(dataTransceiver.transceiver[dataTransceiver.activeCh].freq2); // Number(jsonTransceiver["jsonTrans"][actCh.Value()]["freq2"]);
+		else
+			jsonTop["ins"]["frq"] = Number(dataTransceiver.transceiver[dataTransceiver.activeCh].freq1); //Number(jsonTransceiver["jsonTrans"][actCh.Value()]["freq1"]);
+
+		int nPos = dataTransceiver.transceiver[dataTransceiver.activeCh].transPos; //jsonTransceiver["jsonTrans"][actCh.Value()]["transPos"];
+		//int nPos = pos.Value();
+		if (nPos == 0)
+			jsonTop["ins"]["pos"] = String("AFT");
+		else if (nPos == 1)
+			jsonTop["ins"]["pos"] = String("STRB");
+		else if (nPos == 2)
+			jsonTop["ins"]["pos"] = String("PORT");
+		else
+			jsonTop["ins"]["pos"] = String("FWD");
+
+		getJsonActiveTransceiver(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+	} else if (memcmp ( ddd.Value().c_str(), "trans", 5 ) == 0) { //if starts with "trans"
+		if (strcmp(ddd.Value().c_str(), "transCH1") == 0)
+			dataTransceiver.updateOneChannelWithJson(0, newJson);
+		else if (strcmp(ddd.Value().c_str(), "transCH2") == 0)
+			dataTransceiver.updateOneChannelWithJson(1, newJson);
+		else if (strcmp(ddd.Value().c_str(), "transCH3") == 0) //Extended CH1
+			dataTransceiver.updateOneChannelWithJson(2, newJson);
+		else if (strcmp(ddd.Value().c_str(), "transCH4") == 0) //Extended CH2
+			dataTransceiver.updateOneChannelWithJson(3, newJson);
+
+		char msgToSend[1000];
+		// send back for all channels
+		dataTransceiver.objectToJsonMsg(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+		/*dataSignal.updateObjectWithJson(newJson);
+		char msgToSend[1000];
+		dataSignal.objectToJsonMsg(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+		FileAccess::notifySettingsChanged();
+
+		if (strcmp(ddd.Value().c_str(), "transCH1") == 0)
+			jsonTransceiver["jsonTrans"][0] = newJson;
+		else if (strcmp(ddd.Value().c_str(), "transCH2") == 0)
+			jsonTransceiver["jsonTrans"][1] = newJson;
+		else if (strcmp(ddd.Value().c_str(), "transCH3") == 0) //Extended CH1
+			jsonTransceiver["jsonTrans"][2] = newJson;
+		else if (strcmp(ddd.Value().c_str(), "transCH4") == 0) //Extended CH2
+			jsonTransceiver["jsonTrans"][3] = newJson;
+
+
+		getJsonTransceiver(msgToSend);
+		DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));*/
 	} else if (strcmp(ddd.Value().c_str(), "test") == 0) {
 		jsonTest = newJson;
 		const Number on_off = jsonTest["on"];
 		const Number source = jsonTest["source"];
 		MsgInHandler::getInstance()->selfTest(on_off.Value(), source.Value());
+	} else if (strcmp(ddd.Value().c_str(), "alarmConf") == 0) {
+		Alarm::confirmAlarm();
+	} else if (strcmp(ddd.Value().c_str(), "tiDay") == 0) {  // User is saving date and time
+		SysTime::sysTime_set(((Number)newJson["y"]).Value(), ((Number)newJson["m"]).Value(), ((Number)newJson["d"]).Value(),
+				((Number)newJson["h"]).Value(), ((Number)newJson["min"]).Value(), ((Number)newJson["s"]).Value());
+	} else if (strcmp(ddd.Value().c_str(), "light") == 0) {
+		jsonLightMsg = newJson;
+		const Number newLight = jsonLightMsg["pwm"];
+		Backlight::setBacklight(newLight.Value());
+	} else if (strcmp(ddd.Value().c_str(), "simul") == 0) {
+		jsonSimulate = newJson;
+		const Number simulate = jsonSimulate["sim"];
+		if (simulate.Value() == 1)
+			MsgInHandler::getInstance()->simulate(true);
+		else
+			MsgInHandler::getInstance()->simulate(false);
 	}
 }
+
 
 /**
  * sourceNo = 1 => COM1, 2 => COM2, 3 => COM3, 4 => LAN, 5 => CAN
  */
 void Data::changeBaud(int sourceNo, int newBaudIndex) { //TODO: not right place for this function
-	if (newBaudIndex == 0)
-		MsgInHandler::getInstance()->changeBaudRate_serial3(4800);
-	else if (newBaudIndex == 1)
-		MsgInHandler::getInstance()->changeBaudRate_serial3(9600);
-	else if (newBaudIndex == 2)
-		MsgInHandler::getInstance()->changeBaudRate_serial3(38400);
-	else if (newBaudIndex == 3)
-		MsgInHandler::getInstance()->changeBaudRate_serial3(115200);
-}
-
-// TODO: wrong place for this function
-void Data::sendNmeaMsg(char* nmeaMsg, int nDirection) {
-	jsonNmea["nmea"] = String(nmeaMsg);
-	jsonNmea["dir"] = Number(nDirection);
-
-	char msgToSend[1000];
-	getNmeaData(msgToSend);
-	DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
-	//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
+	if (sourceNo == 3) {
+		dataGlobalt.saveBaudCom3(newBaudIndex);
+		MsgInHandler::getInstance()->restart_serial3();
+	}
 }
 
 void Data::setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon) {
@@ -339,7 +404,15 @@ void Data::setGpsPos(char* n_s, char* sLat, char* e_w, char* sLon) {
 	jsonTop["ins"]["gpsE"] = String(latLong);
 }
 
+
+
+
+//TODO: ta vekk disse variabler. Brukt med Leif i testing
+int nMax = 0;
+int nMin = 1000;
+int dummyCounter = 0;
 void Data::setPowerMeasurment(int nAdcIndex, int value) {
+	dummyCounter ++;
 	char bufferTemp[20];
 	float Vin;// = value*3.3/1023;
 	float Vmeas= value*3.3/1023;
@@ -370,11 +443,19 @@ void Data::setPowerMeasurment(int nAdcIndex, int value) {
 #endif
 			break;
 	case 3:
+		if (dummyCounter > 300) {
+		if (nMax < value)
+			nMax = value;
+		if (nMin > value)
+			nMin = value;
+		}
 		Vin = (Vmeas + Vcc_5*5.4272)*0.08989;
 		//Vin = (Vmeas + Vcc_5*470/86.6)*42.25/470;
 		//sprintf(bufferTemp, "%.3f", (Vin - Vcc_5/2 - 0.06)/0.185);
+		//sprintf(bufferTemp, "%.3f", (Vin - Vcc_5/2)/0.185);
 		sprintf(bufferTemp, "%.2f", (Vin - 2.5)/0.185);
 		jsonTop["pow"]["24_48V_I"] = 	String(bufferTemp);
+	//	printf("24_48 row: %d\t\t MAX: %d, MIN: %d\n", value, nMax, nMin);
 			break;
 	case 4:
 		// ******************************************************************************
@@ -411,26 +492,102 @@ void Data::setPowerMeasurment(int nAdcIndex, int value) {
 	}
 }
 
-
-void Data::setGain(int newGain) {
-	jsonDATA["signal"]["GAIN"] = Number(newGain);
+Array Data::getOutputSettingsObject(int inputIndex) {
+	return jsonIO["set"][inputIndex]["oms"];
 }
 
+bool Data::isAlarmMsgEnabled(int inputIndex) {
+	const Number temp  = jsonIO["set"][inputIndex]["alOn"];
+	return temp.Value() == 1;
+}
+
+
+
+void Data::getNmeaData(char* msg) {
+	std::stringstream stream;
+	Writer::Write(jsonNmea, stream);
+	strcpy(msg, stream.str().c_str());
+}
+
+void Data::getJsonTop(char* msg) {
+	GW_TIME timeStruct;
+	char newTime[30];
+	SysTime::sysTime_get(&timeStruct);
+
+	sprintf(newTime, "%.2d:%.2d:%.2d", timeStruct.gwNewTime.hour,
+			timeStruct.gwNewTime.min, timeStruct.gwNewTime.sec);
+	jsonTop["ins"]["time"] = String(newTime);
+
+	std::stringstream stream;
+	Writer::Write(jsonTop, stream);
+	strcpy(msg, stream.str().c_str());
+}
+
+void Data::getJsonTransceiver(char* msg){
+	dataTransceiver.objectToJsonMsg(msg);
+	/*std::stringstream stream;
+	Writer::Write(jsonTransceiver, stream);
+	strcpy(msg, stream.str().c_str());*/
+}
+
+void Data::getJsonActiveTransceiver(char* msg){
+	dataTransceiver.objectActiveToJsonMsg(msg);
+	/*std::stringstream stream;
+	Writer::Write(jsonActTransceiver, stream);
+	strcpy(msg, stream.str().c_str());*/
+}
+
+/*
+void Data::getPowerData(char* msg) {
+	std::stringstream stream;
+	Writer::Write(jsonPower, stream);
+	strcpy(msg, stream.str().c_str());
+}*/
+
 int Data::getGain() {
-	const Number gain = jsonDATA["signal"]["GAIN"];
-	return (int) (gain.Value());
+	return dataSignal.gain;
+	//const Number gain = jsonDATA["signal"]["GAIN"];
+	//return (int) (gain.Value());
 }
 
 int Data::getTvg() {
-	const Number tvg = jsonDATA["signal"]["TVG"];
-	return (int) (tvg.Value());
+	return dataSignal.tvg;
+	//const Number tvg = jsonDATA["signal"]["TVG"];
+	//return (int) (tvg.Value());
 }
 
 int Data::getRange() {
-	const Number range = jsonDATA["range"];
-	return (int) (range);
+	return dataSignal.range;
+	//const Number range = jsonDATA["range"];
+	//return (int) (range);
 }
 
+char* Data::getLat() {
+	const String aa = jsonTop["ins"]["gpsN"];
+	return (char*) aa.Value().c_str();
+}
+
+char* Data::getLon() {
+	const String aa = jsonTop["ins"]["gpsE"];
+	return (char*) aa.Value().c_str();
+}
+
+int Data::getVelocity() {
+	const Number aa = jsonTop["ins"]["speed"];
+	return (int) aa.Value();
+}
+
+int Data::getBaudCom1() {
+	return dataGlobalt.baudCom1;
+}
+
+int Data::getBaudCom2() {
+	return dataGlobalt.baudCom2;
+}
+
+int Data::getBaudCom3() {
+	return dataGlobalt.baudCom3;
+}
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -483,5 +640,26 @@ float Data::getDepthKeelFeet() {
 }
 float Data::getDepthKeelFathoms() {
 	return getDepthKeelMeters() * METER_FATHOM_CONST;
+}
+
+int Data::getAlarmL(){
+	return dataSignal.alarmL;
+}
+
+int Data::getAlarmH(){
+	return dataSignal.alarmH;
+}
+
+
+// TODO: wrong place for this function
+void Data::sendNmeaMsg(char* nmeaMsg, int nDirection) {
+	jsonNmea["nmea"] = String(nmeaMsg);
+	jsonNmea["dir"] = Number(nDirection);
+
+	char msgToSend[1000];
+	getNmeaData(msgToSend);
+	DataWebSocket::broadcastMsgToClients(msgToSend, strlen(msgToSend));
+
+	//Dispatcher::sendConfigMsg(msgToSend, strlen(msgToSend));
 }
 

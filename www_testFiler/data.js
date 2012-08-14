@@ -3,8 +3,8 @@ var jsonDATA =
 	  "signal" : 
 		{ "GAIN" : 0,
           "TVG"  : 0,
-          "FREQ" : "50",
-          "POW" : "50"},
+          "FREQ" : 50,
+          "POW" : 50},
       "alarm" : 
   		{ "L" : 44,
           "H" : 1200},
@@ -15,10 +15,20 @@ var jsonGet = {
 		"type": "getConf"
 }
 
-var jsonLIGHT = 
-{ "type": "LIGHT",
+var jsonLIGHT =  /* this is not to send to server. Used only localt for saving of values.*/
+{ /*"type": "LIGHT",*/
   "brighDay" :[10,20,30,40,50],
   "brighNight" :[0,10,20,30,40],
+};
+
+var jsonLightMsg = /* this is sent in the start and each time user change light */
+{ "type": "light",
+   "pwm":0
+};
+
+var jsonSimulator = /* simulator ON/OFF (OFF = 0, ON = 1) */
+{ "type": "simul",
+   "sim":0
 };
 
 var jsonTOP = 
@@ -46,36 +56,62 @@ var jsonNmea =
   "nmea" :""
 };
 
+
+
 var jsonIO = // used only in start to set saved values
 { 
 		'type': 'ioAll',
 		'set':[   		
-		       		{'type':'1', //COM1
-		       		'oms':['a','b','e'], 	// active output msg types
-		    	   'disRadio':{'dis':2},	// display: in, out or off
+		       		{'type':'0', //COM1
+		       		 'alOn':0, // alarm NMEA sent via this output
+		       		'oms':[0,0,0,0,0], 	// active output msg types
+		    	   'outInOff':2,	// display: 0: out, 1: in or 2: off
 		    	   'baudR':{'ba':1}},
 		    	    
-		    	   	{'type':'2', //COM2
-		    		   "oms":["a","b","e"], 	// active output msg types
-			    	 'disRadio':{'dis':2},
+		    	   	{'type':'1', //COM2
+		    		   'alOn':0, // alarm NMEA sent via this output
+		    		   "oms":[0,0,0,0,0], 	// active output msg types
+		    		   'outInOff':2,	// display: 0: out, 1: in or 2: off
 			    	 'baudR':{'ba':1}},
 			    	 
-			    	{'type':'3', //COM3
-			    		 "oms":["a","b","e"], 	// active output msg types
-				    	 'disRadio':{'dis':2},
+			    	{'type':'2', //COM3
+			    		 'alOn':0, // alarm NMEA sent via this output
+			    		 "oms":[0,0,0,0,0], 	// active output msg types
+			    		 'outInOff':2,	// display: 0: out, 1: in or 2: off
 				    	 'baudR':{'ba':0}},
 				    	 
-			    	{'type':'4', //LAN
-				     'oms':['a','b','e'], 	// active output msg types
-				     'disRadio':{'dis':2}},
+			    	{'type':'3', //LAN
+				    		 'alOn':0, // alarm NMEA sent via this output
+				     'oms':[0,0,0,0,0], 	// active output msg types
+				     'outInOff':2},	// display: 0: out, 1: in or 2: off
 				     
 				    {'type':'5', //CAN
-				    'oms':['a','b','e'], 	// active output msg types
-				     'disRadio':{'dis':2},
+				    	 'alOn':0, // alarm NMEA sent via this output
+				    'oms':[0,0,0,0,0], 	// active output msg types
+				    'outInOff':2,	// display: 0: out, 1: in or 2: off
 				     'baudR':{'ba':1}}
 			    	]
 };
 
+var jsonTransceiver = 
+{
+	'type': 'transceiver',
+	'jsonTrans':[{'type': 'transCH1','chEnabled' : 1,'transPos': 1,'freq1' : 3000,'dualEnabled' : 1,'freq2' : 4500},
+				 {'type': 'transCH2','chEnabled' : 1,'transPos': 1,'freq1' : 3000,'dualEnabled' : 1,'freq2' : 4500},
+				 {'type': 'transCH3','chEnabled' : 1,'transPos': 1,'freq1' : 3000,'dualEnabled' : 1,'freq2' : 4500}, //Extended CH1
+				 {'type': 'transCH4','chEnabled' : 1,'transPos': 1,'freq1' : 3000,'dualEnabled' : 1,'freq2' : 4500}],//Extended CH2
+
+/*	'activeCh':3,
+	'isActiveDual':0*/
+};
+
+var jsonActiveTransceiver = 
+{
+	'type': 'actTrans',
+	'activeCh':3,
+	'isActiveDual':0
+};
+/*
 var jsonOutputs = 
 { 'type': 'out',
   'oms':['a','b','e'] // active output msg types
@@ -90,51 +126,20 @@ var jsonDisplay =
 var jsonBaud = 
 { 'type': 'baud',
   'baudR':{'ba':1}
-};
+};*/
 
 var jsonTestNmea = 
 { 'type': 'test', // test loop- back on NMEA
   'on':1,    // 0 => off, 1 => on
   'source':0    // 0=> NMEA1, 1=> NMEA1, 2=>NMEA3
 };
-/*
-var jsonTransceiverCH1 = 
-{ "type": "transceiverCH1",
-  "enabled" : 1, 
-  "position": 1, 
-  "freq1" : 3000, 
-  "dualEnabled" : 1,
-  "freq2" : 4500,
+
+var jsonAlarmConfirm = 
+{ 'type': 'alarmConf'
 };
-var jsonTransceiverCH2 = 
-{ "type": "transceiverCH2",
-  "enabled" : 1, 
-  "position": 3,
-  "freq1" : 2000, 
-  "dualEnabled" : 0,
-  "freq2" : 7500 
-};*/
-
-var jsonTransceiver = {
-	"type": "transceiver",
-	"jsonTransceiverCH1":{"type": "transceiverCH1",
-		  "enabled" : 1, 
-		  "position": 1, //AFT=0, PORT=1, STUR=1, FWD=3
-		  "freq1" : 3000, /*!!! freq / 10 **/
-		  "dualEnabled" : 1,
-		  "freq2" : 4500},
-	"jsonTransceiverCH2":{"type": "transceiverCH2",
-		  "enabled" : 1, 
-		  "position": 3, //AFT=0, PORT=1, STUR=1, FWD=3
-		  "freq1" : 2000, /*!!! freq / 10 **/
-		  "dualEnabled" : 0,
-		  "freq2" : 7500},
-	"activeCh":0,
-}
-
-
 
 function setSignalData(){
+	changeRange (jsonDATA.range);
 	updateMenuValues();
 	updateAlarmIcons(); 
 }

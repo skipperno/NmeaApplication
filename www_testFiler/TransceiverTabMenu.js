@@ -6,12 +6,12 @@ var transcMenuArray= new Array();
 var subMenuDivTransc = new Array();
 var NUMB_OF_SUBMENU_TRANSC = 1; // use only if sliding
 
-var selectedTransceiverMenuIndex = -1;
+var selectedTransceiverTabIndex = -1;
 //$(slidingMenu).animate({left:'-425px'},400);
 
-function onHorisontalMenuCallbackTest(tabIndex) {
-	showChannel(tabIndex + 1);
-	//selectTransceiverTabMenu(tabIndex, true);
+function onTabItemCallback(tabIndex) {
+	showChannel(tabIndex);
+	selectTransceiverTabMenu(tabIndex);
 }
 
 function initTransceiverMenu(parentDiv){
@@ -32,8 +32,8 @@ function initTransceiverMenu(parentDiv){
 	// SUBMENU 0 (SIGNAL)
 	transcMenuArray[0]=new TabMenuItem(0, "CH1", "", subMenuDivTransc[0], true);	
 	transcMenuArray[1]=new TabMenuItem(1, "CH2", "", subMenuDivTransc[0], true);
-	transcMenuArray[2]=new TabMenuItem(2, "Ext CH1", "", subMenuDivTransc[0], false);
-	transcMenuArray[3]=new TabMenuItem(3, "Ext CH2", "", subMenuDivTransc[0]), false;
+	transcMenuArray[2]=new TabMenuItem(2, "Ext CH1", "", subMenuDivTransc[0], true);
+	transcMenuArray[3]=new TabMenuItem(3, "Ext CH2", "", subMenuDivTransc[0], true);
 	
 	//for(i=0;i<NUMB_OF_SUBMENU_TRANSC;i++){
 		fastTranscSubMenu.appendChild(subMenuDivTransc[0]);
@@ -47,10 +47,15 @@ function initTransceiverMenu(parentDiv){
 }
 
 
-function selectTransceiverTabMenu(menuIndex, select){
-	transcMenuArray[menuIndex].select(select);
-	if(select)
-		selectedTransceiverMenuIndex = menuIndex;
+function selectTransceiverTabMenu(menuIndex){
+	selectedTransceiverTabIndex = menuIndex;
+	
+	for(var i=0;i<4;i++){
+		if(menuIndex == i)
+			transcMenuArray[i].select(true);
+		else
+			transcMenuArray[i].select(false);
+	}	
 }
 
 /**

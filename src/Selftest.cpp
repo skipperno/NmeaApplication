@@ -59,6 +59,8 @@ void* runTestThread(void *ptr) {
 			MsgInHandler::getInstance()->sendMsgSerial3("$test,loopback,NMEA3*OK", strlen("$test,loopback,NMEA3*OK"));
 		sleep(1);
 	}
+
+	return (void*)0;
 }
 
 

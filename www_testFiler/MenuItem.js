@@ -47,6 +47,7 @@ function HorizMenuItem(itemIndex, line1, line2, parentContainer) {
 		deselectOtherHorizontalMenuItems(this.parentObject.itemIndex);
 		//this.parentObject.select(this.selected);
 		onHorisontalMenuCallback(this.parentObject.itemIndex, this.parentObject.selected);
+		return preventEv(e);
 	});
 }
 

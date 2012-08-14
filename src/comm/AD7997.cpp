@@ -88,18 +88,19 @@ void AD7997::runThreadImplementation(void){
 
 		    while(1) {
 		    	if(nTempCounter%8 == 0)
-		    	sleep(1);
-		    		nTempCounter++;
+		    		sleep(1);
+		    		//usleep(300);
+		    	nTempCounter++;
 
 		    	gpioCortex.setOutputHigh(true);
-		    	usleep(20);
+		    	usleep(2);
 		    	gpioCortex.setOutputHigh(false);
-		    	usleep(30);
+		    	usleep(3);
 
 		        if (read(i2cFd,buf,2) != 2) {
-		            printf("Failed to read from the i2c bus:\n");
-		            printf(strerror(errno));
-		            printf("\n\n");
+		            //printf("Failed to read from the i2c bus:\n");
+		            //printf(strerror(errno));
+		            //printf("\n\n");
 		        } else {
 		            data = (((buf[0] & 0b00001111)<<8)+buf[1]) >> 2;
 

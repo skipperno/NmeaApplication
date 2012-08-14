@@ -5,7 +5,7 @@
 function Scope(x, y, widgetWidth, widgetHeight) {
 	this.frameColor ="#fff";
 	this.backgrColor = "#000";
-	this.lineColor = "#ffe732";
+	this.lineColor = "#0000ff"; //#ffe732";
 	this.x = x;
 	this.y = y;
 	this.test = 1;
@@ -16,13 +16,18 @@ function Scope(x, y, widgetWidth, widgetHeight) {
 	this.scopeDoubleBuff_1pixData = null;
 
 	this.dataArray = new Array(); // received data
+	
+	this.imageObj = new Image();
 
-	this.scopeInit();
+	this.imageObj.src = 'images/ScopeCanvasBack.png';
+    //this.imageObj.src = 'http://10.31.1.121:8080/test/images/ScopeCanvasBack.png';
+	//this.scopeInit();
+
 } // end of constructor
 
 /**
  * public method, class Scope
- */
+
 Scope.prototype.scopeInit = function() {
 
 	this.canvasDoubleBuffElement = document.createElement('canvas');
@@ -33,11 +38,8 @@ Scope.prototype.scopeInit = function() {
 			.getContext('2d');
 	
 	this.clearBackground();
-
-	/*this.canvasDoubleBuff_1pixData = this.canvasDoubleBuffer2Dcontext
-			.createImageData(1, this.widgetHeight);*/
 }
-
+ */
 /**
  * public method, class Scope
  */
@@ -63,17 +65,18 @@ Scope.prototype.paint = function() {
 	
 	
 	
-	var myCanvasContext = document.getElementById('echoCanvas').getContext('2d');
+	var myCanvasContext = document.getElementById('scopeCanvas').getContext('2d'); // echoCanvas
 	
-	myCanvasContext.fillStyle = this.frameColor; 
-	myCanvasContext.fillRect(0,0,this.widgetWidth +6,400); 
+	/*myCanvasContext.fillStyle = this.frameColor; 
+	myCanvasContext.fillRect(0,0,this.widgetWidth + 6, 400); 
 	
 	myCanvasContext.fillStyle = this.backgrColor; 
-	myCanvasContext.fillRect(0,0,this.widgetWidth,this.widgetHeight); 
+	myCanvasContext.fillRect(0,0,this.widgetWidth,this.widgetHeight); */
 	
 	myCanvasContext.lineWidth = 1;
 	
-	
+	myCanvasContext.drawImage(this.imageObj, 0, 0);
+
 	if (this.dataArray != null) {
 		myCanvasContext.strokeStyle = this.lineColor;
 		myCanvasContext.beginPath();
@@ -85,12 +88,18 @@ Scope.prototype.paint = function() {
 		
 		// Paint depth (bottom)
 		myCanvasContext.beginPath();
-		myCanvasContext.strokeStyle = '#fff';
-		var lineX = parseInt(this.dataArray[0]*400/rangeMaxValues[jsonDATA.range]/10);
+		myCanvasContext.strokeStyle = '#f40';
+		var lineX = parseInt(this.dataArray[0]*CANVAS_HEIGHT/rangeMaxValuesCalculation[jsonDATA.range]/10);
 		myCanvasContext.moveTo(lineX, 0);
 		myCanvasContext.lineTo(lineX, 255);
 		
 		myCanvasContext.stroke();
+
+
+
+
+        
+      
 		//this.canvasDoubleBuffer2Dcontext.putImageData(
 		//		this.canvasDoubleBuff_1pixData, this.canWidth - 1, this.y);
 

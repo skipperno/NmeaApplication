@@ -23,7 +23,7 @@
 .horisSlidCenter{
 	width:300px;
 	height:60px;
-	background: url(images/slidHorBackg3.png);
+	background: url(images/slidHorBackg.png);
 	background-repeat:repeat-x;
 	position:relative;
 	float:left;
@@ -54,12 +54,22 @@
 	width:50px;
 	text-align:center;
 }
+
+
+.horisSlidLine{
+	position:absolute;
+	 /*left:0px; calculated*/
+	top:21px;
+	background: url(images/slidHorLine.png);
+	width:1px;
+	height:10px;
+}
 .horisSlidName{
 	position:absolute;
 	left:0px;
 	top:0px;
 	color:#fff;
-	width:150px;
+	width:100%;
 	text-align:center;
 }
 

@@ -96,6 +96,8 @@ void NmeaMsgCreator::getDbsMsgBuffer(char* buffer, float fDeapthMeter,
 	buffer[nNextPos++] = '*';
 
 	//TODO: checksum
+	//char aa[] = {"$SDACK,002*21"};
+	//unsigned char aaa = CheckSum::calculate8bitCheckSum(&aa[1], 9);
 	buffer[nNextPos++] = '1';
 	buffer[nNextPos++] = '1';
 

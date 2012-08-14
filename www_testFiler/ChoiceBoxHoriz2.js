@@ -1,11 +1,10 @@
 
 
 
-function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer, choiceCount, choiceNamesArray, iconNorm, iconSelect, iconWidth, iconHeight, totWidth, totHeight) {
+function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer, choiceCount, choiceNamesArray, iconNorm, iconSelect, iconWidth, iconHeight, totWidth, totHeight, callbackFunc) {
 	this.selectedIndex = selectedIndex;
 	this.mouseDownX;
 	this.mouseDownY;
-	this.selectedIndex = selectedIndex;
 	this.myId = choiceIndex;
 	this.parentContainer = parentContainer;
 	this.stepWidth;
@@ -18,6 +17,7 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 	this.iconHeight = iconHeight;
 	this.totWidth = totWidth;
 	this.totHeight = totHeight;
+	this.callbackFunc = callbackFunc;
 	
 	this.document = parentContainer.ownerDocument || parentContainer.document;
 
@@ -48,7 +48,7 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 		this.txtDiv.className = "horChoiceText";
 		this.txtDiv.innerHTML = this.choiceNamesArray[i];
 		this.txtDiv.style.left = this.choicePosCenterArray[i] - 50 + "px";
-		this.txtDiv.style.top = this.iconHeight/2 - 20 + "px";
+		this.txtDiv.style.top = this.iconHeight/2 - 7 + "px";
 		
 		
 		
@@ -73,16 +73,23 @@ function ChoiceBoxHoriz2(choiceIndex, shownText, selectedIndex, parentContainer,
 	
 	this.selectChoice(this.selectedIndex);
 
-	$(this.horisChoiceCenter).mousedown(function(e) {
+	$(this.horisChoiceCenter).click(function(e) {//mousedown(function(e) {
+		
 		var offset = $(this).offset();
 		var x = parseInt(e.pageX - offset.left);
 		var y = parseInt(e.pageY - offset.top);
+		if (y > this.myObject.iconHeight)
+			return preventEv(e);
 		
 		var newSelectedIndex = this.myObject.convertPosToValue(x);
 
 		this.myObject.selectChoice(newSelectedIndex);
 		
-		onSliderMoved(this.myObject.myId, newSelectedIndex);
+		if (this.myObject.callbackFunc != null)
+			this.myObject.callbackFunc(this.myObject.myId, newSelectedIndex);
+		else
+			onSliderMoved(this.myObject.myId, newSelectedIndex);
+		
 		return preventEv(e);
 	});
 }
@@ -108,18 +115,19 @@ ChoiceBoxHoriz2.prototype.calcChoisePos = function() {
 
 ChoiceBoxHoriz2.prototype.selectChoice = function(selIndex) {
 	var myElem = document.getElementById("choiceIc_id_" + this.myId + "_" + this.selectedIndex);
-	myElem.style.backgroundImage="url(images/" + this.iconNorm + ")";
+	if (myElem != null)
+		myElem.style.backgroundImage="url(images/" + this.iconNorm + ")";
 	
 	myElem = document.getElementById("choiceIc_id_" + this.myId + "_" + selIndex);
 	myElem.style.backgroundImage="url(images/" + this.iconSelect + ")";
 	
 	this.selectedIndex = selIndex;
 };
-
+/*
 function preventEv(e) {
 	if (e.preventDefault)
 		e.preventDefault();
 	else
 		e.returnValue = false;
 	return false;
-}
+}*/

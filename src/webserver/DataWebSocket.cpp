@@ -66,7 +66,7 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 		#ifdef DEBUG_WEBSERVER
 				fprintf(stdout, "Mirror LWS_CALLBACK_BROADCAST\n");
 		#endif
-			//	fprintf(stdout, "!!!!!!!!!!!!!!!!!!!!Mirror LWS_CALLBACK_BROADCAST\n");
+				//fprintf(stdout, "!!!!!!!!!!!!!!!!!!!!Mirror LWS_CALLBACK_BROADCAST\n");
 				n = libwebsocket_write(wsi, &broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], broadcastLength, LWS_WRITE_TEXT);
 		#ifdef DEBUG_WEBSERVER
 				fprintf(stdout, "LWS_CALLBACK_BROADCAST END, length: %d\n", broadcastLength);
@@ -75,14 +75,15 @@ int DataWebSocket::callbackDataWebSocket(struct libwebsocket_context * context,
 
 			case LWS_CALLBACK_RECEIVE:
 		#ifdef DEBUG_WEBSERVER
-				fprintf(stdout, "Mirror LWS_CALLBACK_RECEIVEE, %d\n", (int)wsi);
+				fprintf(stdout, "Mirror LWS_CALLBACK_RECEIVE, %d\n", (int)wsi);
 
-				fprintf(stderr, "Received command widht length: %d\n", len);
+				fprintf(stderr, "Received command width length: %d\n", len);
 		#endif
 				memcpy((char*)&broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], in, len);
 				memcpy((char*)dataMsg, (char*)&broadcastMsg[LWS_SEND_BUFFER_PRE_PADDING], len);
 				broadcastLength = len;
 				dataMsg[len] = 0;
+				printf("!!!!HEI: %s\n", dataMsg);
 				Data::getInstance()->parseJsonMsg((char*)dataMsg);
 				/*
 				if (ringbuffer[ringbuffer_head].payload)

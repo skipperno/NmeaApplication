@@ -15,10 +15,10 @@ var SETUP = 5;
 var STATUS = 6;
 var COM = 7;
 var DIAGN = 8;
-var SCREEN = 9;
-var SYSTEM = 10;
+var SYSTEM_SETUP = 9;
 
-var NUMB_OF_VERT_MENU = 11;
+
+var NUMB_OF_VERT_MENU = 10;
 
 
 function initVertMenu(parentConteiner){
@@ -44,17 +44,19 @@ function initVertMenu(parentConteiner){
 	var westMenuTopButt = this.document.createElement("DIV");
 	westMenuTopButt.id = "westMenuTopButt";
 	$(westMenuTopButt).click(function(e){
+		removeSlider();
 		$("#vertMenuSliding").animate({top:'0px'},300);
 	});
 	
 	var westMenuDownButt = this.document.createElement("DIV");
 	westMenuDownButt.id = "westMenuDownButt";
 	$(westMenuDownButt).click(function(e){
+		removeSlider();
 		$("#vertMenuSliding").animate({top:'-400px'},300);
 	});
 	
 	verMenuArray[ALARMS]=new VerMenuItem(ALARMS, "Alarm", vertMenuSlidingBlock_1);
-	verMenuArray[PICT_SPEED]=new VerMenuItem(PICT_SPEED, "Picture speed", vertMenuSlidingBlock_1);
+	verMenuArray[PICT_SPEED]=new VerMenuItem(PICT_SPEED, "Screen Time", vertMenuSlidingBlock_1);
 	verMenuArray[MARK]=new VerMenuItem(MARK, "Mark", vertMenuSlidingBlock_1);
 	verMenuArray[TRANSDUCER]=new VerMenuItem(TRANSDUCER, "Transducer", vertMenuSlidingBlock_1);
 	verMenuArray[ADJUST]=new VerMenuItem(ADJUST, "Adjust", vertMenuSlidingBlock_1);
@@ -68,8 +70,7 @@ function initVertMenu(parentConteiner){
 	verMenuArray[STATUS]=new VerMenuItem(STATUS, "Status", vertMenuSlidingBlock_2);
 	verMenuArray[COM]=new VerMenuItem(COM, "Com", vertMenuSlidingBlock_2);
 	verMenuArray[DIAGN]=new VerMenuItem(DIAGN, "Diagnostic", vertMenuSlidingBlock_2);
-	verMenuArray[SCREEN]=new VerMenuItem(SCREEN, "Screen", vertMenuSlidingBlock_2);
-	verMenuArray[SYSTEM]=new VerMenuItem(SYSTEM, "System", vertMenuSlidingBlock_2);
+	verMenuArray[SYSTEM_SETUP]=new VerMenuItem(SYSTEM_SETUP, "System Setup", vertMenuSlidingBlock_2);
 	
 /*	
 	verMenuArray[8]=new VerMenuItem(8, "Skjerm 9", vertMenuSlidingBlock_2);

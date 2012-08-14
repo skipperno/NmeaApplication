@@ -8,9 +8,9 @@
 #include "MimeTypes.h"
 #include <string.h>
 
-const char * extension[] = { "html", "js", "css", "png", "ico"};
+const char * extension[] = { "html", "js", "css", "png", "ico"}; //, "sh"};
 const char * mimeType[] = { "text/html", "application/x-javascript",
-		"text/css", "image/png", "image/x-icon"};
+		"text/css", "image/png", "image/x-icon"};//, "/usr/bin/php-cgi"};
 
 MimeTypes::MimeTypes() {
 	// TODO Auto-generated constructor stub
@@ -53,7 +53,12 @@ bool MimeTypes::getMimeType(const char* fileName, char* returnMimeType) {
 			strcpy(returnMimeType, mimeType[4]);
 			return true;
 			break;
+		/*case 's':
+			strcpy(returnMimeType, mimeType[5]);
+						return true;
+						break;*/
 		default:
+
 			break;
 		}
 

@@ -21,7 +21,13 @@
 
 #include "private-libwebsockets.h"
 
-static int interpret_key(const char *key, unsigned long *result) {
+#define LWS_CPYAPP(ptr, str) { strcpy(ptr, str); ptr += strlen(str); }
+#define LWS_CPYAPP_TOKEN(ptr, tok) { strcpy(p, wsi->utf8_token[tok].token); \
+		p += wsi->utf8_token[tok].token_len; }
+
+static int
+interpret_key(const char *key, unsigned long *result)
+{
 	char digits[20];
 	int digit_pos = 0;
 	const char *p = key;
@@ -30,12 +36,13 @@ static int interpret_key(const char *key, unsigned long *result) {
 	int rem = 0;
 
 	while (*p) {
-		if (isdigit(*p)) {
-			if (digit_pos == sizeof(digits) - 1)
-				return -1;
-			digits[digit_pos++] = *p;
+		if (!isdigit(*p)) {
+			p++;
+			continue;
 		}
-		p++;
+		if (digit_pos == sizeof(digits) - 1)
+			return -1;
+		digits[digit_pos++] = *p++;
 	}
 	digits[digit_pos] = '\0';
 	if (!digit_pos)
@@ -67,72 +74,10 @@ static int interpret_key(const char *key, unsigned long *result) {
 	return 0;
 }
 
-static int handshake_old75(struct libwebsocket *wsi) {
-	char *response;
-	char *p;
-	int n;
 
-	if (wsi->protocol->per_session_data_size) {
-		wsi->user_space = malloc(wsi->protocol->per_session_data_size);
-		if (wsi->user_space == NULL) {
-			fprintf(stderr, "Out of memory for conn user space\n");
-			return -1;
-		}
-	} else
-		wsi->user_space = NULL;
-
-	response = malloc(500);
-
-	p = response;
-	strcpy(p,   "HTTP/1.1 101 Web Socket Protocol Handshake\x0d\x0aUpgrade: WebSocket\x0d\x0a");
-	p += strlen("HTTP/1.1 101 Web Socket Protocol Handshake\x0d\x0aUpgrade: WebSocket\x0d\x0a");
-	strcpy(p,   "Connection: Upgrade\x0d\x0aWebSocket-Origin: ");
-	p += strlen("Connection: Upgrade\x0d\x0aWebSocket-Origin: ");
-
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_ORIGIN].token);
-	p += wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len;
-
-	strcpy(p, "\x0d\x0aWebSocket-Location: ws://");
-	p += strlen("\x0d\x0aWebSocket-Location: ws://");
-
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_HOST].token);
-	p += wsi->utf8_token[WSI_TOKEN_HOST].token_len;
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_GET_URI].token);
-	p += wsi->utf8_token[WSI_TOKEN_GET_URI].token_len;
-
-	strcpy(p, "\x0d\x0aWebSocket-Protocol: ");
-	p += strlen("\x0d\x0aWebSocket-Protocol: ");
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_PROTOCOL].token);
-	p += wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len;
-
-	strcpy(p, "\x0d\x0a\x0d\x0a");
-	p += strlen("\x0d\x0a\x0d\x0a");
-
-	n = libwebsocket_write(wsi, (unsigned char *) response, p - response,
-			LWS_WRITE_HTTP);
-	if (n < 0) {
-		fprintf(stderr, "ERROR writing to socket");
-		return -1;
-	}
-
-	printf("SENT HANDSHAKE: \n%s", (unsigned char *) response);
-
-	/* alright clean up and set ourselves into established state */
-
-	free(response);
-	wsi->state = WSI_STATE_ESTABLISHED;
-	wsi->lws_rx_parse_state = LWS_RXPS_NEW;
-
-	/* notify user code that we're ready to roll */
-
-	if (wsi->protocol->callback)
-		wsi->protocol->callback(wsi->protocol->owning_server, wsi,
-				LWS_CALLBACK_ESTABLISHED, wsi->user_space, NULL, 0);
-
-	return 0;
-}
-
-static int handshake_00(struct libwebsocket *wsi) {
+static int
+handshake_00(struct libwebsocket_context *context, struct libwebsocket *wsi)
+{
 	unsigned long key1, key2;
 	unsigned char sum[16];
 	char *response;
@@ -141,78 +86,61 @@ static int handshake_00(struct libwebsocket *wsi) {
 
 	/* Confirm we have all the necessary pieces */
 
-	if (!wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len
-			|| !wsi->utf8_token[WSI_TOKEN_HOST].token_len
-			|| !wsi->utf8_token[WSI_TOKEN_CHALLENGE].token_len
-			|| !wsi->utf8_token[WSI_TOKEN_KEY1].token_len
-			|| !wsi->utf8_token[WSI_TOKEN_KEY2].token_len)
+	if (!wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len ||
+		!wsi->utf8_token[WSI_TOKEN_HOST].token_len ||
+		!wsi->utf8_token[WSI_TOKEN_CHALLENGE].token_len ||
+		!wsi->utf8_token[WSI_TOKEN_KEY1].token_len ||
+			     !wsi->utf8_token[WSI_TOKEN_KEY2].token_len)
 		/* completed header processing, but missing some bits */
 		goto bail;
 
 	/* allocate the per-connection user memory (if any) */
-
-	if (wsi->protocol->per_session_data_size) {
-		wsi->user_space = malloc(wsi->protocol->per_session_data_size);
-		if (wsi->user_space == NULL) {
-			fprintf(stderr, "Out of memory for "
-				"conn user space\n");
-			goto bail;
-		}
-	} else
-		wsi->user_space = NULL;
+	if (wsi->protocol->per_session_data_size &&
+					  !libwebsocket_ensure_user_space(wsi))
+		goto bail;
 
 	/* create the response packet */
 
 	/* make a buffer big enough for everything */
 
-	response = malloc(
-			256 + wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len
-					+ wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len
-					+ wsi->utf8_token[WSI_TOKEN_HOST].token_len
-					+ wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len
-					+ wsi->utf8_token[WSI_TOKEN_GET_URI].token_len
-					+ wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len);
+	response = malloc(256 +
+		wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len +
+		wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len +
+		wsi->utf8_token[WSI_TOKEN_HOST].token_len +
+		wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len +
+		wsi->utf8_token[WSI_TOKEN_GET_URI].token_len +
+		wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len);
 	if (!response) {
 		fprintf(stderr, "Out of memory for response buffer\n");
 		goto bail;
 	}
 
 	p = response;
-	strcpy(p, "HTTP/1.1 101 WebSocket Protocol Handshake\x0d\x0a"
-		"Upgrade: WebSocket\x0d\x0a");
-	p += strlen("HTTP/1.1 101 WebSocket Protocol Handshake\x0d\x0a"
-		"Upgrade: WebSocket\x0d\x0a");
-	strcpy(p, "Connection: Upgrade\x0d\x0a"
-		"Sec-WebSocket-Origin: ");
-	p += strlen("Connection: Upgrade\x0d\x0a"
-		"Sec-WebSocket-Origin: ");
+	LWS_CPYAPP(p, "HTTP/1.1 101 WebSocket Protocol Handshake\x0d\x0a"
+		      "Upgrade: WebSocket\x0d\x0a"
+		      "Connection: Upgrade\x0d\x0a"
+		      "Sec-WebSocket-Origin: ");
 	strcpy(p, wsi->utf8_token[WSI_TOKEN_ORIGIN].token);
 	p += wsi->utf8_token[WSI_TOKEN_ORIGIN].token_len;
 #ifdef LWS_OPENSSL_SUPPORT
 	if (wsi->ssl) {
-		strcpy(p, "\x0d\x0aSec-WebSocket-Location: wss://");
-		p += strlen("\x0d\x0aSec-WebSocket-Location: wss://");
+		LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Location: wss://");
 	} else {
+		LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Location: ws://");
+	}
+#else
+	LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Location: ws://");
 #endif
-	strcpy(p, "\x0d\x0aSec-WebSocket-Location: ws://");
-	p += strlen("\x0d\x0aSec-WebSocket-Location: ws://");
-#ifdef LWS_OPENSSL_SUPPORT
-}
-#endif
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_HOST].token);
-	p += wsi->utf8_token[WSI_TOKEN_HOST].token_len;
-	strcpy(p, wsi->utf8_token[WSI_TOKEN_GET_URI].token);
-	p += wsi->utf8_token[WSI_TOKEN_GET_URI].token_len;
+
+	LWS_CPYAPP_TOKEN(p, WSI_TOKEN_HOST);
+	LWS_CPYAPP_TOKEN(p, WSI_TOKEN_GET_URI);
 
 	if (wsi->utf8_token[WSI_TOKEN_PROTOCOL].token) {
-		strcpy(p, "\x0d\x0aSec-WebSocket-Protocol: ");
-		p += strlen("\x0d\x0aSec-WebSocket-Protocol: ");
-		strcpy(p, wsi->utf8_token[WSI_TOKEN_PROTOCOL].token);
-		p += wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len;
+		LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Protocol: ");
+		LWS_CPYAPP_TOKEN(p, WSI_TOKEN_PROTOCOL);
 	}
 
-	strcpy(p, "\x0d\x0a\x0d\x0a");
-	p += strlen("\x0d\x0a\x0d\x0a");
+	LWS_CPYAPP(p, "\x0d\x0a\x0d\x0a");
 
 	/* convert the two keys into 32-bit integers */
 
@@ -241,17 +169,17 @@ static int handshake_00(struct libwebsocket *wsi) {
 	 * payload after our headers
 	 */
 
-	MD5(sum, 16, (unsigned char *) p);
+	MD5(sum, 16, (unsigned char *)p);
 	p += 16;
 
 	/* it's complete: go ahead and send it */
 
-	debug("issuing response packet %d len\n", (int) (p - response));
+	debug("issuing response packet %d len\n", (int)(p - response));
 #ifdef DEBUG
-	fwrite(response, 1, p - response, stderr);
+	fwrite(response, 1,  p - response, stderr);
 #endif
-	n = libwebsocket_write(wsi, (unsigned char *) response, p - response,
-			LWS_WRITE_HTTP);
+	n = libwebsocket_write(wsi, (unsigned char *)response,
+					  p - response, LWS_WRITE_HTTP);
 	if (n < 0) {
 		fprintf(stderr, "ERROR writing to socket");
 		goto bail;
@@ -266,23 +194,27 @@ static int handshake_00(struct libwebsocket *wsi) {
 	/* notify user code that we're ready to roll */
 
 	if (wsi->protocol->callback)
-		wsi->protocol->callback(wsi->protocol->owning_server, wsi,
-				LWS_CALLBACK_ESTABLISHED, wsi->user_space, NULL, 0);
+		wsi->protocol->callback(wsi->protocol->owning_server,
+				wsi, LWS_CALLBACK_ESTABLISHED,
+					  wsi->user_space, NULL, 0);
 
 	return 0;
 
-	bail: return -1;
+bail:
+	return -1;
 }
 
 /*
  * Perform the newer BASE64-encoded handshake scheme
  */
 
-static int handshake_0405(struct libwebsocket *wsi) {
+static int
+handshake_0405(struct libwebsocket_context *context, struct libwebsocket *wsi)
+{
 	static const char *websocket_magic_guid_04 =
-			"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+					 "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	static const char *websocket_magic_guid_04_masking =
-			"61AC5F19-FBBA-4540-B96F-6561F1AB40A8";
+					 "61AC5F19-FBBA-4540-B96F-6561F1AB40A8";
 	char accept_buf[MAX_WEBSOCKET_04_KEY_LEN + 37];
 	char nonce_buf[256];
 	char mask_summing_buf[256 + MAX_WEBSOCKET_04_KEY_LEN + 37];
@@ -295,86 +227,75 @@ static int handshake_0405(struct libwebsocket *wsi) {
 	int accept_len;
 	char *c;
 	char ext_name[128];
-	struct libwebsocket_extension * ext;
+	struct libwebsocket_extension *ext;
 	int ext_count = 0;
 	int more = 1;
 
-	if (!wsi->utf8_token[WSI_TOKEN_HOST].token_len
-			|| !wsi->utf8_token[WSI_TOKEN_KEY].token_len) {
+	if (!wsi->utf8_token[WSI_TOKEN_HOST].token_len ||
+	    !wsi->utf8_token[WSI_TOKEN_KEY].token_len) {
 		debug("handshake_04 missing pieces\n");
 		/* completed header processing, but missing some bits */
 		goto bail;
 	}
 
-	if (wsi->utf8_token[WSI_TOKEN_KEY].token_len >= MAX_WEBSOCKET_04_KEY_LEN) {
+	if (wsi->utf8_token[WSI_TOKEN_KEY].token_len >=
+						     MAX_WEBSOCKET_04_KEY_LEN) {
 		fprintf(stderr, "Client sent handshake key longer "
-			"than max supported %d\n", MAX_WEBSOCKET_04_KEY_LEN);
+			   "than max supported %d\n", MAX_WEBSOCKET_04_KEY_LEN);
 		goto bail;
 	}
 
 	strcpy(accept_buf, wsi->utf8_token[WSI_TOKEN_KEY].token);
 	strcpy(accept_buf + wsi->utf8_token[WSI_TOKEN_KEY].token_len,
-			websocket_magic_guid_04);
+						       websocket_magic_guid_04);
 
-	SHA1(
-			(unsigned char *) accept_buf,
-			wsi->utf8_token[WSI_TOKEN_KEY].token_len + strlen(
-					websocket_magic_guid_04), hash);
+	SHA1((unsigned char *)accept_buf,
+			wsi->utf8_token[WSI_TOKEN_KEY].token_len +
+					 strlen(websocket_magic_guid_04), hash);
 
-	accept_len = lws_b64_encode_string((char *) hash, 20, accept_buf,
-			sizeof accept_buf);
+	accept_len = lws_b64_encode_string((char *)hash, 20, accept_buf,
+							     sizeof accept_buf);
 	if (accept_len < 0) {
 		fprintf(stderr, "Base64 encoded hash too long\n");
 		goto bail;
 	}
 
 	/* allocate the per-connection user memory (if any) */
-
-	if (wsi->protocol->per_session_data_size) {
-		wsi->user_space = malloc(wsi->protocol->per_session_data_size);
-		if (wsi->user_space == NULL) {
-			fprintf(stderr, "Out of memory for "
-				"conn user space\n");
-			goto bail;
-		}
-	} else
-		wsi->user_space = NULL;
+	if (wsi->protocol->per_session_data_size &&
+					  !libwebsocket_ensure_user_space(wsi))
+		goto bail;
 
 	/* create the response packet */
 
 	/* make a buffer big enough for everything */
 
-	response = malloc(
-			256 + wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len
-					+ wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len
-					+ wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len);
+	response = malloc(256 +
+		wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len +
+		wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len +
+		wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len);
 	if (!response) {
 		fprintf(stderr, "Out of memory for response buffer\n");
 		goto bail;
 	}
 
 	p = response;
-	strcpy(p, "HTTP/1.1 101 Switching Protocols\x0d\x0a"
-		"Upgrade: WebSocket\x0d\x0a");
-	p += strlen("HTTP/1.1 101 Switching Protocols\x0d\x0a"
-		"Upgrade: WebSocket\x0d\x0a");
-	strcpy(p, "Connection: Upgrade\x0d\x0a"
-		"Sec-WebSocket-Accept: ");
-	p += strlen("Connection: Upgrade\x0d\x0a"
-		"Sec-WebSocket-Accept: ");
+	LWS_CPYAPP(p, "HTTP/1.1 101 Switching Protocols\x0d\x0a"
+		      "Upgrade: WebSocket\x0d\x0a"
+		      "Connection: Upgrade\x0d\x0a"
+		      "Sec-WebSocket-Accept: ");
 	strcpy(p, accept_buf);
 	p += accept_len;
 
 	if (wsi->ietf_spec_revision == 4) {
-		strcpy(p, "\x0d\x0aSec-WebSocket-Nonce: ");
-		p += strlen("\x0d\x0aSec-WebSocket-Nonce: ");
+		LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Nonce: ");
 
 		/* select the nonce */
 
-		n = libwebsockets_get_random(wsi->protocol->owning_server, hash, 16);
+		n = libwebsockets_get_random(wsi->protocol->owning_server,
+								      hash, 16);
 		if (n != 16) {
 			fprintf(stderr, "Unable to read random device %s %d\n",
-					SYSTEM_RANDOM_FILEPATH, n);
+						     SYSTEM_RANDOM_FILEPATH, n);
 			if (wsi->user_space)
 				free(wsi->user_space);
 			goto bail;
@@ -382,8 +303,8 @@ static int handshake_0405(struct libwebsocket *wsi) {
 
 		/* encode the nonce */
 
-		nonce_len = lws_b64_encode_string((const char *) hash, 16, nonce_buf,
-				sizeof nonce_buf);
+		nonce_len = lws_b64_encode_string((const char *)hash, 16,
+						   nonce_buf, sizeof nonce_buf);
 		if (nonce_len < 0) {
 			fprintf(stderr, "Failed to base 64 encode the nonce\n");
 			if (wsi->user_space)
@@ -398,10 +319,8 @@ static int handshake_0405(struct libwebsocket *wsi) {
 	}
 
 	if (wsi->utf8_token[WSI_TOKEN_PROTOCOL].token) {
-		strcpy(p, "\x0d\x0aSec-WebSocket-Protocol: ");
-		p += strlen("\x0d\x0aSec-WebSocket-Protocol: ");
-		strcpy(p, wsi->utf8_token[WSI_TOKEN_PROTOCOL].token);
-		p += wsi->utf8_token[WSI_TOKEN_PROTOCOL].token_len;
+		LWS_CPYAPP(p, "\x0d\x0aSec-WebSocket-Protocol: ");
+		LWS_CPYAPP_TOKEN(p, WSI_TOKEN_PROTOCOL);
 	}
 
 	/*
@@ -410,8 +329,6 @@ static int handshake_0405(struct libwebsocket *wsi) {
 	 */
 
 	if (wsi->utf8_token[WSI_TOKEN_EXTENSIONS].token_len) {
-		strcpy(p, "\x0d\x0aSec-WebSocket-Extensions: ");
-		p += strlen("\x0d\x0aSec-WebSocket-Extensions: ");
 
 		/*
 		 * break down the list of client extensions
@@ -419,10 +336,13 @@ static int handshake_0405(struct libwebsocket *wsi) {
 		 */
 
 		c = wsi->utf8_token[WSI_TOKEN_EXTENSIONS].token;
+		debug("wsi->utf8_token[WSI_TOKEN_EXTENSIONS].token = %s\n",
+				  wsi->utf8_token[WSI_TOKEN_EXTENSIONS].token);
+		wsi->count_active_extensions = 0;
 		n = 0;
 		while (more) {
 
-			if (*c && *c != ',') {
+			if (*c && (*c != ',' && *c != ' ' && *c != '\t')) {
 				ext_name[n] = *c++;
 				if (n < sizeof(ext_name) - 1)
 					n++;
@@ -431,6 +351,11 @@ static int handshake_0405(struct libwebsocket *wsi) {
 			ext_name[n] = '\0';
 			if (!*c)
 				more = 0;
+			else {
+				c++;
+				if (!n)
+					continue;
+			}
 
 			/* check a client's extension against our support */
 
@@ -450,10 +375,12 @@ static int handshake_0405(struct libwebsocket *wsi) {
 				 * particular connection + protocol
 				 */
 
-				n = wsi->protocol->owning_server-> protocols[0].callback(
-						wsi->protocol->owning_server, wsi,
-						LWS_CALLBACK_CONFIRM_EXTENSION_OKAY, wsi->user_space,
-						ext_name, 0);
+				n = wsi->protocol->owning_server->
+					protocols[0].callback(
+						wsi->protocol->owning_server,
+						wsi,
+					  LWS_CALLBACK_CONFIRM_EXTENSION_OKAY,
+						  wsi->user_space, ext_name, 0);
 
 				/*
 				 * zero return from callback means
@@ -471,26 +398,35 @@ static int handshake_0405(struct libwebsocket *wsi) {
 
 				if (ext_count)
 					*p++ = ',';
+				else
+					LWS_CPYAPP(p,
+					 "\x0d\x0aSec-WebSocket-Extensions: ");
 				p += sprintf(p, "%s", ext_name);
 				ext_count++;
 
 				/* instantiate the extension on this conn */
 
-				wsi->active_extensions_user[wsi->count_active_extensions]
-						= malloc(ext->per_session_data_size);
-				wsi->active_extensions[wsi->count_active_extensions] = ext;
+				wsi->active_extensions_user[
+					wsi->count_active_extensions] =
+					     malloc(ext->per_session_data_size);
+				memset(wsi->active_extensions_user[
+					wsi->count_active_extensions], 0,
+						    ext->per_session_data_size);
+
+				wsi->active_extensions[
+					  wsi->count_active_extensions] = ext;
 
 				/* allow him to construct his context */
 
-				ext->callback(
-						wsi->protocol->owning_server,
-						ext,
-						wsi,
+				ext->callback(wsi->protocol->owning_server,
+						ext, wsi,
 						LWS_EXT_CALLBACK_CONSTRUCT,
-						wsi->active_extensions_user[wsi->count_active_extensions],
-						NULL, 0);
+						wsi->active_extensions_user[
+					wsi->count_active_extensions], NULL, 0);
 
 				wsi->count_active_extensions++;
+				debug("wsi->count_active_extensions <- %d",
+						  wsi->count_active_extensions);
 
 				ext++;
 			}
@@ -501,8 +437,7 @@ static int handshake_0405(struct libwebsocket *wsi) {
 
 	/* end of response packet */
 
-	strcpy(p, "\x0d\x0a\x0d\x0a");
-	p += strlen("\x0d\x0a\x0d\x0a");
+	LWS_CPYAPP(p, "\x0d\x0a\x0d\x0a");
 
 	if (wsi->ietf_spec_revision == 4) {
 
@@ -524,21 +459,27 @@ static int handshake_0405(struct libwebsocket *wsi) {
 		strcpy(m, websocket_magic_guid_04_masking);
 		m += strlen(websocket_magic_guid_04_masking);
 
-		SHA1((unsigned char *) mask_summing_buf, m - mask_summing_buf,
-				wsi->masking_key_04);
+		SHA1((unsigned char *)mask_summing_buf, m - mask_summing_buf,
+							   wsi->masking_key_04);
 	}
 
-	/* okay send the handshake response accepting the connection */
+	if (!lws_any_extension_handled(context, wsi,
+			LWS_EXT_CALLBACK_HANDSHAKE_REPLY_TX,
+						     response, p - response)) {
 
-	debug("issuing response packet %d len\n", (int) (p - response));
-#ifdef DEBUG
-	fwrite(response, 1, p - response, stderr);
-#endif
-	n = libwebsocket_write(wsi, (unsigned char *) response, p - response,
-			LWS_WRITE_HTTP);
-	if (n < 0) {
-		fprintf(stderr, "ERROR writing to socket");
-		goto bail;
+		/* okay send the handshake response accepting the connection */
+
+		debug("issuing response packet %d len\n", (int)(p - response));
+	#ifdef DEBUG
+		fwrite(response, 1,  p - response, stderr);
+	#endif
+		n = libwebsocket_write(wsi, (unsigned char *)response,
+						  p - response, LWS_WRITE_HTTP);
+		if (n < 0) {
+			fprintf(stderr, "ERROR writing to socket");
+			goto bail;
+		}
+
 	}
 
 	/* alright clean up and set ourselves into established state */
@@ -551,13 +492,17 @@ static int handshake_0405(struct libwebsocket *wsi) {
 	/* notify user code that we're ready to roll */
 
 	if (wsi->protocol->callback)
-		wsi->protocol->callback(wsi->protocol->owning_server, wsi,
-				LWS_CALLBACK_ESTABLISHED, wsi->user_space, NULL, 0);
+		wsi->protocol->callback(wsi->protocol->owning_server,
+				wsi, LWS_CALLBACK_ESTABLISHED,
+					  wsi->user_space, NULL, 0);
 
 	return 0;
 
-	bail: return -1;
+
+bail:
+	return -1;
 }
+
 
 /*
  * -04 of the protocol (actually the 80th version) has a radically different
@@ -591,8 +536,10 @@ static int handshake_0405(struct libwebsocket *wsi) {
  * machine that is completely independent of packet size.
  */
 
-int libwebsocket_read(struct libwebsocket_context *context,
-		struct libwebsocket *wsi, unsigned char * buf, size_t len) {
+int
+libwebsocket_read(struct libwebsocket_context *context,
+		     struct libwebsocket *wsi, unsigned char * buf, size_t len)
+{
 	size_t n;
 
 	switch (wsi->state) {
@@ -602,12 +549,16 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		/* fallthru */
 	case WSI_STATE_HTTP_HEADERS:
 
-		debug("issuing %d bytes to parser\n", (int) len);
+		debug("issuing %d bytes to parser\n", (int)len);
 #ifdef DEBUG
 		fwrite(buf, 1, len, stderr);
 #endif
 
 		switch (wsi->mode) {
+		case LWS_CONNMODE_WS_CLIENT_WAITING_PROXY_REPLY:
+		case LWS_CONNMODE_WS_CLIENT_ISSUE_HANDSHAKE:
+		case LWS_CONNMODE_WS_CLIENT_WAITING_SERVER_REPLY:
+		case LWS_CONNMODE_WS_CLIENT_WAITING_EXTENSION_CONNECT:
 		case LWS_CONNMODE_WS_CLIENT:
 			for (n = 0; n < len; n++)
 				libwebsocket_client_rx_sm(wsi, *buf++);
@@ -625,19 +576,24 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		if (wsi->parser_state != WSI_PARSING_COMPLETE)
 			break;
 
+		debug("seem to be serving, mode is %d\n", wsi->mode);
+
 		debug("libwebsocket_parse sees parsing complete\n");
 
 		/* is this websocket protocol or normal http 1.0? */
 
-		if (!wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len
-				|| !wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len) {
-			if (wsi->protocol->callback)
-				(wsi->protocol->callback)(context, wsi, LWS_CALLBACK_HTTP,
-						wsi->user_space,
-						wsi->utf8_token[WSI_TOKEN_GET_URI].token, 0);
+		if (!wsi->utf8_token[WSI_TOKEN_UPGRADE].token_len ||
+			     !wsi->utf8_token[WSI_TOKEN_CONNECTION].token_len) {
 			wsi->state = WSI_STATE_HTTP;
+			if (wsi->protocol->callback)
+				(wsi->protocol->callback)(context, wsi,
+				   LWS_CALLBACK_HTTP, wsi->user_space,
+				   wsi->utf8_token[WSI_TOKEN_GET_URI].token, 0);
 			return 0;
 		}
+
+		if (!wsi->protocol)
+			fprintf(stderr, "NULL protocol at libwebsocket_read\n");
 
 		/*
 		 * It's websocket
@@ -650,9 +606,11 @@ int libwebsocket_read(struct libwebsocket_context *context,
 			if (wsi->utf8_token[WSI_TOKEN_PROTOCOL].token == NULL) {
 				if (wsi->protocol->name == NULL)
 					break;
-			} else if (strcmp(wsi->utf8_token[WSI_TOKEN_PROTOCOL].token,
-					wsi->protocol->name) == 0)
-				break;
+			} else
+				if (wsi->protocol->name && strcmp(
+				     wsi->utf8_token[WSI_TOKEN_PROTOCOL].token,
+						      wsi->protocol->name) == 0)
+					break;
 
 			wsi->protocol++;
 		}
@@ -665,8 +623,8 @@ int libwebsocket_read(struct libwebsocket_context *context,
 					"not supported (use NULL .name)\n");
 			else
 				fprintf(stderr, "Requested protocol %s "
-					"not supported\n",
-						wsi->utf8_token[WSI_TOKEN_PROTOCOL].token);
+						"not supported\n",
+				     wsi->utf8_token[WSI_TOKEN_PROTOCOL].token);
 			goto bail;
 		}
 
@@ -676,8 +634,8 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		 */
 
 		if (wsi->utf8_token[WSI_TOKEN_VERSION].token_len)
-			wsi->ietf_spec_revision = atoi(
-					wsi->utf8_token[WSI_TOKEN_VERSION].token);
+			wsi->ietf_spec_revision =
+				 atoi(wsi->utf8_token[WSI_TOKEN_VERSION].token);
 
 		/*
 		 * Give the user code a chance to study the request and
@@ -685,11 +643,12 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		 */
 
 		if ((wsi->protocol->callback)(wsi->protocol->owning_server, wsi,
-				LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION, &wsi->utf8_token[0],
-				NULL, 0)) {
+				LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION,
+						&wsi->utf8_token[0], NULL, 0)) {
 			fprintf(stderr, "User code denied connection\n");
 			goto bail;
 		}
+
 
 		/*
 		 * Perform the handshake according to the protocol version the
@@ -697,41 +656,37 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		 */
 
 		switch (wsi->ietf_spec_revision) {
-		case -1: /* applies to qt webkit old protocol */
-			wsi->xor_mask = xor_no_mask;
-			if (handshake_old75(wsi))
-				goto bail;
-			break;
 		case 0: /* applies to 76 and 00 */
 			wsi->xor_mask = xor_no_mask;
-			if (handshake_00(wsi))
+			if (handshake_00(context, wsi))
 				goto bail;
 			break;
 		case 4: /* 04 */
 			wsi->xor_mask = xor_mask_04;
 			debug("libwebsocket_parse calling handshake_04\n");
-			if (handshake_0405(wsi))
+			if (handshake_0405(context, wsi))
 				goto bail;
 			break;
 		case 5:
 		case 6:
 		case 7:
-		case 8://ernad, remove later case 8
-		case 13: // new Google Chrome
+		case 8:
+		case 13:
 			wsi->xor_mask = xor_mask_05;
-			debug("libwebsocket_parse calling handshake_05-08\n");
-			if (handshake_0405(wsi))
+			debug("libwebsocket_parse calling handshake_04\n");
+			if (handshake_0405(context, wsi))
 				goto bail;
 			break;
 
 		default:
 			fprintf(stderr, "Unknown client spec version %d\n",
-					wsi->ietf_spec_revision);
+						       wsi->ietf_spec_revision);
 			goto bail;
 		}
-#ifdef DEBUG_WEBSERVER
-		fprintf(stderr, "accepted v%02d connection\n", wsi->ietf_spec_revision);
-#endif
+
+		debug("accepted v%02d connection\n",
+						       wsi->ietf_spec_revision);
+
 		break;
 
 	case WSI_STATE_AWAITING_CLOSE_ACK:
@@ -739,7 +694,8 @@ int libwebsocket_read(struct libwebsocket_context *context,
 		switch (wsi->mode) {
 		case LWS_CONNMODE_WS_CLIENT:
 			for (n = 0; n < len; n++)
-				libwebsocket_client_rx_sm(wsi, *buf++);
+				if (libwebsocket_client_rx_sm(wsi, *buf++) < 0)
+					goto bail;
 
 			return 0;
 		default:
@@ -758,8 +714,9 @@ int libwebsocket_read(struct libwebsocket_context *context,
 
 	return 0;
 
-	bail: libwebsocket_close_and_free_session(context, wsi,
-			LWS_CLOSE_STATUS_NOSTATUS);
+bail:
+	libwebsocket_close_and_free_session(context, wsi,
+						     LWS_CLOSE_STATUS_NOSTATUS);
 
 	return -1;
 }

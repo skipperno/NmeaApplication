@@ -31,6 +31,7 @@ public:
 private:
 	ifstream inpstream;
 	ofstream outstream;
+
 };
 
 #endif /* SERIALPORT_H_ */

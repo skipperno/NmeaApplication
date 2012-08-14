@@ -11,6 +11,8 @@
 #include "comm/TcpServer.h"
 #include "comm/AD7997.h"
 #include "MsgInHandler.h"
+#include "data/Alarm.h"
+#include "data/GpioInputEvent.h"
 
 #include "data/Data.h"
 #include "data/DataProvider.h"
@@ -24,24 +26,36 @@
 #include <sstream>
 #include <pthread.h>
 
+#include "utility/CheckSum.h"
+#include "utility/Log.h"
+
+#include "definitions.h"
+
+#include "InitMultiBox.h"
+#include "data/DataTransceiver.h"
 
 void * runMsgInHandlerThread(void *ptr);
 
 
 int nEchoSounderPort = 2004;
 int nDataPort = 2005;
-Data jsonData;
+
 DataProvider dataProvider;
 pthread_t threadMsgInHandler;
 
+
 int main(int argc, char **argv) {
 	AD7997 ad7997;
-	ad7997.startMeasuringAD7997();
-	//char testCh[1000];
-	//jsonData.setGain(99);
-	/*jsonData.getJsonData(testCh);
 
-	printf("JSON: %s", testCh);*/
+	InitMultiBox initMultiBox;
+	if (!initMultiBox.searchNewConfiguration())
+		initMultiBox.setDefaultConfiguration();
+	initMultiBox.setConfiguration();
+
+
+	Alarm::initAlarm();
+	ad7997.startMeasuringAD7997();
+
 
 	/*using namespace json;
 
@@ -85,6 +99,9 @@ int main(int argc, char **argv) {
 
 	pthread_create(&threadMsgInHandler,   NULL, runMsgInHandlerThread, (void*) &msgInHandler);
 
+	GpioInputEvent gpioInputEvent; // CREATE THREAD FOR WAITING ON EVENTS
+	//DataTransceiver abc;
+	//abc.setTransceiver(1, "0 1 3000 0 4000");
 	Webserver webServer;
 	webServer.mainLoop();
 }

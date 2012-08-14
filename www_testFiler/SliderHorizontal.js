@@ -4,9 +4,11 @@ SliderHorizontal.isSupported = typeof document.createElement != "undefined"
 		&& typeof document.documentElement != "undefined"
 		&& typeof document.documentElement.offsetWidth == "number";
 
-function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
+function SliderHorizontal(slidIndex, slidName, slUnit, slMin, slMax, slStart,
 		parentContainer, textArray, bDiscret) {
 	this.currentValue = slStart;
+	this.slidName = slidName;
+	this.slUnit = slUnit;
 	this.currentPos = 0;
 	this.mouseDownX;
 	this.mouseDownY;
@@ -61,7 +63,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 	this.nameDiv.className = "horisSlidName";
 	this.nameDiv.unselectable = "on";
 	this.nameDiv.innerHTML = slidName;
-	this.nameDiv.style.left = "75px";
+	//this.nameDiv.style.left = "75px";
 	this.nameDiv.style.top = "45px";
 	this.slidCenter.appendChild(this.nameDiv);
 
@@ -87,8 +89,12 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 	this.horisSlider.appendChild(this.rightButt);
 
 	this.parentContainer.appendChild(this.horisSlider);// this.mySlidConteiner);
-	this.setHandlButtPos(parseInt(slStart * 300 / (this.slMax - this.slMin)),
+	this.setHandlButtPixPos(parseInt(slStart * 300 / (this.slMax - this.slMin)),
 			false);
+	
+	$(this.parentContainer).click (function(e) {
+		return preventEv(e);
+});
 
 	$(this.leftButt)
 			.mousedown(
@@ -96,7 +102,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 						if (this.myObject.currentValue > this.myObject.slMin) {
 							this.myObject.currentValue -= this.myObject.stepValueJump;
 							this.myObject
-									.setHandlButtPos(
+									.setHandlButtPixPos(
 											parseInt((this.myObject.currentValue - this.myObject.slMin)
 													* 300
 													/ (this.myObject.slMax - this.myObject.slMin)),
@@ -114,7 +120,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 						if (this.myObject.currentValue < this.myObject.slMax) {
 							this.myObject.currentValue += this.myObject.stepValueJump;
 							this.myObject
-									.setHandlButtPos(
+									.setHandlButtPixPos(
 											(this.myObject.currentValue - this.myObject.slMin)
 													* 300
 													/ (this.myObject.slMax - this.myObject.slMin),
@@ -126,7 +132,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 						return preventEv(e);
 					});
 
-
+	
 	$(this.slidCenter).mouseup (
 					function(e) {
 						if (!buttonPushed) {
@@ -135,13 +141,13 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 							var y = parseInt(e.pageY - offset.top);
 
 							if (!this.myObject.bDiscret) {
-								this.myObject.setHandlButtPos(x, true);
+								this.myObject.setHandlButtPixPos(x, true);
 							} else if (this.myObject.bDiscret) {
 								var pixelStep = 300 / ((this.slMax - this.slMin) / this.myObject.stepValueJump);
 								x += pixelStep / 2;
 								var discrX = parseInt(x / pixelStep)
 										* pixelStep;
-								this.myObject.setHandlButtPos(discrX);
+								this.myObject.setHandlButtPixPos(discrX);
 							}
 
 							this.myObject.currentValue = this.myObject
@@ -157,7 +163,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 							var yy = parseInt(e.pageY - offset2.top);
 							
 							//!!!!!!!!!!!!!!
-							this.myObject.setHandlButtPos(xx
+							this.myObject.setHandlButtPixPos(xx
 									- this.myObject.mouseDownX, true);
 							this.myObject.currentValue = this.myObject.convertPosToValue();
 							onSliderMoved(this.myObject.sliderIndex, this.myObject.currentValue);
@@ -176,7 +182,7 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 					var yy = parseInt(e.pageY - offset2.top);
 					
 					//!!!!!!!!!!!!!!
-					this.myObject.setHandlButtPos(xx
+					this.myObject.setHandlButtPixPos(xx
 							- this.myObject.mouseDownX, true);
 					this.myObject.currentValue = this.myObject.convertPosToValue();
 					onSliderMoved(this.myObject.sliderIndex, this.myObject.currentValue);
@@ -216,13 +222,13 @@ function SliderHorizontal(slidIndex, slidName, slMin, slMax, slStart,
 							var yy = parseInt(e.pageY - offset2.top);
 							//if(xx < 300 && xx >= 0){
 
-								this.myObject.setHandlButtPos(xx
+								this.myObject.setHandlButtPixPos(xx
 									- this.myObject.mouseDownX, false);
 						/*	} else {
 								$(this).unbind('mousemove');
 								buttonPushed = false;
 								if (xx >= 300)
-									this.myObject.setHandlButtPos(299, false);
+									this.myObject.setHandlButtPixPos(299, false);
 								else
 									this.myObject.setHandlButtPos(0, false);
 								this.myObject.currentValue = this.myObject.convertPosToValue();
@@ -260,7 +266,7 @@ SliderHorizontal.prototype.convertValToPosition = function(newValue) {
 };
 
 // !!! newX is pixel position. If you don't have, use "setHandButtValue"
-SliderHorizontal.prototype.setHandlButtPos = function(newX, anim) {
+SliderHorizontal.prototype.setHandlButtPixPos = function(newX, anim) {
 	if(newX >= 300)
 		newX = 300;
 	else if (newX < 0) {
@@ -279,7 +285,7 @@ SliderHorizontal.prototype.setHandlButtPos = function(newX, anim) {
 };
 // Not callback from this function.
 SliderHorizontal.prototype.setHandlButtValue = function(newValue, anim) {
-	this.setHandlButtPos(this.convertValToPosition(newValue));
+	this.setHandlButtPixPos(this.convertValToPosition(newValue));
 	this.currentValue = newValue;
 };
 /*
@@ -292,10 +298,4 @@ SliderHorizontal.prototype.setHandlButtValue = function(newValue, anim) {
  * calcX + "px"); } };
  */
 
-function preventEv(e) {
-	if (e.preventDefault)
-		e.preventDefault();
-	else
-		e.returnValue = false;
-	return false;
-}
+

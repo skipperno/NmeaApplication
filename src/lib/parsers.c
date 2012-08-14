@@ -21,28 +21,16 @@
 
 #include "private-libwebsockets.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// Ernad: changed for QtWebKit: added "WebSocket-Protocol", 19   // 19 is length of string "WebSocket-Protocol"
-// It is parameter in handshaking request sent from the browser (QtWebKit):
-//
-// GET /HTTP/1.1
-// Upgrade: WebSocket
-// Connection: Upgrade
-// Host: 10.31.1.128:7681
-// Origin: http://10.31.1.128:7681
-// WebSocket-Protocol: myProtocol
-
 const struct lws_tokens lws_tokens[WSI_TOKEN_COUNT] = {
 
 	/* win32 can't do C99 */
 
-/*	[WSI_TOKEN_GET_URI]	=	*/{ "GET ",			 4 }, //!!! Ernad, must be first
+/*	[WSI_TOKEN_GET_URI]	=	*/{ "GET ",			 4 },
 /*	[WSI_TOKEN_HOST]	=	*/{ "Host:",			 5 },
 /*	[WSI_TOKEN_CONNECTION]	=	*/{ "Connection:",		11 },
 /*	[WSI_TOKEN_KEY1]	=	*/{ "Sec-WebSocket-Key1:",	19 },
 /*	[WSI_TOKEN_KEY2]	=	*/{ "Sec-WebSocket-Key2:",	19 },
 /*	[WSI_TOKEN_PROTOCOL]	=	*/{ "Sec-WebSocket-Protocol:",	23 },
-/*	[WSI_TOKEN_QTPROTOCOL]	=	*/{ "WebSocket-Protocol:",	19 }, // Ernad: for QT WebKit
 /*	[WSI_TOKEN_UPGRADE]	=	*/{ "Upgrade:",			 8 },
 /*	[WSI_TOKEN_ORIGIN]	=	*/{ "Origin:",			 7 },
 /*	[WSI_TOKEN_DRAFT]	=	*/{ "Sec-WebSocket-Draft:",	20 },
@@ -57,6 +45,7 @@ const struct lws_tokens lws_tokens[WSI_TOKEN_COUNT] = {
 /*	[WSI_TOKEN_ACCEPT]	=	*/{ "Sec-WebSocket-Accept:",	21 },
 /*	[WSI_TOKEN_NONCE]	=	*/{ "Sec-WebSocket-Nonce:",	20 },
 /*	[WSI_TOKEN_HTTP]	=	*/{ "HTTP/1.1 ",		 9 },
+/*	[WSI_TOKEN_MUXURL]	=	*/{ "",		 -1 },
 
 };
 
@@ -64,17 +53,13 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 {
 	int n;
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Ernad: changed for QtWebKit:
-	// Here is not used "WSI_TOKEN_QTPROTOCOL". When "WebSocket-Protocol" is received, parser_state is
-	// changed to "WSI_TOKEN_PROTOCOL" and not to "QTPROTOCOL" (TODO?)
 	switch (wsi->parser_state) {
 	case WSI_TOKEN_GET_URI:
 	case WSI_TOKEN_HOST:
 	case WSI_TOKEN_CONNECTION:
 	case WSI_TOKEN_KEY1:
 	case WSI_TOKEN_KEY2:
-	case WSI_TOKEN_PROTOCOL:   //if we are in this state, string: "Sec-WebSocket-Protocol:" is recevied and we are receiving e.g. "myProtocolName".
+	case WSI_TOKEN_PROTOCOL:
 	case WSI_TOKEN_UPGRADE:
 	case WSI_TOKEN_ORIGIN:
 	case WSI_TOKEN_SWORIGIN:
@@ -86,6 +71,9 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 	case WSI_TOKEN_NONCE:
 	case WSI_TOKEN_EXTENSIONS:
 	case WSI_TOKEN_HTTP:
+	case WSI_TOKEN_MUXURL:
+
+		debug("WSI_TOKEN_(%d) '%c'\n", wsi->parser_state, c);
 
 		/* collect into malloc'd buffers */
 		/* optional space swallow */
@@ -116,22 +104,13 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 			       realloc(wsi->utf8_token[wsi->parser_state].token,
 							wsi->current_alloc_len);
 		}
-		if (wsi->parser_state == WSI_TOKEN_PROTOCOL && c == '\x0d' && wsi->utf8_token[WSI_TOKEN_VERSION].token_len) {
-			// Ernad: both "WebSocket-Protocol" and "Sec-WebSocket-Protocol" is using the same state (WSI_TOKEN_PROTOCOL). If
-			// TOKEN_VERSION is "-1", it's QtWebKit ("WebSocket-Protocol) and we don't need more data
-			if (wsi->utf8_token[WSI_TOKEN_VERSION].token[0] == '-') {// Ernad, protocol = -1 => old protocol used by QT
-				wsi->utf8_token[wsi->parser_state].token[wsi->utf8_token[wsi->parser_state].token_len] = '\0';
-				// printf("*end of QT protocol name? \n");
-				wsi->parser_state = WSI_PARSING_COMPLETE;
-				break;
-			}
-		}
 
 		/* bail at EOL */
 		if (wsi->parser_state != WSI_TOKEN_CHALLENGE && c == '\x0d') {
 			wsi->utf8_token[wsi->parser_state].token[
 			   wsi->utf8_token[wsi->parser_state].token_len] = '\0';
 			wsi->parser_state = WSI_TOKEN_SKIPPING_SAW_CR;
+			debug("*\n");
 			break;
 		}
 
@@ -176,9 +155,18 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 		wsi->parser_state = WSI_PARSING_COMPLETE;
 		break;
 
+	case WSI_INIT_TOKEN_MUXURL:
+		wsi->parser_state = WSI_TOKEN_MUXURL;
+		wsi->current_alloc_len = LWS_INITIAL_HDR_ALLOC;
+
+		wsi->utf8_token[wsi->parser_state].token =
+					 malloc(wsi->current_alloc_len);
+		wsi->utf8_token[wsi->parser_state].token_len = 0;
+		break;
+
 		/* collecting and checking a name part */
 	case WSI_TOKEN_NAME_PART:
-		// ernad debug("WSI_TOKEN_NAME_PART '%c'\n", c);
+		debug("WSI_TOKEN_NAME_PART '%c'\n", c);
 
 		if (wsi->name_buffer_pos == sizeof(wsi->name_buffer) - 1) {
 			/* name bigger than we can handle, skip until next */
@@ -191,33 +179,29 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 		for (n = 0; n < WSI_TOKEN_COUNT; n++) {
 			if (wsi->name_buffer_pos != lws_tokens[n].token_len)
 				continue;
-			if (strcmp(lws_tokens[n].token, wsi->name_buffer))
+			if (strcasecmp(lws_tokens[n].token, wsi->name_buffer))
 				continue;
-			if(n == WSI_TOKEN_QTPROTOCOL) {
-				//////////////////////////////////////////////////////////////////////////
-				// Ernad: We have received: "WebSocket-Protocol:" and next string is protocol
-				// name (e.g. myProtocolName). It is handshaking from
-				// QtWebKit. Change state to "WSI_TOKEN_PROTOCOL" (TODO: change to "WSI_TOKEN_QTPROTOCOL")
-				// and set Token Version to "-1". !!! Qt is not sending any protocol version.
-				// We can not use positive (because of "if" test many places in code e.g. "if (protocol < 4 ...)" )
-				//////////////////////////////////////////////////////////////////////////
-				debug("!!!! QT known hdr '%s'\n", wsi->name_buffer);
-				wsi->utf8_token[WSI_TOKEN_VERSION].token = malloc(3);
-				wsi->parser_state = WSI_TOKEN_PROTOCOL; // change to standard protocol parameter
-				wsi->utf8_token[WSI_TOKEN_VERSION].token[0] = '-'; // QT WebKit has not version as parameter. Set it to "-1"
-				wsi->utf8_token[WSI_TOKEN_VERSION].token[1] = '1'; //
-				wsi->utf8_token[WSI_TOKEN_VERSION].token[2] = 0; // and null terminate
-				wsi->utf8_token[WSI_TOKEN_VERSION].token_len = 2;
-			} else {
-				debug("known hdr '%s'\n", wsi->name_buffer);
-				wsi->parser_state = WSI_TOKEN_GET_URI + n;             //ERNAD: set state to receiving of the new parameter
-			}
-			wsi->current_alloc_len = LWS_INITIAL_HDR_ALLOC;
+			debug("known hdr '%s'\n", wsi->name_buffer);
 
+			/*
+			 * WSORIGIN is protocol equiv to ORIGIN,
+			 * JWebSocket likes to send it, map to ORIGIN
+			 */
+			if (n == WSI_TOKEN_SWORIGIN)
+				n = WSI_TOKEN_ORIGIN;
+
+			wsi->parser_state = WSI_TOKEN_GET_URI + n;
+
+			n = WSI_TOKEN_COUNT;
+
+			/*  If the header has been seen already, just append */
+			if (wsi->utf8_token[wsi->parser_state].token)
+				continue;
+
+			wsi->current_alloc_len = LWS_INITIAL_HDR_ALLOC;
 			wsi->utf8_token[wsi->parser_state].token =
 						 malloc(wsi->current_alloc_len);
 			wsi->utf8_token[wsi->parser_state].token_len = 0;
-			n = WSI_TOKEN_COUNT;
 		}
 
 		/* colon delimiter means we just don't know this name */
@@ -263,7 +247,7 @@ int libwebsocket_parse(struct libwebsocket *wsi, unsigned char c)
 
 		/* skipping arg part of a name we didn't recognize */
 	case WSI_TOKEN_SKIPPING:
-		// ernad debug("WSI_TOKEN_SKIPPING '%c'\n", c);
+		debug("WSI_TOKEN_SKIPPING '%c'\n", c);
 		if (c == '\x0d')
 			wsi->parser_state = WSI_TOKEN_SKIPPING_SAW_CR;
 		break;
@@ -311,17 +295,24 @@ xor_mask_05(struct libwebsocket *wsi, unsigned char c)
 
 
 
-static int libwebsocket_rx_sm(struct libwebsocket *wsi, unsigned char c)
+int
+libwebsocket_rx_sm(struct libwebsocket *wsi, unsigned char c)
 {
 	int n;
 	unsigned char buf[20 + 4];
+	struct lws_tokens eff_buf;
+	int handled;
+	int m;
+
+#if 0
+	fprintf(stderr, "RX: %02X ", c);
+#endif
 
 	switch (wsi->lws_rx_parse_state) {
 	case LWS_RXPS_NEW:
 
 		switch (wsi->ietf_spec_revision) {
-		/* Firefox 4.0b6 likes this as of 30 Oct */
-		case -1: //Ernad: Used for QtWebKit
+		/* Firefox 4.0b6 likes this as of 30 Oct 2010 */
 		case 0:
 			if (c == 0xff)
 				wsi->lws_rx_parse_state = LWS_RXPS_SEEN_76_FF;
@@ -341,8 +332,8 @@ static int libwebsocket_rx_sm(struct libwebsocket *wsi, unsigned char c)
 			wsi->lws_rx_parse_state = LWS_RXPS_04_MASK_NONCE_1;
 			break;
 		case 7:
-		case 8: //ernad
-		case 13: //ernad
+		case 8:
+		case 13:
 			/*
 			 * no prepended frame key any more
 			 */
@@ -467,12 +458,9 @@ handle_first:
 		if (wsi->ietf_spec_revision < 7)
 			c = wsi->xor_mask(wsi, c);
 
-		if (c & 0x70) {
+		if (c & 0x70)
 			fprintf(stderr,
-				      "Frame has extensions set illegally 1 %02X\n", c);
-			/* kill the connection */
-			return -1;
-		}
+			    "Frame has unknown extension bits set 1 %02X\n", c);
 
 		/* translate all incoming opcodes into v7+ map */
 		if (wsi->ietf_spec_revision < 7)
@@ -522,7 +510,7 @@ handle_first:
 
 		wsi->this_frame_masked = !!(c & 0x80);
 
-		switch (c) {
+		switch (c & 0x7f) {
 		case 126:
 			/* control frames are not allowed to have big lengths */
 			if (wsi->opcode & 8)
@@ -718,7 +706,8 @@ issue:
 
 
 	case LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED:
-		if (wsi->ietf_spec_revision < 4 || (wsi->all_zero_nonce && wsi->ietf_spec_revision >= 5))
+		if (wsi->ietf_spec_revision < 4 ||
+			 (wsi->all_zero_nonce && wsi->ietf_spec_revision >= 5))
 			wsi->rx_user_buffer[LWS_SEND_BUFFER_PRE_PADDING +
 			       (wsi->rx_user_buffer_head++)] = c;
 		else
@@ -738,6 +727,8 @@ spill:
 		 * layer?  If so service it and hide it from the user callback
 		 */
 
+		debug("spill on %s\n", wsi->protocol->name);
+
 		switch (wsi->opcode) {
 		case LWS_WS_OPCODE_07__CLOSE:
 			/* is this an acknowledgement of our close? */
@@ -746,10 +737,10 @@ spill:
 				 * fine he has told us he is closing too, let's
 				 * finish our close
 				 */
-				fprintf(stderr, "seen client close ack\n");
+				debug("seen client close ack\n");
 				return -1;
 			}
-			fprintf(stderr, "server sees client close packet\n");
+			debug("server sees client close packet\n");
 			/* parrot the close packet payload back */
 			n = libwebsocket_write(wsi, (unsigned char *)
 			   &wsi->rx_user_buffer[LWS_SEND_BUFFER_PRE_PADDING],
@@ -774,8 +765,42 @@ spill:
 			wsi->rx_user_buffer_head = 0;
 			return 0;
 
-		default:
+		case LWS_WS_OPCODE_07__TEXT_FRAME:
+		case LWS_WS_OPCODE_07__BINARY_FRAME:
 			break;
+
+		default:
+
+			debug("passing opcode %x up to exts\n", wsi->opcode);
+
+			/*
+			 * It's something special we can't understand here.
+			 * Pass the payload up to the extension's parsing
+			 * state machine.
+			 */
+
+			eff_buf.token = &wsi->rx_user_buffer[
+						   LWS_SEND_BUFFER_PRE_PADDING];
+			eff_buf.token_len = wsi->rx_user_buffer_head;
+
+			handled = 0;
+			for (n = 0; n < wsi->count_active_extensions; n++) {
+				m = wsi->active_extensions[n]->callback(
+					wsi->protocol->owning_server,
+					wsi->active_extensions[n], wsi,
+					LWS_EXT_CALLBACK_EXTENDED_PAYLOAD_RX,
+					    wsi->active_extensions_user[n],
+								   &eff_buf, 0);
+				if (m)
+					handled = 1;
+			}
+
+			if (!handled)
+				fprintf(stderr, "Unhandled extended opcode "
+					"0x%x - ignoring frame\n", wsi->opcode);
+
+			wsi->rx_user_buffer_head = 0;
+			return 0;
 		}
 
 		/*
@@ -793,6 +818,9 @@ spill:
 						wsi->user_space,
 			  &wsi->rx_user_buffer[LWS_SEND_BUFFER_PRE_PADDING],
 						      wsi->rx_user_buffer_head);
+		else
+			fprintf(stderr, "No callback on payload spill!\n");
+
 		wsi->rx_user_buffer_head = 0;
 		break;
 	}
@@ -813,10 +841,15 @@ int libwebsocket_client_rx_sm(struct libwebsocket *wsi, unsigned char c)
 	int n;
 	unsigned char buf[20 + 4];
 	int callback_action = LWS_CALLBACK_CLIENT_RECEIVE;
+	int handled;
+	struct lws_tokens eff_buf;
+	int m;
+
+	debug(" CRX: %02X %d\n", c, wsi->lws_rx_parse_state);
 
 	switch (wsi->lws_rx_parse_state) {
 	case LWS_RXPS_NEW:
-printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
+
 		switch (wsi->ietf_spec_revision) {
 		/* Firefox 4.0b6 likes this as of 30 Oct */
 		case 0:
@@ -832,8 +865,8 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		case 5:
 		case 6:
 		case 7:
-		case 8: //ernad
-
+		case 8:
+		case 13:
 	/*
 	 *  04 logical framing from the spec (all this is masked when
 	 *  incoming and has to be unmasked)
@@ -885,17 +918,15 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		 *		FIN (b7)
 		 */
 
-			if (c & 0x70) {
-				fprintf(stderr, "Frame has extensions set "
-				   "illegally on first framing byte %02X\n", c);
-				/* kill the connection */
-				return -1;
-			}
+			if (c & 0x70)
+				fprintf(stderr, "Frame has unknown extension "
+				    "bits set on first framing byte %02X\n", c);
 
 			if (wsi->ietf_spec_revision < 7)
 				switch (c & 0xf) {
 				case LWS_WS_OPCODE_04__CONTINUATION:
-					wsi->opcode = LWS_WS_OPCODE_07__CONTINUATION;
+					wsi->opcode =
+						LWS_WS_OPCODE_07__CONTINUATION;
 					break;
 				case LWS_WS_OPCODE_04__CLOSE:
 					wsi->opcode = LWS_WS_OPCODE_07__CLOSE;
@@ -907,14 +938,16 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 					wsi->opcode = LWS_WS_OPCODE_07__PONG;
 					break;
 				case LWS_WS_OPCODE_04__TEXT_FRAME:
-					wsi->opcode = LWS_WS_OPCODE_07__TEXT_FRAME;
+					wsi->opcode =
+						  LWS_WS_OPCODE_07__TEXT_FRAME;
 					break;
 				case LWS_WS_OPCODE_04__BINARY_FRAME:
-					wsi->opcode = LWS_WS_OPCODE_07__BINARY_FRAME;
+					wsi->opcode =
+						LWS_WS_OPCODE_07__BINARY_FRAME;
 					break;
 				default:
 					fprintf(stderr, "reserved opcodes not "
-							    "usable pre v7 protocol\n");
+						   "usable pre v7 protocol\n");
 					return -1;
 				}
 			else
@@ -945,7 +978,7 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 
 		wsi->this_frame_masked = !!(c & 0x80);
 
-		switch (c) {
+		switch (c & 0x7f) {
 		case 126:
 			/* control frames are not allowed to have big lengths */
 			if (wsi->opcode & 8)
@@ -963,9 +996,15 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 			if (wsi->this_frame_masked)
 				wsi->lws_rx_parse_state =
 						LWS_RXPS_07_COLLECT_FRAME_KEY_1;
-			else
-				wsi->lws_rx_parse_state =
+			else {
+				if (c)
+					wsi->lws_rx_parse_state =
 					LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+				else {
+					wsi->lws_rx_parse_state = LWS_RXPS_NEW;
+					goto spill;
+				}
+			}
 			break;
 		}
 		break;
@@ -980,9 +1019,15 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		if (wsi->this_frame_masked)
 			wsi->lws_rx_parse_state =
 					LWS_RXPS_07_COLLECT_FRAME_KEY_1;
-		else
-			wsi->lws_rx_parse_state =
-				LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+		else {
+			if (wsi->rx_packet_length)
+				wsi->lws_rx_parse_state =
+					LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+			else {
+				wsi->lws_rx_parse_state = LWS_RXPS_NEW;
+				goto spill;
+			}
+		}
 		break;
 
 	case LWS_RXPS_04_FRAME_HDR_LEN64_8:
@@ -1040,9 +1085,15 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		if (wsi->this_frame_masked)
 			wsi->lws_rx_parse_state =
 					LWS_RXPS_07_COLLECT_FRAME_KEY_1;
-		else
-			wsi->lws_rx_parse_state =
-				LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+		else {
+			if (wsi->rx_packet_length)
+				wsi->lws_rx_parse_state =
+					LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+			else {
+				wsi->lws_rx_parse_state = LWS_RXPS_NEW;
+				goto spill;
+			}
+		}
 		break;
 
 	case LWS_RXPS_07_COLLECT_FRAME_KEY_1:
@@ -1070,8 +1121,14 @@ printf("ERNAD, NOT USED THIS FUNCTION??????????????????????????????\n");
 		wsi->frame_masking_nonce_04[3] = c;
 		if (c)
 			wsi->all_zero_nonce = 0;
-		wsi->lws_rx_parse_state =
+
+		if (wsi->rx_packet_length)
+			wsi->lws_rx_parse_state =
 					LWS_RXPS_PAYLOAD_UNTIL_LENGTH_EXHAUSTED;
+		else {
+			wsi->lws_rx_parse_state = LWS_RXPS_NEW;
+			goto spill;
+		}
 		break;
 
 	case LWS_RXPS_EAT_UNTIL_76_FF:
@@ -1130,6 +1187,9 @@ issue:
 		if (wsi->rx_user_buffer_head != MAX_USER_RX_BUFFER)
 			break;
 spill:
+
+		handled = 0;
+
 		/*
 		 * is this frame a control packet we should take care of at this
 		 * layer?  If so service it and hide it from the user callback
@@ -1143,15 +1203,15 @@ spill:
 				 * fine he has told us he is closing too, let's
 				 * finish our close
 				 */
-				fprintf(stderr, "seen server's close ack\n");
+				debug("seen server's close ack\n");
 				return -1;
 			}
-			fprintf(stderr, "client sees server close packet len = %d\n", wsi->rx_user_buffer_head);
+			debug("client sees server close packet len = %d\n", wsi->rx_user_buffer_head);
 			/* parrot the close packet payload back */
 			n = libwebsocket_write(wsi, (unsigned char *)
 			   &wsi->rx_user_buffer[LWS_SEND_BUFFER_PRE_PADDING],
 				     wsi->rx_user_buffer_head, LWS_WRITE_CLOSE);
-			fprintf(stderr, "client writing close ack returned %d\n", n);
+			debug("client writing close ack returned %d\n", n);
 			wsi->state = WSI_STATE_RETURNED_CLOSE_ALREADY;
 			/* close the connection */
 			return -1;
@@ -1161,6 +1221,7 @@ spill:
 			n = libwebsocket_write(wsi, (unsigned char *)
 			    &wsi->rx_user_buffer[LWS_SEND_BUFFER_PRE_PADDING],
 				    wsi->rx_user_buffer_head, LWS_WRITE_PONG);
+			handled = 1;
 			break;
 
 		case LWS_WS_OPCODE_07__PONG:
@@ -1171,7 +1232,43 @@ spill:
 			callback_action = LWS_CALLBACK_CLIENT_RECEIVE_PONG;
 			break;
 
+		case LWS_WS_OPCODE_07__CONTINUATION:
+		case LWS_WS_OPCODE_07__TEXT_FRAME:
+		case LWS_WS_OPCODE_07__BINARY_FRAME:
+			break;
+
 		default:
+
+			debug("Reserved opcode 0x%2X\n", wsi->opcode);
+			/*
+			 * It's something special we can't understand here.
+			 * Pass the payload up to the extension's parsing
+			 * state machine.
+			 */
+
+			eff_buf.token = &wsi->rx_user_buffer[
+						   LWS_SEND_BUFFER_PRE_PADDING];
+			eff_buf.token_len = wsi->rx_user_buffer_head;
+
+			for (n = 0; n < wsi->count_active_extensions; n++) {
+				m = wsi->active_extensions[n]->callback(
+					wsi->protocol->owning_server,
+					wsi->active_extensions[n], wsi,
+					LWS_EXT_CALLBACK_EXTENDED_PAYLOAD_RX,
+					    wsi->active_extensions_user[n],
+								   &eff_buf, 0);
+				if (m)
+					handled = 1;
+			}
+
+			if (!handled) {
+				fprintf(stderr, "Unhandled extended opcode "
+					"0x%x - ignoring frame\n", wsi->opcode);
+				wsi->rx_user_buffer_head = 0;
+
+				return 0;
+			}
+
 			break;
 		}
 
@@ -1181,7 +1278,7 @@ spill:
 		 * so it can be sent straight out again using libwebsocket_write
 		 */
 
-		if (wsi->protocol->callback)
+		if (!handled && wsi->protocol->callback)
 			wsi->protocol->callback(wsi->protocol->owning_server,
 						wsi, callback_action,
 						wsi->user_space,
@@ -1260,7 +1357,7 @@ libwebsocket_0405_frame_mask_generate(struct libwebsocket *wsi)
 	 */
 
 	memcpy(buf, wsi->frame_masking_nonce_04, 4);
-	
+
 	memcpy(buf + 4, wsi->masking_key_04, 20);
 
 	/* concatenate the nonce with the connection key then hash it */
@@ -1270,9 +1367,80 @@ libwebsocket_0405_frame_mask_generate(struct libwebsocket *wsi)
 	return 0;
 }
 
+void lws_stderr_hexdump(unsigned char *buf, size_t len)
+{
+	int n;
+	int m;
+	int start;
+
+	fprintf(stderr, "\n");
+
+	for (n = 0; n < len;) {
+		start = n;
+
+		fprintf(stderr, "%04X: ", start);
+
+		for (m = 0; m < 16 && n < len; m++)
+			fprintf(stderr, "%02X ", buf[n++]);
+		while (m++ < 16)
+			fprintf(stderr, "   ");
+
+		fprintf(stderr, "   ");
+
+		for (m = 0; m < 16 && (start + m) < len; m++) {
+			if (buf[start + m] >= ' ' && buf[start + m] <= 127)
+				fprintf(stderr, "%c", buf[start + m]);
+			else
+				fprintf(stderr, ".");
+		}
+		while (m++ < 16)
+			fprintf(stderr, " ");
+
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n");
+}
+
 int lws_issue_raw(struct libwebsocket *wsi, unsigned char *buf, size_t len)
 {
 	int n;
+	int m;
+
+	/*
+	 * one of the extensions is carrying our data itself?  Like mux?
+	 */
+
+	for (n = 0; n < wsi->count_active_extensions; n++) {
+		/*
+		 * there can only be active extensions after handshake completed
+		 * so we can rely on protocol being set already in here
+		 */
+		m = wsi->active_extensions[n]->callback(
+				wsi->protocol->owning_server,
+				wsi->active_extensions[n], wsi,
+				LWS_EXT_CALLBACK_PACKET_TX_DO_SEND,
+				     wsi->active_extensions_user[n], &buf, len);
+		if (m < 0) {
+			fprintf(stderr, "Extension reports fatal error\n");
+			return -1;
+		}
+		if (m) /* handled */ {
+/*			fprintf(stderr, "ext sent it\n"); */
+			return 0;
+		}
+	}
+
+	if (!wsi->sock)
+		fprintf(stderr, "** error 0 sock but expected to send\n");
+
+	/*
+	 * nope, send it on the socket directly
+	 */
+
+#if 0
+	fprintf(stderr, "  TX: ");
+	lws_stderr_hexdump(buf, len);
+#endif
 
 #ifdef LWS_OPENSSL_SUPPORT
 	if (wsi->ssl) {
@@ -1293,6 +1461,87 @@ int lws_issue_raw(struct libwebsocket *wsi, unsigned char *buf, size_t len)
 #ifdef LWS_OPENSSL_SUPPORT
 	}
 #endif
+	return 0;
+}
+
+int
+lws_issue_raw_ext_access(struct libwebsocket *wsi,
+						 unsigned char *buf, size_t len)
+{
+	int ret;
+	struct lws_tokens eff_buf;
+	int m;
+	int n;
+
+	eff_buf.token = (char *)buf;
+	eff_buf.token_len = len;
+
+	/*
+	 * while we have original buf to spill ourselves, or extensions report
+	 * more in their pipeline
+	 */
+
+	ret = 1;
+	while (ret == 1) {
+
+		/* default to nobody has more to spill */
+
+		ret = 0;
+
+		/* show every extension the new incoming data */
+
+		for (n = 0; n < wsi->count_active_extensions; n++) {
+			m = wsi->active_extensions[n]->callback(
+					wsi->protocol->owning_server,
+					wsi->active_extensions[n], wsi,
+					LWS_EXT_CALLBACK_PACKET_TX_PRESEND,
+				   wsi->active_extensions_user[n], &eff_buf, 0);
+			if (m < 0) {
+				fprintf(stderr, "Extension: fatal error\n");
+				return -1;
+			}
+			if (m)
+				/*
+				 * at least one extension told us he has more
+				 * to spill, so we will go around again after
+				 */
+				ret = 1;
+		}
+
+		/* assuming they left us something to send, send it */
+
+		if (eff_buf.token_len)
+			if (lws_issue_raw(wsi, (unsigned char *)eff_buf.token,
+							    eff_buf.token_len))
+				return -1;
+
+		/* we used up what we had */
+
+		eff_buf.token = NULL;
+		eff_buf.token_len = 0;
+
+		/*
+		 * Did that leave the pipe choked?
+		 */
+
+		if (!lws_send_pipe_choked(wsi))
+			/* no we could add more */
+			continue;
+
+		debug("choked\n");
+
+		/*
+		 * Yes, he's choked.  Don't spill the rest now get a callback
+		 * when he is ready to send and take care of it there
+		 */
+		libwebsocket_callback_on_writable(
+					     wsi->protocol->owning_server, wsi);
+		wsi->extension_data_pending = 1;
+		ret = 0;
+	}
+
+	debug("written %d bytes to client\n", eff_buf.token_len);
+
 	return 0;
 }
 
@@ -1325,13 +1574,11 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 			  size_t len, enum libwebsocket_write_protocol protocol)
 {
 	int n;
-	int m;
 	int pre = 0;
 	int post = 0;
 	int shift = 7;
-	struct lws_tokens eff_buf;
-	int ret;
-	int masked7 = wsi->mode == LWS_CONNMODE_WS_CLIENT;
+	int masked7 = wsi->mode == LWS_CONNMODE_WS_CLIENT &&
+						  wsi->xor_mask != xor_no_mask;
 	unsigned char *dropmask = NULL;
 	unsigned char is_masked_bit = 0;
 
@@ -1349,9 +1596,8 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 		return -1;
 
 	switch (wsi->ietf_spec_revision) {
-	/* chrome likes this as of 30 Oct */
-	/* Firefox 4.0b6 likes this as of 30 Oct */
-	case -1: //Ernad for QT
+	/* chrome likes this as of 30 Oct 2010 */
+	/* Firefox 4.0b6 likes this as of 30 Oct 2010 */
 	case 0:
 		if ((protocol & 0xf) == LWS_WRITE_BINARY) {
 			/* in binary mode we send 7-bit used length blocks */
@@ -1374,6 +1620,7 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 			}
 			break;
 		}
+
 		/* frame type = text, length-free spam mode */
 
 		pre = 1;
@@ -1383,7 +1630,8 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 		break;
 
 	case 7:
-	case 8: //ernad
+	case 8:
+	case 13:
 		if (masked7) {
 			pre += 4;
 			dropmask = &buf[0 - pre];
@@ -1423,7 +1671,7 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 			 * v5 mandates the first byte of close packet
 			 * in both client and server directions
 			 */
-			
+
 			switch (wsi->ietf_spec_revision) {
 			case 0:
 			case 4:
@@ -1433,7 +1681,7 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 
 				if (len < 1)
 					len = 1;
-				
+
 				switch (wsi->mode) {
 				case LWS_CONNMODE_WS_SERVING:
 					/*
@@ -1538,7 +1786,8 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 		 * to control the raw packet payload content
 		 */
 
-		if (!(protocol & LWS_WRITE_CLIENT_IGNORE_XOR_MASK)) {
+		if (!(protocol & LWS_WRITE_CLIENT_IGNORE_XOR_MASK) &&
+						wsi->xor_mask != xor_no_mask) {
 
 			if (libwebsocket_0405_frame_mask_generate(wsi)) {
 				fprintf(stderr, "libwebsocket_write: "
@@ -1559,7 +1808,8 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 				 * in v7, just mask the payload
 				 */
 				for (n = 0; n < (int)len; n++)
-					dropmask[n + 4] = wsi->xor_mask(wsi, dropmask[n + 4]);
+					dropmask[n + 4] =
+					   wsi->xor_mask(wsi, dropmask[n + 4]);
 
 
 			if (wsi->ietf_spec_revision < 7) {
@@ -1571,7 +1821,8 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 
 			if (dropmask)
 				/* copy the frame nonce into place */
-				memcpy(dropmask, wsi->frame_masking_nonce_04, 4);
+				memcpy(dropmask,
+					       wsi->frame_masking_nonce_04, 4);
 
 		} else {
 			if (wsi->ietf_spec_revision < 7) {
@@ -1584,10 +1835,12 @@ int libwebsocket_write(struct libwebsocket *wsi, unsigned char *buf,
 				buf[2 - pre] = 0;
 				buf[3 - pre] = 0;
 			} else {
-				dropmask[0] = 0;
-				dropmask[1] = 0;
-				dropmask[2] = 0;
-				dropmask[3] = 0;
+				if (dropmask && wsi->xor_mask != xor_no_mask) {
+					dropmask[0] = 0;
+					dropmask[1] = 0;
+					dropmask[2] = 0;
+					dropmask[3] = 0;
+				}
 			}
 		}
 
@@ -1611,7 +1864,6 @@ send_raw:
 		return 0;
 	}
 
-
 	/*
 	 * give any active extensions a chance to munge the buffer
 	 * before send.  We pass in a pointer to an lws_tokens struct
@@ -1626,82 +1878,7 @@ send_raw:
 	 * callback returns 1 in case it wants to spill more buffers
 	 */
 
-	eff_buf.token = (char *)buf - pre;
-	eff_buf.token_len = len + pre + post;
-
-	/*
-	 * while we have original buf to spill ourselves, or extensions report
-	 * more in their pipeline
-	 */
-
-	ret = 1;
-	while (ret == 1) {
-
-		/* default to nobody has more to spill */
-
-		ret = 0;
-
-		/* show every extension the new incoming data */
-
-		for (n = 0; n < wsi->count_active_extensions; n++) {
-			m = wsi->active_extensions[n]->callback(
-					wsi->protocol->owning_server,
-					wsi->active_extensions[n], wsi,
-					LWS_EXT_CALLBACK_PACKET_TX_PRESEND,
-				   wsi->active_extensions_user[n], &eff_buf, 0);
-			if (m < 0) {
-				fprintf(stderr, "Extension reports fatal error\n");
-				return -1;
-			}
-			if (m)
-				/*
-				 * at least one extension told us he has more
-				 * to spill, so we will go around again after
-				 */
-				ret = 1;
-		}
-
-		/* assuming they left us something to send, send it */
-
-		if (eff_buf.token_len) {
-			if (lws_issue_raw(wsi, (unsigned char *)eff_buf.token,
-							     eff_buf.token_len)) {
-				return -1;
-			} else {
-#ifdef DEBUG_WEBSERVER
-				printf("----------> sent: %d\n", eff_buf.token_len);
-#endif
-			}
-		} else {
-			printf("----------> 888 !!! TOKEN NULL\n");
-		}
-
-		/* we used up what we had */
-
-		eff_buf.token = NULL;
-		eff_buf.token_len = 0;
-
-		/*
-		 * Did that leave the pipe choked?
-		 */
-
-		if (!lws_send_pipe_choked(wsi))
-			/* no we could add more */
-			continue;
-
-		fprintf(stderr, "choked\n");
-
-		/*
-		 * Yes, he's choked.  Don't spill the rest now get a callback
-		 * when he is ready to send and take care of it there
-		 */
-		libwebsocket_callback_on_writable(
-					     wsi->protocol->owning_server, wsi);
-		wsi->extension_data_pending = 1;
-		ret = 0;
-	}
-
-	return 0;
+	return lws_issue_raw_ext_access(wsi, buf - pre, len + pre + post);
 }
 
 
@@ -1725,7 +1902,11 @@ int libwebsockets_serve_http_file(struct libwebsocket *wsi, const char *file,
 	char *p = buf;
 	int n;
 
+#ifdef WIN32
+	fd = open(file, O_RDONLY | _O_BINARY);
+#else
 	fd = open(file, O_RDONLY);
+#endif
 	if (fd < 1) {
 		p += sprintf(p, "HTTP/1.0 400 Bad\x0d\x0a"
 			"Server: libwebsockets\x0d\x0a"
@@ -1742,7 +1923,8 @@ int libwebsockets_serve_http_file(struct libwebsocket *wsi, const char *file,
 			"Server: libwebsockets\x0d\x0a"
 			"Content-Type: %s\x0d\x0a"
 			"Content-Length: %u\x0d\x0a"
-			"\x0d\x0a", content_type, (unsigned int)stat_buf.st_size);
+			"\x0d\x0a", content_type,
+					(unsigned int)stat_buf.st_size);
 
 	libwebsocket_write(wsi, (unsigned char *)buf, p - buf, LWS_WRITE_HTTP);
 

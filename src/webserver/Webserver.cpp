@@ -15,7 +15,7 @@
 //#define DEBUG_WEBSERVER
 
 #define LOCAL_RESOURCE_PATH DATADIR"/libwebsockets-test-server"
-#define SERVER_PATH "/www" // /test/files"
+#define SERVER_PATH "/www/test" // /test/files"
 
 
 Webserver::Webserver() {
@@ -111,7 +111,7 @@ int Webserver::callback_http(struct libwebsocket_context * context,
 #endif
 
 		if (in && strcmp((char*)in, "/") == 0) {
-			sprintf(wantedFile, "%s%s", SERVER_PATH, "/test.html");
+			sprintf(wantedFile, "%s%s", SERVER_PATH, "/index.html");
 
 			if (libwebsockets_serve_http_file(wsi, wantedFile, "text/html"))
 				fprintf(stderr, "Failed to send HTTP file, TODO: ernad release\n");
@@ -130,7 +130,8 @@ int Webserver::callback_http(struct libwebsocket_context * context,
 			}
 			break;
 		} else {
-			fprintf(stderr, "Failed to fine extension: %s\n", wantedFile);
+			fprintf(stderr, "Failed to fine extension: %s.%s\n", (const char *)in, extension);
+			libwebsockets_serve_http_file(wsi,(const char *)in, extension);
 		}
 
 		break;
@@ -218,7 +219,7 @@ int Webserver::mainLoop()
 	const char *cert_path ="files/libwebsockets-test-server.pem";
 
 	const char *key_path ="files/libwebsockets-test-server.key.pem";
-	int port = 7681;
+	int port = 8080;
 	int use_ssl = 0;
 	struct libwebsocket_context *context;
 	int opts = 0;

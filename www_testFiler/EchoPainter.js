@@ -1,75 +1,58 @@
+var bottomPoint;
+
 var noOfColors = 19; // !!! set this number to length of your color array
 
 var colors_R;
 var colors_G;
 var colors_B;
 
+var colors_R1 = new Array(40, 40, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252,
+		224, 180, 160, 120, 80, 40);
+var colors_G1 = new Array(120, 120, 120, 80, 40, 0, 80, 120, 160, 200, 200, 240,
+		200, 120, 80, 0, 0, 0, 0);
+var colors_B1 = new Array(252, 252, 252, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0,
+		0, 0, 20, 40, 20, 0);
+/*
 var colors_R1 = new Array(40, 80, 40, 0, 0, 0, 0, 0, 40, 120, 200, 240, 252,
 		224, 180, 160, 120, 80, 40);
 var colors_G1 = new Array(252, 220, 140, 80, 40, 0, 80, 120, 160, 200, 200, 240,
 		200, 120, 80, 0, 0, 0, 0);
 var colors_B1 = new Array(252, 220, 192, 168, 160, 128, 64, 40, 0, 0, 0, 0, 0,
-		0, 0, 20, 40, 20, 0);
-// DON'T REMOVE. This is array for green color
+		0, 0, 20, 40, 20, 0);*/
 
-var colors_R2 = new Array(0x00, 0x09, 0x1f, 0x2f, 0x4f, 0x67,   0x72, 0x9f, 0xa3, 0xcf); 
-var colors_G2 = new Array(0x00, 0x0f, 0x2f, 0x4f, 0x6f, 0x87,   0x92, 0xbf, 0xc3, 0xef); 
-var colors_B2 = new Array(0x00, 0x00, 0x02, 0x02, 0x04, 0x08,   0x0A, 0x10, 0x13, 0x18);
-/*
-var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C, 0xBC, 0xDC); 
-var colors_G2 = new Array(0x00, 0x45, 0x60, 0x8E, 0x9D, 0xAF, 0xBF, 0xCF, 0xFF, 0xFF); 
-var colors_B2 = new Array(0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x22, 0x53, 0x80, 0xC3);
-*/
-var colors_R3 = new Array(0x00, 15, 30, 45, 60, 85,   90,  105,  120,  135); 
+var colors_R2 = new Array(0x00, 0x00, 0x00, 0x2f, 0x4f, 0x67,   0x72, 0x9f, 0xa3, 0xcf); 
+var colors_G2 = new Array(0x00, 0x00, 0x00, 0x4f, 0x6f, 0x87,   0x92, 0xbf, 0xc3, 0xef); 
+var colors_B2 = new Array(0x00, 0x00, 0x00, 0x02, 0x04, 0x08,   0x0A, 0x10, 0x13, 0x18);
+
+
+
+var colors_R3 = new Array(0x00, 0, 0, 45, 60, 85,   90,  105,  120,  135); 
+var colors_G3 = new Array(0x00, 0, 0, 88, 112, 138, 162, 188, 214, 240); 
+var colors_B3 = new Array(0x00, 0, 0, 94, 122, 150, 178, 206, 234, 255);
+ 
+/*var colors_R3 = new Array(0x00, 15, 30, 45, 60, 85,   90,  105,  120,  135); 
 var colors_G3 = new Array(0x00, 24, 52, 88, 112, 138, 162, 188, 214, 240); 
 var colors_B3 = new Array(0x00, 28, 56, 94, 122, 150, 178, 206, 234, 255);
-
-//var colors_R4 = new Array(0x00, 0x30, 0xC4, 0xf9, 0xf9, 0xf9, 0xf9, 0xfa, 0xfc, 0xff); 
-var colors_R4 = new Array(0x00, 0x0f, 0x2f, 0x4f, 0x6f, 0x87,   0x92, 0xbf, 0xc3, 0xef);  
-var colors_G4 = new Array(0x00, 0x09, 0x1f, 0x2f, 0x4f, 0x67,   0x72, 0x9f, 0xa3, 0xcf); 
+*/
+var colors_R4 = new Array(0x00, 0x09, 0x1f, 0x2f, 0x4f, 0x67,   0x72, 0x9f, 0xa3, 0xcf); 
+var colors_G4 = new Array(0x00, 0x0f, 0x2f, 0x4f, 0x6f, 0x87,   0x92, 0xbf, 0xc3, 0xef); 
 var colors_B4 = new Array(0x00, 0x00, 0x02, 0x02, 0x04, 0x08,   0x0A, 0x10, 0x13, 0x18);
+
 /*
-var colors_R3 = new Array(0x00, 10, 20, 30, 40, 50,   60,  70,  80,  90); 
-var colors_G3 = new Array(0x00, 20, 40, 60, 80, 100, 120, 140, 160, 180); 
-var colors_B3 = new Array(0x00, 22, 44, 66, 88, 110, 132, 154, 176, 198);*/
+var colors_R4 = new Array(0x00, 0x00, 0x00, 0x2f, 0x6f, 0x87,   0x92, 0xbf, 0xc3, 0xef);  
+var colors_G4 = new Array(0x00, 0x00, 0x00, 0x1f, 0x4f, 0x67,   0x72, 0x9f, 0xa3, 0xcf); 
+var colors_B4 = new Array(0x00, 0x00, 0x00, 0x02, 0x04, 0x08,   0x0A, 0x10, 0x13, 0x18);
+*/
 
-/*var colors_R2 = new Array(0x00, 0x00, 0x09, 0x0D, 0x1C, 0x49, 0x58, 0x8C,
- 0xBC, 0xDC); 
-var colors_G2 = new Array(0x00, 0x25, 0x40, 0x5E, 0x6D, 0x9D,
-0xBE, 0xFF, 0xFF, 0xFF); 
-var colors_B2 = new Array(0x00, 0x00, 0x09, 0x0D,
-0x1C, 0x29, 0x38, 0x5C, 0x8C, 0xAC);*/
-
-
-
-
-
-function changeToGreen() {
-	if(colors_R  == colors_R1) {
-		colors_R = colors_R2;
-		colors_G = colors_G2;
-		colors_B = colors_B2;
-		noOfColors = 10;
-	} else if(colors_R  == colors_R2) {
-		colors_R = colors_R3;
-		colors_G = colors_G3;
-		colors_B = colors_B3;
-		noOfColors = 10;
-	} else if(colors_R  == colors_R3) {
-		colors_R = colors_R4;
-		colors_G = colors_G4;
-		colors_B = colors_B4;
-		noOfColors = 10;
-	} else {
+function changeColor(colIndex) {
+	setColorStorage(colIndex);
+	
+	if (colIndex == 0) {
 		colors_R = colors_R1;
 		colors_G = colors_G1;
 		colors_B = colors_B1;
 		noOfColors = 19;
-	}
-}
-
-function changeColor(colIndex) {
-	if(colIndex == 1) {
+	}else if(colIndex == 1) {
 		colors_R = colors_R2;
 		colors_G = colors_G2;
 		colors_B = colors_B2;
@@ -79,25 +62,16 @@ function changeColor(colIndex) {
 		colors_G = colors_G3;
 		colors_B = colors_B3;
 		noOfColors = 10;
-	} else if(colIndex == 3) {
+	} else {//if(colIndex == 3) {
 		colors_R = colors_R4;
 		colors_G = colors_G4;
 		colors_B = colors_B4;
 		noOfColors = 10;
-	} else {
-		colors_R = colors_R1;
-		colors_G = colors_G1;
-		colors_B = colors_B1;
-		noOfColors = 19;
 	}
 }
 // //////////////////////////////
 // EchoCanvas class
 function EchoCanvas(x, y, canWidth, canHeight) {
-	colors_R = colors_R1;
-	colors_G = colors_G1;
-	colors_B = colors_B1;
-	
 	this.x = x;
 	this.y = y;
 	this.test = 1;
@@ -180,31 +154,35 @@ EchoCanvas.prototype.echoPainter_PaintCanvas = function() {
 
 			this.canvasDoubleBuff_1pixData.data[i * 4 + 3] = 0xff; // opaque
 		}
-
+		//this.resetData();
 		
 		this.canvasDoubleBuff_1pixData.data[alarmPoint* 4] = 0xff;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 1] = 0x65;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 2] = 0x1E;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0x50; // opaque
 		
-		var alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.L / rangeMaxValues[jsonDATA.range]) ;
+		// Paint alarm line LOW
+		var alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.L / rangeMaxValuesCalculation[jsonDATA.range]) ;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint* 4] = 0xff;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 1] = 0x65;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 2] = 0x1E;
-		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0x50; // opaque
-		
-		alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.H / rangeMaxValues[jsonDATA.range]) ;
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0xff; // opaque
+		// Paint alarm line HIGH
+		alarmPoint = parseInt($(alarmParentDiv).height() * jsonDATA.alarm.H / rangeMaxValuesCalculation[jsonDATA.range]) ;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint* 4] = 0xff;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 1] = 0x65;
 		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 2] = 0x1E;
-		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0x50; // opaque
+		this.canvasDoubleBuff_1pixData.data[alarmPoint * 4 + 3] = 0xff; // opaque
 		
-		if(this.buttom < rangeMaxValues[jsonDATA.range]){
-			var buttomPoint = parseInt(CANVAS_HEIGHT*this.buttom/ rangeMaxValues[jsonDATA.range]) ;
-			this.canvasDoubleBuff_1pixData.data[buttomPoint* 4] = 0xff;
-			this.canvasDoubleBuff_1pixData.data[buttomPoint * 4 + 1] = 0x00;
-			this.canvasDoubleBuff_1pixData.data[buttomPoint * 4 + 2] = 0;
-			this.canvasDoubleBuff_1pixData.data[buttomPoint * 4 + 3] = 0xff; // opaque
+		
+		if(this.buttom < rangeMaxValuesCalculation[jsonDATA.range]){
+			bottomPoint = parseInt(CANVAS_HEIGHT*this.buttom/ rangeMaxValuesCalculation[jsonDATA.range]) ;
+			this.canvasDoubleBuff_1pixData.data[bottomPoint* 4] = 0xff;
+			this.canvasDoubleBuff_1pixData.data[bottomPoint * 4 + 1] = 0x00;
+			this.canvasDoubleBuff_1pixData.data[bottomPoint * 4 + 2] = 0;
+			this.canvasDoubleBuff_1pixData.data[bottomPoint * 4 + 3] = 0xff; // opaque
+		} else {
+			bottomPoint = rangeMaxValuesCalculation[jsonDATA.range];
 		}
 		
 		this.canvasDoubleBuffer2Dcontext.putImageData(
@@ -229,6 +207,11 @@ EchoCanvas.prototype.setNewData = function(buttom, data) {
 	this.buttom = buttom;
 	for (i = 0; i < 400; i++)
 	this.colorArray[i] = data[i+1]; //TODO: not "elegant". First element is depth
+}
+
+EchoCanvas.prototype.resetData = function() {
+	for (i = 0; i < 400; i++)
+	this.colorArray[i] = 0;
 }
 
 /**

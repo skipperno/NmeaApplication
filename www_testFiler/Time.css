@@ -1,0 +1,47 @@
+@CHARSET "UTF-8";
+
+.timeConf{
+	position:relative;
+	height: 50px;
+	float:left;
+	width:100%;
+	}
+	
+.timeCells{
+	font-size:23px;
+	background: url(images/timeDateBck.png);
+	margin:9px 5px 9px 0px;/* negative half of the height */
+	float:left;Time.css
+	height:32px;
+	}
+	
+	.timeCell{
+		width:15px;
+		text-align:center;
+		line-height:32px;
+		background: url(images/timeDateBck.png);
+		float:left;
+	}
+	
+	.timeButtons{
+	float:left;
+	position:relative;
+	width:30px;
+	height:50px;
+	}
+	
+	#timeHup{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width:30px;
+	height:25px;
+	}
+	
+	#timeHdown{
+	position: absolute;
+	left: 0px;
+	top: 25px;
+	width:30px;
+	height:25px;
+	}

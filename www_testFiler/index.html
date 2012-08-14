@@ -23,16 +23,19 @@
 <link rel="stylesheet" type="text/css" href="ChoiceBoxHoriz.css" />
 <link rel="stylesheet" type="text/css" href="Transceiver.css" />
 <link rel="stylesheet" type="text/css" href="TabMenu.css" />
-
+<link rel="stylesheet" type="text/css" href="Time.css" />
 
 <script src="jquery.js"></script>
 <script src="jquery.populate.pack.js"></script>
 <script type="text/javascript" src="json2.js"></script>
 <script type="text/javascript" src="TransceiverBoat.js"></script>
 <script type="text/javascript" src="SliderHorizontal.js"></script>
+<script type="text/javascript" src="SliderHorizontalUnlinear.js"></script>
 <script type="text/javascript" src="SliderVertical.js"></script>
-<script type="text/javascript" src="ChoiceBoxHoriz.js"></script>
 <script type="text/javascript" src="ChoiceBoxHoriz2.js"></script>
+<script type="text/javascript" src="ChoiceBoxMultiple.js"></script>
+
+<script type="text/javascript" src="Button.js"></script>
 
 <script type="text/javascript" src="Menu.js"></script>
 <script type="text/javascript" src="MenuVertical.js"></script>
@@ -50,6 +53,14 @@
 <script type="text/javascript" src="TransceiverTabMenu.js"></script>
 <script type="text/javascript" src="DataStorage.js"></script>
 <script type="text/javascript" src="DepthInfo.js"></script>
+<script type="text/javascript" src="Setup.js"></script>
+<script type="text/javascript" src="PainterMsg.js"></script>
+<script type="text/javascript" src="Screen_Setup.js"></script>
+<script type="text/javascript" src="ScreenHardware.js"></script>
+<script type="text/javascript" src="ScreenCom.js"></script>
+<script type="text/javascript" src="FontSize.js"></script>
+<script type="text/javascript" src="Common.js"></script>
+<script type="text/javascript" src="Validation.js"></script>
 
 <!-- """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 <script type="text/javascript" src="swfobject.js"></script>
@@ -64,15 +75,14 @@
 
 <script type="text/javascript" charset="UTF-8">
 	//ISO-8859-1">
-	WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
+	// WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
 	var conn = {};
 	var echoWebSock; //echo sounder data
 	var dataWebSock; // set-get data (e.q. GAIN, TVG...)
 
 	var rangeSlider3;
 	
-	var oldRange = 0;
-	var currRange = -1;
+	
 
 	var currTimeScale = 0;
 
@@ -83,7 +93,7 @@
 	var scopeCanvas;
 	var scopeVisible = false;
 	
-	var CANVAS_WIDTH = 556;
+	var CANVAS_WIDTH = 540;//556;
 	var CANVAS_HEIGHT = 400;
 	
 	var dataReceived = 0;
@@ -117,22 +127,24 @@
 	
 	function changeToScopeScreen() {
 		scopeVisible = true;
-		canvasWidth = 150;
-		echoCanvas1.resize(406, 0, canvasWidth, canvasHeight);
+		$("#scopeDiv").show();
+		//canvasWidth = 150;
+		//echoCanvas1.resize(406, 0, canvasWidth, canvasHeight);
 	}
 	
 	function changeToEchoScreen() {
 		scopeVisible = false;
-		canvasWidth = CANVAS_WIDTH;
+		$("#scopeDiv").hide();
+		/*canvasWidth = CANVAS_WIDTH;
 		canvasHeight = CANVAS_HEIGHT;
-		echoCanvas1.resize(0, 0, canvasWidth, canvasHeight);
+		echoCanvas1.resize(0, 0, canvasWidth, canvasHeight);*/
 	}
 
 	//////////////////////////////////////////////////
 	//TIMER USED FOR ECHO PAINTING USING CANVAS
 	//////////////////////////////////////////////////
 	function startPaintingCanvasTimer() {
-		t = setTimeout("onPaintingCanvasTimer()", paintSleepTime[sleepTimeIndex]); //200); 
+		t = setTimeout("onPaintingCanvasTimer()", paintSleepTime[getSleepTimeIndex()]); //200); 
 	}
 
 	function onPaintingCanvasTimer() {
@@ -206,34 +218,42 @@
 			 return;
 		if (data.charAt(0) == '1') { //MSG TYPE = ECHO_
 			var range = data.charAt(1);
-if (range < 0 || range > 5)
-	return;
+			var tempAlarmValue = data.charAt(2);
+			alarmValue = tempAlarmValue.charCodeAt(0) - 0x30;
+			
+			if (range < 0 || range > 5)
+				return;
 			if (currRange != range) {		
 				oldRange = currRange;
 				currRange = range;
+				
 				echoCanvas1.paintChangedRange(oldRange);
 				changeRange(currRange);
 				rangeSlider3.setNewIndex(currRange, true);
 			}
 
 
-			var chanelsArray = data.substring(2).split("CH"); // NOT USED YET
+			var chanelsArray = data.substring(3).split("CH"); // NOT USED YET
 			newColorArrayCh1 = chanelsArray[0].split(",");
 			if (chanelsArray.length > 1) // NOT USED, ALWAYS = 1
 				newColorArrayCh2 = chanelsArray[1].split(",");
 			
-			var buttom = newColorArrayCh1[0]/10;
-			updateDepthText(buttom.toFixed(1));
+			var buttomMeter = newColorArrayCh1[0]/10;
+			var buttomUnit = buttomMeter * depthConverFactor[getDepthUnitStorage()];
 			
 			dataReceived = 1;
-			alarmTest(buttom);
+			alarmTest();//buttomMeter);
 			
 			if (scopeVisible)
 				scopeCanvas.setNewData(newColorArrayCh1);
-			echoCanvas1.setNewData(buttom, newColorArrayCh1);
+			echoCanvas1.setNewData(buttomMeter, newColorArrayCh1);
 			if (echoCanvas2 != null)
-				echoCanvas2.setNewData(buttom, newColorArrayCh2);
+				echoCanvas2.setNewData(buttomMeter, newColorArrayCh2);
 			//startDataProviderTimer(); // if you start timer from here, it will take 500ms (timer time) + around 500ms for sending/receiving of data
+			
+			
+			updateDepthText(buttomUnit.toFixed(1));
+			updateDepthRightText(buttomUnit.toFixed(1));
 		}
 		//updateSigBeam();
 	}
@@ -250,19 +270,24 @@ if (range < 0 || range > 5)
 			$('#tableTest').populate(jsonTOP.ins); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
 			$('#statusDiv').populate(jsonTOP.pow); 
 			//$('#tableTest').populate(jsonTOP.pow);
-		}	else if (recJson.type == "nmea") {
+		}	else if (recJson.type == "nmea" && selectedIO_source > -1) {
 			jsonNmea = recJson;
-			if (getListCount() > 20) {
+			if (getListCount() > 15) {
 				removeOptionFirst();
 			}
 			//TODO: if 
 			
 			
-			if(jsonNmea.dir == jsonIO.set[selectedIO_source-1].disRadio.dis ) // if msg direction is OUT and display chois is OUT or if msg direction is IN and ...
+			if(jsonNmea.dir == jsonIO.set[selectedIO_source].outInOff ) // if msg direction is OUT and display chois is OUT or if msg direction is IN and ...
 				appendOptionLast(jsonNmea.nmea);
 			//document.getElementById("gps").innerHTML = jsonNmea.nmea;
 		} else if (recJson.type == "ioAll") {
 			jsonIO  = recJson;	
+		} else if (recJson.type == "transceiver") {
+			jsonTransceiver  = recJson;	
+		} else if (recJson.type == "actTrans") {
+			jsonActiveTransceiver  = recJson;	
+			changeBoatIconPosition(jsonTransceiver.jsonTrans[jsonActiveTransceiver.activeCh].transPos);
 		}
 	}
 	
@@ -277,19 +302,16 @@ if (range < 0 || range > 5)
 <body>
 	<div id="wrap">
 		<div id="container">
-
+			
 			<div class="northsidebar">
-			<div name="tableTest" id="tableTest" style="width:495px;height:75px; border:2px ridge #C90;">
+			<div class="tableTest" id="tableTest">
 				<div class="topField"><div class="topFieldTextLeft">TIME:</div><div class="topFieldTextLeft2" id="time"></div></div>
-				<div class="topField"><div class="topFieldTextLeft">Screen Speed:</div><div class="topFieldTextLeft2" id="scrSpeed">20/s</div></div>
-				<div class="topField"><div class="topFieldTextLeft">Freq:</div><div class="topFieldTextLeft"2 id="frq">1000kHz</div></div>
-				<div class="topField"><div class="topFieldTextLeft">Position:</div><div class="topFieldTextLeft2" id="pos">Port</div></div>
-			<!--  	<div class="topField" style="width:100px"><div class="topFieldTextLeft">5V_I</div><div class="topFieldDown" id="5V_I"></div></div>
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">SPEED</div><div class="topFieldTextRight">[m/s]</div><div class="topFieldDown" id="speed1"></div></div>
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">TIME</div><div class="topFieldDown" id="time2"></div></div>
-				<div class="topField" style="width:100px"><div class="topFieldTextLeft">GPS</div><div class="topFieldDown" id="gps2"></div></div>
-				<div class="topField" style="width:70px"><div class="topFieldTextLeft">SPEED</div><div class="topFieldTextRight">[m/s]</div><div class="topFieldDown" id="speed2"></div></div>
-				-->
+				<div class="topField"><div class="topFieldTextLeft">Screen Time:</div><div class="topFieldTextLeft2" id="scrSpeed">10s</div></div>
+				<div class="topField"><div class="topFieldTextLeft">Freq:</div><div class="topFieldTextLeft"2 id="frq">100</div>kHz</div>
+				<div class="topField"><div class="topFieldTextLeft">Position:</div><div class="topFieldTextLeft2" id="pos">Port</div></div>				
+			</div>
+			<div class="tableTest" id="tableTest2">
+				<div class="topField"><div class="topFieldTextLeft">Alarm state:</div><div id="alarmStateDiv" class="topFieldTextLeft2">ALARM SHALLOW</div></div>
 			</div>
 			<!-- 
 			<table name="tableTest" id="tableTest">
@@ -303,78 +325,45 @@ if (range < 0 || range > 5)
 			<!--  	<div id="boatFreq">124.32kHz</div>
 				<div id="boatTransPos">AFT</div>-->
 			</div>
-			<div id="maincenter">
+			<div id="maincenter" onclick="onMainCenterClick()">				
+
+				<div id="canvasDiv">
+				   <canvas id="echoCanvas" width="556" height="400"></canvas>
+				</div>
+				<div id="scopeDiv">
+				  <canvas id="scopeCanvas" width="420" height="256"></canvas>
+				</div>
+				
 				<div id="depth">??</div>
 				<div id="depthType">??</div>
-				<script>
-					initAlarm(document.getElementById("maincenter"));
-				</script>
-				<canvas id="echoCanvas" width="556" height="400"></canvas>
+				
 				<div id="rangeScale"></div>
 				<div id="rangeScaleTextDiv"></div>
 				<div id="timeScale"></div>
-				<div id="nmeaPanel">
-				<form id="nmeaOutputs">
-				<div class="nmeaHeaderText">NMEA OUTPUTS:</div>
-					<table>
-					<tr><td width="30px">DPT:</td><td width="45px"><input type="checkbox" id="ch1" name="oms[]" value="a" onclick="onOutputsCheckboxEvent()"></input></td>
-					<td width="30px">DBS:</td><td width="45px"><input type="checkbox" id="ch2" name="oms[]" value="b" onclick="onOutputsCheckboxEvent()"></input></td>
-					<td width="30px">DBA:</td><td width="45px"><input type="checkbox" id="ch3" name="oms[]" value="c" onclick="onOutputsCheckboxEvent()"></input></td></tr>
-					<tr><td width="30px">PSWP:</td><td width="45px"><input type="checkbox" id="ch4" name="oms[]" value="d" onclick="onOutputsCheckboxEvent()"></input></td>
-					<td width="30px">XDR</td><td width="45px"><input type="checkbox" id="ch5" name="oms[]" value="e" onclick="onOutputsCheckboxEvent()"></input></td></tr> 
-					</table>
-				</form>
-		
 				
+				<div id="ScreenHardware" class="Screen"></div>
+				<div id="ScreenSetup" class="Screen"></div>
 				
-				<form id="comBaud">
-				<div class="nmeaHeaderText">BAUD RATE:</div>
-					<table>
-					<tr><td width="30px">4800</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(0)" value=0></input></td>
-					<td width="30px">9600</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(1)" value=1></input></td>
-					<td width="30px">38400</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(2)" value=2></input></td>
-					<td width="30px">115200</td><td width="40px"><input type="radio" name="ba" onclick="onBaudChanged(3)" value=3></input></td></tr> 
-					</table>
-				</form>
-				
-				<form id="diplayForm">
-				<div class="nmeaHeaderText">DISPLAY</div>
-					<table>
-					<tr><td width="20px">OUT</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(0)" value=0></input></td>
-					<td width="20px">IN</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(1)" value=1></input></td>
-					<td width="20px">OFF</td><td width="45px"><input type="radio" name="dis" onclick="onDisplayChanged(2)" value=2></input></td></tr> 
-					</table>
-				</form>
-				
-				
-				<div id="nmeaListDiv" border="1">
-					
-				<select id="nmeaList" size="17" multiple="multiple">
-					<!--  	<option value="a" selected="selected">PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option>
-							<option value="b">$PPSKT, 0200,0,+00.0,0,0050,7,03,*41</option> -->
-				</select>
-		 		</div> 
-		 		</div> <!-- nmeaPanel end -->
+				<div id="ComSetup" class="Screen"></div>
+			
+		 		
 		 		<div id="day_night"></div>
 				<div id="sliderChoice"></div>
 				<div id="alarmMsgDiv"></div>
 				<div id="alarmSlidDiv"><div id="alarmSlidDiv_1"></div><div id="alarmSlidDiv_2"></div></div>
 				<div id="transceiverDiv"></div>
 				
-				<div id="boatBigDiv"><div id="sens_F" onclick="onBigBoatClick(1)"></div><div id="sens_FL" onclick="onBigBoatClick(2)"></div><div id="sens_FR" onclick="onBigBoatClick(3)"></div>
-					<div id="sens_P"></div><div id="sens_S"></div>
-					<div id="sens_A"></div><div id="sens_AL"></div><div id="sens_AR"></div>
-				</div>
+				<div id="boatBigDiv"></div>
+				<div id="transButtDiv"></div>
+
 				<div id="menuBar">
-					<div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
+					<!--  <div id="menuOnOffBut" style="height: 100%; float: left"; onmouseover="onSetupButtonOver()"
 						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;> Menu 
-					</div>
-				
-					<!--  <div id="mainChoiceText">Range</div>-->
+					</div>-->
 					<div id="subMenu"></div>
 				</div><!--  end menuBar -->
 			
-			<div id="statusDiv">STATUS
+			 <div id="statusDiv">STATUS
 				<table>
 					<tr><th></th><th>U[V]</th><th>I[A]</th></tr>
 					<tr><td class="sr1">+5V</td><td class="sr2" id="5V_U">?V</td><td class="sr2" id="5V_I">?A</td></tr>
@@ -384,21 +373,15 @@ if (range < 0 || range > 5)
 					<tr><td class="sr1">NMEA2</td><td class="sr2">-</td><td class="sr2" id="NMEA2_I">?A</td></tr>
 					<tr><td class="sr1">NMEA3</td><td class="sr2">-</td><td class="sr2" id="NMEA3_I">?A</td></tr>
 				</table>
-					<!--
-					<table>
-					<tr><td class="sr1">+5V</td><td class="sr2">4.8V</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
-					<tr><td class="sr1">+12V</td><td class="sr2">11.5V</td><td class="sr3">Depth range:</td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
-					<tr><td class="sr1">Inv12V</td><td class="sr2">11.5V</td><td class="sr3"></td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
-					<tr><td class="sr1">XCVR</td><td class="sr2">25.4V</td><td class="sr3"></td><td class="sr4">50m</td><td class="sr3">Frequency:</td><td class="sr4">50kHz</td></tr>
-					</table>
-					  -->
-				</div>
+			 </div>
 			</div><!--  end main -->
 
 			<div id="eastsidebar">
-				<div id="sigDiv"></div>
+				<div id="eastAlarmContainer"><div id="depthRight"></div></div>
 				<div id="eastContainer">
-					
+					<div id="menuOnOffBut" onmouseover="onSetupButtonOver()"
+						onmouseout="onSetupButtonOut()" onclick="onSetupButtonClick()" ;> Menu 
+					</div>
 				</div>
 				<div id="eastRange_Light">
 						<div id="eastRangeButton"; onmouseover="onRangeButtonOver()"
@@ -411,6 +394,7 @@ if (range < 0 || range > 5)
 			
 
 			<div id="rangeSliderDiv"></div>
+			<div id="alarmConfirmDiv"></div>
 		</div>
 		<!-- container end -->
 
@@ -418,10 +402,17 @@ if (range < 0 || range > 5)
 	<!-- wrap end -->
 
 	<script>
-	
+	initAlarm(document.getElementById("eastAlarmContainer"));
+	initRange();
 	initDepthText();
 	initDepthTypeText();
 	updateDepthTypeText();
+	changeTimeRange(getTimeScaleStorage());
+	changeColor(getColorStorage());
+	
+	initScreenSetup();
+	initScreenHardware();
+	initScreenCom();
 	////////////////////////////////////////////////////////////
 	// If client is using Qt WebKit (touchscreen), remove cursor
 	////////////////////////////////////////////////////////////
@@ -430,7 +421,7 @@ if (range < 0 || range > 5)
 	}
 	
 	// TODO
-	function onOutputsCheckboxEvent(){
+/*	function onOutputsCheckboxEvent(){
 		var tempArray = new Array();
 		if($('#ch1').attr('checked'))
 			tempArray.push($('#ch1').attr('value'));
@@ -446,38 +437,18 @@ if (range < 0 || range > 5)
 		jsonIO.set[selectedIO_source-1].oms = tempArray;
 		//alert("source: " + (selectedIO_source-1) + ". " + JSON.stringify(jsonIO.set[selectedIO_source-1]));
 		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
-}
+}*/
 
 	function selectJsonRadioValue(selIndex){
-		jsonIO.set[selectedIO_source-1].baudR.ba = selIndex;
-		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
+		jsonIO.set[selectedIO_source].baudR.ba = selIndex;
+		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source]));
 	}
 	
-	// baud rate pushed
-	function onBaudChanged(selIndex){
-		/*jsonBaud.baudR.ba = selIndex;
-		sendToServer(JSON.stringify(jsonBaud));
-		*/
-		jsonIO.set[selectedIO_source-1].baudR.ba = selIndex;
-		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
-	}
-	
-	// Changed Displays "Input", "Output" or "Off" 
-	function onDisplayChanged(selIndex){
-		jsonIO.set[selectedIO_source-1].disRadio.dis = selIndex;
-		if(selIndex == 0 || selIndex == 1){
-			while(getListCount() > 0) { // TODO: remove all
-				removeOptionLast();
-			}
-		}
-			
-		sendToServer(JSON.stringify(jsonIO.set[selectedIO_source-1]));
-	}
 	
 
 
 	
-		createLightDiv(document.getElementById("day_night"));
+		initLightDiv(document.getElementById("day_night"));
 		
 		$("#nmeaPanel").hide();
 		$("#day_night").hide();
@@ -495,27 +466,27 @@ if (range < 0 || range > 5)
 		
 		initTransceiver(document.getElementById("transceiverDiv"));
 		
-		var rangeSlidText = [ "10", "50", "100", "500", "1200", "1600" ];
-	
-		rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
-				document.getElementById("rangeSliderDiv"), rangeSlidText);//testCont"),rangeText);
+		// Present range slider with right unit (meter, feet ...)
+		onDepthUnitCheckboxEvent(getDepthUnitStorage());
+		//rangeSlider3 = new SliderVertical(100, "RANGE", 1, 100, 34,
+			//	document.getElementById("rangeSliderDiv"), rangeMaxValues);//testCont"),rangeText);
+			
 		$("#rangeSliderDiv").hide();		
 		//setSignalData();
-				
-		showAlarmMsg(false);
+
 		$('#tableTest').populate(jsonTOP.myObject); //{'time':'12.22.12','gps':"11111",'speed':'144','frq':'100kHz'});	
 		//$('#nmeaOutputs').populate(jsonOutputs.oms);
-		$('#diplayForm').populate(jsonDisplay.disRadio);
-		$('#comBaud').populate(jsonBaud.baudR);
+		//$('#diplayForm').populate(jsonDisplay.disRadio);
+		//$('#comBaud').populate(jsonBaud.baudR);
 		
 		reconnectSocket();
-
+		changeToEchoScreen();
 		function reconnectSocket() {
 		
 			if (window.MozWebSocket) {
-				echoWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"dumb-increment-protocol");
+				echoWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.130:7681*/ ,"dumb-increment-protocol");
 			} else if(window.WebSocket) {
-				echoWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"dumb-increment-protocol");
+				echoWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.130:7681*/ ,"dumb-increment-protocol");
 			} else {
 				alert("Your browser is not supporitng WebSockets");
 				return;
@@ -551,9 +522,9 @@ if (range < 0 || range > 5)
 			
 			//////// DATA WEBSOCKET ////////
 			if (window.MozWebSocket){
-				dataWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"lws-mirror-protocol");
+				dataWebSock =  new MozWebSocket("ws://" + window.location.host/*10.31.1.130:7681*/ ,"lws-mirror-protocol");
 			} else if(window.WebSocket) {
-				dataWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.113:7681*/ ,"lws-mirror-protocol");
+				dataWebSock =  new WebSocket("ws://" + window.location.host/*10.31.1.130:7681*/ ,"lws-mirror-protocol");
 			} 
 			//dataWebSock = new MozWebSocket('ws://10.31.1.128:7681/lws-mirror-protocol');//data');
 			dataWebSock.onopen = function() { //e
